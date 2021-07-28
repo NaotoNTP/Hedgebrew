@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Namespace="S3KObjectDefinitions.Common" TypeName="Spikes" Language="cs" Name="Spikes" Image="horiz">
+  <Images>
+    <ImageFromMappings id="horiz">
+      <ArtFile filename="../Level/Objects/Spikes/Art - Normal.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spikes/Mappings.asm" frame="0" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="vert">
+      <ArtFile filename="../Level/Objects/Spikes/Art - Sideways.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spikes/Mappings.asm" frame="1" startpal="0" />
+    </ImageFromMappings>
+  </Images>
+  <Subtypes>
+    <Subtype id="00" name="Horizontal Stationary" image="horiz" />
+    <Subtype id="01" name="Horizontal w/ Vertical Movement" image="horiz" />
+    <Subtype id="02" name="Horizontal w/ Horizontal Movement" image="horiz" />
+    <Subtype id="03" name="Invalid" image="horiz" />
+    <Subtype id="10" name="Vertical Stationary" image="vert" />
+    <Subtype id="11" name="Vertical w/ Vertical Movement" image="vert" />
+    <Subtype id="12" name="Vertical w/ Horizontal Movement" image="vert" />
+    <Subtype id="13" name="Invalid" image="vert" />
+  </Subtypes>
+  <Properties>
+    <BitsProperty name="Movement" type="SpikeMovement" startbit="0" length="2" />
+    <BitsProperty name="Direction" type="Direction" startbit="4" length="1" />
+  </Properties>
+  <Enums>
+    <Enum name="SpikeMovement">
+      <EnumMember name="Stationary" />
+      <EnumMember name="Vertical" />
+      <EnumMember name="Horizontal" />
+      <EnumMember name="Invalid" />
+    </Enum>
+    <Enum name="Direction">
+      <EnumMember name="Horizontal" />
+      <EnumMember name="Vertical" />
+    </Enum>
+  </Enums>
+  <Display>
+    <DisplayOption>
+      <Condition property="Direction" value="Horizontal" />
+      <ImageRef image="horiz" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Vertical" />
+      <ImageRef image="vert" />
+    </DisplayOption>
+  </Display>
+</ObjDef>

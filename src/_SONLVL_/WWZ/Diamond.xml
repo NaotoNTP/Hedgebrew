@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<ObjDef xmlns="http://www.sonicretro.org" Name="Diamond" Image="blue" RememberState="true">
+  <Images>
+    <ImageFromMappings id="blue">
+      <ArtFile filename="../Level/Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Diamond/Mappings.asm" frame="0" startpal="0"/>
+    </ImageFromMappings>
+    <ImageFromMappings id="grey">
+      <ArtFile filename="../Level/Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Diamond/Mappings.asm" frame="4" startpal="0"/>
+    </ImageFromMappings>
+    <ImageFromMappings id="yellow">
+      <ArtFile filename="../Level/Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Diamond/Mappings.asm" frame="8" startpal="0"/>
+    </ImageFromMappings>
+    <ImageFromMappings id="teal">
+      <ArtFile filename="../Level/Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Diamond/Mappings.asm" frame="12" startpal="0"/>
+    </ImageFromMappings>
+  </Images>
+  <Subtypes>
+    <Subtype id="03" name="Blue" image="blue"/>
+    <Subtype id="02" name="Grey" image="grey"/>
+    <Subtype id="01" name="Yellow" image="yellow"/>
+    <Subtype id="00" name="Teal" image="teal"/>
+  </Subtypes>
+  <Properties>
+    <BitsProperty name="Color" displayname="Color" type="Color" startbit="0" length="2" />
+  </Properties>
+  <Enums>
+    <Enum name="Color">
+      <EnumMember name="Blue" />
+      <EnumMember name="Grey" />
+      <EnumMember name="Yellow" />
+      <EnumMember name="Teal" />
+    </Enum>
+  </Enums>
+  <Display>
+    <DisplayOption>
+      <Condition property="Color" value="Blue" />
+      <ImageRef image="blue" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Color" value="Grey" />
+      <ImageRef image="grey" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Color" value="Yellow" />
+      <ImageRef image="yellow" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Color" value="Teal" />
+      <ImageRef image="teal" />
+    </DisplayOption>
+  </Display>
+</ObjDef>

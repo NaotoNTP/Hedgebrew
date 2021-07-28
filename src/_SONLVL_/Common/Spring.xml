@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Namespace="S3KObjectDefinitions.Common" TypeName="Spring" Language="cs" Name="Spring" Image="vertred" RememberState="false" Debug="false">
+  <Images>
+    <ImageFromMappings id="vertred">
+      <ArtFile filename="../Level/Objects/Spring/Art - Horizontal.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="0" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="vertyel">
+      <ArtFile filename="../Level/Objects/Spring/Art - Horizontal.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="0" startpal="1" />
+    </ImageFromMappings>
+    <ImageFromMappings id="horzred">
+      <ArtFile filename="../Level/Objects/Spring/Art - Vertical.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="2" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="horzyel">
+      <ArtFile filename="../Level/Objects/Spring/Art - Vertical.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="2" startpal="1" />
+    </ImageFromMappings>
+    <ImageFromMappings id="diagredu">
+      <ArtFile filename="../Level/Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="4" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="diagyelu">
+      <ArtFile filename="../Level/Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="4" startpal="1" />
+    </ImageFromMappings>
+    <ImageFromMappings id="diagredd">
+      <ArtFile filename="../Level/Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="6" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="diagyeld">
+      <ArtFile filename="../Level/Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Spring/Mappings.asm" frame="6" startpal="1" />
+    </ImageFromMappings>
+  </Images>
+  <Subtypes>
+    <Subtype id="00" name="Red Up" image="vertred" />
+    <Subtype id="02" name="Yellow Up" image="vertyel" />
+    <Subtype id="10" name="Red Horizontal" image="horzred" />
+    <Subtype id="12" name="Yellow Horizontal" image="horzyel" />
+    <Subtype id="20" name="Red Down" image="vertred" />
+    <Subtype id="22" name="Yellow Down" image="vertyel" />
+    <Subtype id="30" name="Red Diagonal Up" image="diagredu" />
+    <Subtype id="32" name="Yellow Diagonal Up" image="diagyelu" />
+    <Subtype id="40" name="Red Diagonal Down" image="diagredd" />
+    <Subtype id="42" name="Yellow Diagonal Down" image="diagyeld" />
+  </Subtypes>
+  <Properties>
+    <BitsProperty name="Color" type="SpringColor" startbit="1" length="1" />
+    <BitsProperty name="Layer" type="SpringLayer" startbit="2" length="2" />
+    <BitsProperty name="Direction" type="SpringDirection" startbit="4" length="3" />
+    <BitsProperty name="KillTransverseSpeed" displayname="Kill Transverse Speed" type="bool" startbit="7" length="1" />
+  </Properties>
+  <Enums>
+    <Enum name="SpringColor">
+      <EnumMember name="Red" />
+      <EnumMember name="Yellow" />
+    </Enum>
+    <Enum name="SpringLayer">
+      <EnumMember name="No Change" />
+      <EnumMember name="Layer 1" />
+      <EnumMember name="Layer 2" />
+      <EnumMember name="No Change 2" />
+    </Enum>
+    <Enum name="SpringDirection">
+      <EnumMember name="Up" />
+      <EnumMember name="Horizontal" />
+      <EnumMember name="Down" />
+      <EnumMember name="Diagonal Up" />
+      <EnumMember name="Diagonal Down" />
+      <EnumMember name="Invalid 1" />
+      <EnumMember name="Invalid 2" />
+      <EnumMember name="Invalid 3" />
+    </Enum>
+  </Enums>
+  <Display>
+    <DisplayOption>
+      <Condition property="Direction" value="Up" />
+      <Condition property="Color" value="Red" />
+      <ImageRef image="vertred" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Up" />
+      <Condition property="Color" value="Yellow" />
+      <ImageRef image="vertyel" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Horizontal" />
+      <Condition property="Color" value="Red" />
+      <ImageRef image="horzred" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Horizontal" />
+      <Condition property="Color" value="Yellow" />
+      <ImageRef image="horzyel" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Down" />
+      <Condition property="Color" value="Red" />
+      <ImageRef image="vertred" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Down" />
+      <Condition property="Color" value="Yellow" />
+      <ImageRef image="vertyel" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Diagonal Up" />
+      <Condition property="Color" value="Red" />
+      <ImageRef image="diagredu" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Diagonal Up" />
+      <Condition property="Color" value="Yellow" />
+      <ImageRef image="diagyelu" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Diagonal Down" />
+      <Condition property="Color" value="Red" />
+      <ImageRef image="diagredd" />
+    </DisplayOption>
+    <DisplayOption>
+      <Condition property="Direction" value="Diagonal Down" />
+      <Condition property="Color" value="Yellow" />
+      <ImageRef image="diagyeld" />
+    </DisplayOption>
+  </Display>
+</ObjDef>

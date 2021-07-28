@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjDef xmlns="http://www.sonicretro.org" Namespace="S3KObjectDefinitions.Common" TypeName="Monitor" Language="cs" Name="Monitor" Image="img">
+  <Images>
+    <ImageFromMappings id="img">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="0" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="static">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="1" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="eggman">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="2" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="rings">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="3" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="shoes">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="4" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="shield">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="5" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="invincibility">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="6" startpal="0" />
+    </ImageFromMappings>
+    <ImageFromMappings id="broken">
+      <ArtFile filename="../Level/Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../Level/Objects/Monitor/Mappings.asm" frame="7" startpal="0" />
+    </ImageFromMappings>
+  </Images>
+  <Subtypes>
+    <Subtype id="00" name="Static" image="static" />
+    <Subtype id="01" name="Eggman" image="eggman" />
+    <Subtype id="02" name="Rings" image="rings" />
+    <Subtype id="03" name="Shoes" image="shoes" />
+    <Subtype id="04" name="Shield" image="shield" />
+    <Subtype id="05" name="Invincibility" image="invincibility" />
+    <Subtype id="06" name="Broken" image="broken" />
+  </Subtypes>
+  <Properties>
+    <BitsProperty name="Contents" type="MonitorType" startbit="0" length="4" />
+  </Properties>
+  <Enums>
+    <Enum name="MonitorType">
+      <EnumMember name="Static" />
+      <EnumMember name="Eggman" />
+      <EnumMember name="Rings" />
+      <EnumMember name="Shoes" />
+      <EnumMember name="Shield" />
+      <EnumMember name="Invincibility" />
+      <EnumMember name="Broken" />
+    </Enum>
+  </Enums>
+</ObjDef>
