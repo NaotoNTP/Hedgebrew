@@ -31,6 +31,7 @@ InitObjectList:
 .load
 		add.w	d1,a0				; go to the next object now
 		move.w	a0,oPrev-oSize(a0)		; save new previous pointer
+		clr.l	oDrawNext(a0)			; clear the display link values
 		dbf	d0,.load			; loop for every object
 
 		clr.w	oPrev(a0)			; set the last previous pointer to 0

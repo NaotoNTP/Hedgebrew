@@ -76,7 +76,7 @@ ObjLostRing:
 
 .ChkDel:
 		tst.b	rRLossAniT.w
-		beq.s	ObjLostRing_Delete
+		beq.w	ObjLostRing_Delete
 		move.w	rMaxCamY.w,d0		; Get max camera Y position
 		addi.w	#224,d0				; Get bottom boundary position
 		cmp.w	oYPos(a0),d0			; Have we touched the bottom boundary?

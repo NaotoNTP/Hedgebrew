@@ -259,10 +259,15 @@ displaySprite		macro	layer, obj, fre, chk
 	endif
 
 		move.w	#rDispInput+(\layer*dSize),oDrawNext(\obj)	; put end marker as the next pointer
-		move.w	rDispInput+dPrev+(\layer*dSize).w,\fre	; copy the pointer from the end marker to dst register
+		move.w	rDispInput+dPrev+(\layer*dSize).w,\fre		; copy the pointer from the end marker to dst register
 		move.w	\fre,oDrawPrev(\obj)				; copy that to prev pointer
 		move.w	\obj,oDrawNext(\fre)				;
-		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w	; copy the pointer from the end marker to dst register
+		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w		; copy the pointer from the end marker to dst register
+
+		cmp.w	#rDispInput+(\layer*dSize),rDispInput+dPrev+(\layer*dSize).w	; special case: points to itself
+		bne.s	.no\@								; if no, skip
+		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w				; else, copy over
+
 .no\@
 	endm
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -288,6 +293,10 @@ layer EQUR	\reg							; convert register
 		move.w	\fre,oDrawPrev(\obj)				; copy that to prev pointer
 		move.w	\obj,oDrawNext(\fre)				;
 		move.w	\obj,oDrawPrev(layer)				; copy the pointer from the end marker to dst register
+
+		cmp.w	oDrawPrev(layer),layer				; special case: points to itself
+		bne.s	.no\@						; if no, skip
+		move.w	\obj,oDrawPrev(layer)				; else, copy over
 .no\@
 	endm
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -308,6 +317,12 @@ removeSprite		macro	obj, fre, chk
 		move.w	oDrawNext(\obj),oDrawNext(\fre)			; copy the next object pointer from src to dst
 		move.w	oDrawNext(\obj),\fre				; load the next pointer to dst
 		move.w	oDrawPrev(\obj),oDrawPrev(\fre)			; copy the prev object pointer from src to dst
+
+		cmp.w	oDrawPrev(\obj),\fre				; special case: last object
+		bne.s	.no\@						; if no, skip
+		move.w	\fre,oDrawNext(\fre)				; else, change to point to same address
+
+.no\@
 		clr.l	oDrawNext(\obj)
 .yes\@
 	endm
