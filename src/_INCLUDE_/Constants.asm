@@ -87,6 +87,7 @@ oNext		rs.w	1				; Pointer to next object in the linked list
 oPrev		rs.w	1				; Pointer to previous object in the linked list
 oDrawNext	rs.w	1				; Pointer to next object to display
 oDrawPrev	rs.w	1				; Pointer to previous object to display
+oPtrsEnd	rs.b	0				; End of object structure's pointers (the following data can be safely cleared upon deletion)
 
 oFlags		rs.b	1				; Object flags
 oRender		rs.b	1				; Render flags

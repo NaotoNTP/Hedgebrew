@@ -63,22 +63,10 @@ InitObjectList:
 ;	a2.l	- Trashed
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FindFreeObj:
-		move.w	rFreeHead.w,a1			; load the next free object to a1
-		cmp.w	#0,a1				; check if its a null pointer
-		beq.w	.rts				; branch if so (z=1)
+		move.w	rFreeHead.w,d0			; get pointer to the next free object
+		beq.s	.rts				; if it's a null pointer (z=1), return
+		movea.w	d0,a1				; load to a1
 		move.w	oPrev(a1),rFreeHead.w		; copy the next free object pointer to list start
-; --------------------------------------------------------------
-
-	; clear object memory
-		lea	oDrawPrev(a1),a2		; load the first byte to clear to a2
-	if (oSize-oDrawPrev) & 2
-		clr.w	(a2)+				; clear a word of data
-	endif
-
-	rept (oSize-oDrawPrev) / 4			; repeat for every object property
-		clr.l	(a2)+				; clear a longword of data
-	endr
-; --------------------------------------------------------------
 
 		move.w	rTailPrev.w,a2			; load last object to a2
 		move.w	a1,rTailPrev.w			; save as the new last object
@@ -86,7 +74,22 @@ FindFreeObj:
 		move.w	a1,oNext(a2)			; save new object as next pointer for old tail
 		move.w	a2,oPrev(a1)			; save old tail as prev pointer for new object
 
-.rts
+.rts:
+		rts
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; Delete an object
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; PARAMETERS:
+;	a1.l	- Pointer to object space to clear
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; RETURNS:
+;	a1.l	- Trashed
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+DeleteOtherObj:
+		pea	(a0)
+		move.l	a1,a0
+		bsr.s	DeleteObject
+		pop.l	a0
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Delete the current object
@@ -106,21 +109,20 @@ DeleteObject:
 
 		move.w	rFreeHead.w,oPrev(a0)		; get the head of the free list to previous pointer of this object
 		move.w	a0,rFreeHead.w			; save as the new head of free list
-		rts
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; Delete an object
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; PARAMETERS:
-;	a1.l	- Pointer to object space to clear
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; RETURNS:
-;	a1.l	- Trashed
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-DeleteOtherObj:
-		push.l	a0
-		move.l	a1,a0
-		bsr.s	DeleteObject
-		pop.l	a0
+
+		; clear object memory
+		moveq	#0,d0				; clear d0
+		pea	(a2)
+		lea	oDrawPrev(a0),a2		; load the first byte to clear to a2
+	if (oSize-oDrawPrev) & 2
+		move.w	d0,(a2)+			; clear a word of data
+	endif
+
+	rept (oSize-oDrawPrev) / 4			; repeat for every object property
+		move.l	d0,(a2)+			; clear a longword of data
+	endr
+		pop.l	a2
+
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Render object sprites
