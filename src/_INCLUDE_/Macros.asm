@@ -264,9 +264,9 @@ displaySprite		macro	layer, obj, fre, chk
 		move.w	\obj,oDrawNext(\fre)				;
 		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w		; copy the pointer from the end marker to dst register
 
-		cmp.w	#rDispInput+(\layer*dSize),rDispInput+dPrev+(\layer*dSize).w	; special case: points to itself
-		bne.s	.no\@								; if no, skip
-		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w				; else, copy over
+;		cmp.w	#rDispInput+(\layer*dSize),rDispInput+dPrev+(\layer*dSize).w	; special case: points to itself
+;		bne.s	.no\@								; if no, skip
+;		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w				; else, copy over
 
 .no\@
 	endm
@@ -294,9 +294,9 @@ layer EQUR	\reg							; convert register
 		move.w	\obj,oDrawNext(\fre)				;
 		move.w	\obj,oDrawPrev(layer)				; copy the pointer from the end marker to dst register
 
-		cmp.w	oDrawPrev(layer),layer				; special case: points to itself
-		bne.s	.no\@						; if no, skip
-		move.w	\obj,oDrawPrev(layer)				; else, copy over
+;		cmp.w	oDrawPrev(layer),layer				; special case: points to itself
+;		bne.s	.no\@						; if no, skip
+;		move.w	\obj,oDrawPrev(layer)				; else, copy over
 .no\@
 	endm
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -318,9 +318,9 @@ removeSprite		macro	obj, fre, chk
 		move.w	oDrawNext(\obj),\fre				; load the next pointer to dst
 		move.w	oDrawPrev(\obj),oDrawPrev(\fre)			; copy the prev object pointer from src to dst
 
-		cmp.w	oDrawPrev(\obj),\fre				; special case: last object
-		bne.s	.no\@						; if no, skip
-		move.w	\fre,oDrawNext(\fre)				; else, change to point to same address
+;		cmp.w	oDrawPrev(\obj),\fre				; special case: last object
+;		bne.s	.no\@						; if no, skip
+;		move.w	\fre,oDrawNext(\fre)				; else, change to point to same address
 
 .no\@
 		clr.l	oDrawNext(\obj)
