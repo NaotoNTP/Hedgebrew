@@ -63,9 +63,9 @@ InitObjectList:
 ;	a2.l	- Trashed
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FindFreeObj:
-		move.w	rFreeHead.w,a1			; load the next free object to a1
-		cmp.w	#0,a1				; check if its a null pointer
-		beq.w	.rts				; branch if so (z=1)
+		move.w	rFreeHead.w,d0			; get pointer to the next free object
+		beq.s	.rts				; if it's a null pointer (z=1), return
+		movea.w	d0,a1				; load to a1
 		move.w	oPrev(a1),rFreeHead.w		; copy the next free object pointer to list start
 ; --------------------------------------------------------------
 
@@ -86,7 +86,7 @@ FindFreeObj:
 		move.w	a1,oNext(a2)			; save new object as next pointer for old tail
 		move.w	a2,oPrev(a1)			; save old tail as prev pointer for new object
 
-.rts
+.rts:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Delete the current object
