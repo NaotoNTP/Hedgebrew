@@ -210,11 +210,3 @@ locret_CFE6:
 Map_ObjSpike:
 	include "Objects/Spikes/Mappings.asm"
 ; ===========================================================================
-ArtKosM_SpikesN:
-		incbin	"Objects/Spikes/Art - Normal.kosm.bin"
-		even
-; ===========================================================================
-ArtKosM_SpikesS:
-		incbin	"Objects/Spikes/Art - Sideways.kosm.bin"
-		even
-; ===========================================================================

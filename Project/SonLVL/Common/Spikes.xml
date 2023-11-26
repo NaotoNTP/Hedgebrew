@@ -2,11 +2,11 @@
 <ObjDef xmlns="http://www.sonicretro.org" Namespace="S3KObjectDefinitions.Common" TypeName="Spikes" Language="cs" Name="Spikes" Image="horiz">
   <Images>
     <ImageFromMappings id="horiz">
-      <ArtFile filename="../../Objects/Spikes/Art - Normal.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spikes/Art - Normal.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spikes/Mappings.asm" frame="0" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="vert">
-      <ArtFile filename="../../Objects/Spikes/Art - Sideways.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spikes/Art - Sideways.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spikes/Mappings.asm" frame="1" startpal="0" />
     </ImageFromMappings>
   </Images>

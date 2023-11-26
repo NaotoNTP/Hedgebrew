@@ -2,35 +2,35 @@
 <ObjDef xmlns="http://www.sonicretro.org" Namespace="S3KObjectDefinitions.Common" TypeName="Monitor" Language="cs" Name="Monitor" Image="img">
   <Images>
     <ImageFromMappings id="img">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="0" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="static">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="1" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="eggman">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="2" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="rings">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="3" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="shoes">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="4" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="shield">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="5" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="invincibility">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="6" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="broken">
-      <ArtFile filename="../../Objects/Monitor/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Monitor/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Monitor/Mappings.asm" frame="7" startpal="0" />
     </ImageFromMappings>
   </Images>

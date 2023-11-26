@@ -6,7 +6,7 @@ oSurfacePause		rs.b	1				; Animation stop flag
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjWaterSplash:
 		move.l	#ObjWaterSplash_Main,oAddr(a0)		; Next routine
-		move.l	#Map_ObjWaterSurface,oMappings(a0)	; Mappings
+		move.l	#Map_ObjWaterSplash,oMappings(a0)	; Mappings
 		move.w	#$480,oTileProps(a0)			; Tile properties
 		move.b	#4,oRender(a0)				; Render flags
 		move.w	#rSprInput,oPriority(a0)		; Priority
@@ -51,11 +51,7 @@ ObjWaterSplash_Main:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Data
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-Map_ObjWaterSurface:
-		include	"Objects/Water Surface/Mappings.asm"
-		even
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ArtKosM_WaterSurface:
-		incbin	"Objects/Water Surface/Art.kosm"
+Map_ObjWaterSplash:
+		include	"Objects/Water Splash/Mappings.asm"
 		even
 ; =========================================================================================================================================================

@@ -764,7 +764,18 @@ CMap_Ring_Sparkle_Last:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; HUD mappings
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-Map_HUD:	include	"Objects/HUD/Mappings.asm"
+Map_HUD:	
+		dc.w Map_HUD_4-Map_HUD, Map_HUD_18-Map_HUD	
+
+Map_HUD_4:	dc.b 0, 3	
+		dc.b 0, $D, 0, 2, 0, 0	
+		dc.b 0, 1, 0, 0, 0, $20	
+		dc.b 0, 9, 0, $A, 0, $30
+
+Map_HUD_18:	dc.b 0, 3	
+		dc.b 0, $D, $20, 2, 0, 0	
+		dc.b 0, 1, $20, 0, 0, $20	
+		dc.b 0, 9, 0, $A, 0, $30	
 		even
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Update the HUD
@@ -796,7 +807,7 @@ Level_UpdateHUD:
 		moveq	#0,d4				; Reset the "draw digit" flag
 		lea	HUDMod_100,a2			; Start with the 100s digit
 		moveq	#3-1,d6				; Number of digits to draw
-		lea	ArtUnc_HUDNumbers(pc),a1	; HUD numbers
+		lea	ArtUnc_HUDNumbers.l,a1		; HUD numbers
 		
 .LoadDigit_Loop:
 		moveq	#0,d2				; Reset the digit
@@ -844,7 +855,7 @@ Level_HUDResetRings:
 		lea	HUD_RingsBase(pc),a2		; Tile base
 		move.w	#3-1,d2				; Length
 
-		lea	ArtUnc_HUDNumbers(pc),a1	; HUD numbers art
+		lea	ArtUnc_HUDNumbers.l,a1		; HUD numbers art
 
 .LoadTiles:
 		move.b	(a2)+,d0			; Get digit
@@ -863,13 +874,7 @@ Level_HUDResetRings:
 HUD_RingsBase:
 		dc.b	$A, $A, 0			; Ring count
 		even
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; HUD art
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ArtUnc_HUDNumbers:
-		incbin	"Objects/HUD/Art - HUD Numbers.unc.bin"
-		dcb.l	16, 0
-		even
+
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Animate the level art
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

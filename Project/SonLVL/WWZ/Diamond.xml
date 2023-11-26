@@ -2,19 +2,19 @@
 <ObjDef xmlns="http://www.sonicretro.org" Name="Diamond" Image="blue" RememberState="true">
   <Images>
     <ImageFromMappings id="blue">
-      <ArtFile filename="../../Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Diamond/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Diamond/Mappings.asm" frame="0" startpal="0"/>
     </ImageFromMappings>
     <ImageFromMappings id="grey">
-      <ArtFile filename="../../Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Diamond/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Diamond/Mappings.asm" frame="4" startpal="0"/>
     </ImageFromMappings>
     <ImageFromMappings id="yellow">
-      <ArtFile filename="../../Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Diamond/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Diamond/Mappings.asm" frame="8" startpal="0"/>
     </ImageFromMappings>
     <ImageFromMappings id="teal">
-      <ArtFile filename="../../Objects/Diamond/Art.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Diamond/Art.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Diamond/Mappings.asm" frame="12" startpal="0"/>
     </ImageFromMappings>
   </Images>

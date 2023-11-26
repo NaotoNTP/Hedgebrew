@@ -86,6 +86,164 @@ GotoGameMode:
 
 ; =========================================================================================================================================================
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; Object Code
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ObjNull:
+		jmp	DeleteObject
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+		include	"Objects/Player/Code.asm"		; Player object
+		include	"Objects/Ring/Code.asm"		; Ring loss object
+		include	"Objects/Explosion/Code.asm"	; Explosion object
+		include	"Objects/Water Surface/Code.asm"	; Water surface object
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+		include	"Objects/Monitor/Code.asm"	; Monitor object
+		include	"Objects/Spikes/Code.asm"		; Spike object
+		include	"Objects/Spring/Code.asm"		; Spring object
+		include	"Objects/Checkpoint/Code.asm"	; Checkpoint object
+		include	"Objects/Wall Spring/Code.asm"	; Wall spring object
+		include	"Objects/Ball Mode/Code.asm"	; Ball mode switch object
+		include	"Objects/Bumper/Code.asm"		; Bumper object
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; Unused/Temporary
+;		include	"Objects/Slicer/Code.asm"		; Slicer object
+;		include	"Objects/Shellcracker/Code.asm"	; Shellcracker object
+;		include	"Objects/Asteron/Code.asm"	; Asteron object
+;		include	"Objects/Boss - WFZ/Code.asm"	; WFZ boss object
+;		include	"Objects/Harpoon/Code.asm"	; Harpoon object
+;		include	"Objects/CNZ Barrel/Code.asm"	; CNZ barrel object
+;		include	"Objects/Diamond/Code.asm"	; Diamond object
+;		include	"Objects/Orbinaut/Code.asm"	; Orbinaut object
+
+; =========================================================================================================================================================
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; Object Art
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtUnc_Sonic:
+		incbin	"Graphics/Sprites/Sonic/Art.unc"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_Bumper:
+		incbin	"Graphics/Sprites/Bumper/Art.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_Chkpoint:
+		incbin	"Graphics/Sprites/Checkpoint/Art.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_DrownCnt:
+		incbin	"Graphics/Sprites/Drown Countdown/Art.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_Explosion:
+		incbin	"Graphics/Sprites/Explosion/Art.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_Monitor:
+		incbin	"Graphics/Sprites/Monitor/Art.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtUnc_Ring:
+		incbin	"Graphics/Sprites/Ring/Art - Ring.unc"
+		even
+
+ArtKosM_RingSparkle:
+		incbin	"Graphics/Sprites/Ring/Art - Sparkle.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_SpikesN:
+		incbin	"Graphics/Sprites/Spikes/Art - Normal.kosm"
+		even
+
+ArtKosM_SpikesS:
+		incbin	"Graphics/Sprites/Spikes/Art - Sideways.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_SpringH:
+		incbin	"Graphics/Sprites/Spring/Art - Horizontal.kosm"
+		even
+
+ArtKosM_SpringV:
+		incbin	"Graphics/Sprites/Spring/Art - Vertical.kosm"
+		even
+
+ArtKosM_SpringD:
+		incbin	"Graphics/Sprites/Spring/Art - Diagonal.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_WaterSplash:
+		incbin	"Graphics/Sprites/Water Splash/Art.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_WaterSurface:
+		incbin	"Graphics/Sprites/Water Surface/Art.kosm"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+ArtKosM_HUD:
+		incbin	"Graphics/Sprites/HUD/Art - HUD Base.kosm"
+		even
+
+ArtUnc_HUDNumbers:
+		incbin	"Graphics/Sprites/HUD/Art - HUD Numbers.unc"
+		dcb.l	16, 0
+		even
+
+; =========================================================================================================================================================
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; Level data
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+; Wacky Workbench Zone
+
+WWZ_Layout:
+		incbin	"Zones/Wacky Workbench/Layout.bin"
+		even
+WWZ_Objects:
+		incbin	"Zones/Wacky Workbench/Objects.bin"
+		even
+WWZ_Rings:
+		incbin	"Zones/Wacky Workbench/Rings.bin"
+		even
+WWZ_Collision:
+		dc.l	.ColData, .Angles, .Heights, .HeightsR
+.ColData:
+		incbin	"Zones/Wacky Workbench/Collision.bin"
+		even
+.Angles:
+		incbin	"Zones/Wacky Workbench/Angle Values.bin"
+		even
+.Heights:
+		incbin	"Zones/Wacky Workbench/Height Values.bin"
+		even
+.HeightsR:
+		incbin	"Zones/Wacky Workbench/Height Values (Rotated).bin"
+		even
+WWZ_Chunks:
+		incbin	"Zones/Wacky Workbench/Chunks.bin"
+		even
+WWZ_Blocks:
+		incbin	"Zones/Wacky Workbench/Blocks.bin"
+		even
+WWZ_Pal:
+		dc.w	$100>>1-1
+		incbin	"Graphics/Palettes/Wacky Workbench/Normal.pal"
+		incbin	"Graphics/Palettes/Wacky Workbench/Water.pal"
+		even
+WWZ_Tiles:
+		incbin	"Graphics/Tilesets/Wacky Workbench/Tiles.kosm"
+		even
+;		dc.w	$FFFF, 0, 0
+ArtUnc_Electricity:
+		incbin	"Graphics/Tilesets/Wacky Workbench/Electricity.unc"
+		even
+ArtUnc_ElectricOrbs:
+		incbin	"Graphics/Tilesets/Wacky Workbench/Electric Orbs.unc"
+		even
+ArtUnc_Sirens:
+		incbin	"Graphics/Tilesets/Wacky Workbench/Sirens.unc"
+		even
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+; =========================================================================================================================================================
+; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Sound driver
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 		include	"Sound/amps/code/68k.asm"

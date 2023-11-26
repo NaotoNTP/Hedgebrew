@@ -2,35 +2,35 @@
 <ObjDef xmlns="http://www.sonicretro.org" Namespace="S3KObjectDefinitions.Common" TypeName="Spring" Language="cs" Name="Spring" Image="vertred" RememberState="false" Debug="false">
   <Images>
     <ImageFromMappings id="vertred">
-      <ArtFile filename="../../Objects/Spring/Art - Horizontal.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Horizontal.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="0" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="vertyel">
-      <ArtFile filename="../../Objects/Spring/Art - Horizontal.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Horizontal.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="0" startpal="1" />
     </ImageFromMappings>
     <ImageFromMappings id="horzred">
-      <ArtFile filename="../../Objects/Spring/Art - Vertical.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Vertical.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="2" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="horzyel">
-      <ArtFile filename="../../Objects/Spring/Art - Vertical.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Vertical.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="2" startpal="1" />
     </ImageFromMappings>
     <ImageFromMappings id="diagredu">
-      <ArtFile filename="../../Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Diagonal.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="4" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="diagyelu">
-      <ArtFile filename="../../Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Diagonal.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="4" startpal="1" />
     </ImageFromMappings>
     <ImageFromMappings id="diagredd">
-      <ArtFile filename="../../Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Diagonal.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="6" startpal="0" />
     </ImageFromMappings>
     <ImageFromMappings id="diagyeld">
-      <ArtFile filename="../../Objects/Spring/Art - Diagonal.kosm.bin" compression="KosinskiM" />
+      <ArtFile filename="../../Graphics/Sprites/Spring/Art - Diagonal.kosm" compression="KosinskiM" />
       <MapFile type="ASM" filename="../../Objects/Spring/Mappings.asm" frame="6" startpal="1" />
     </ImageFromMappings>
   </Images>

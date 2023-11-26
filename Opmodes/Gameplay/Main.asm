@@ -452,56 +452,6 @@ WWZ_UpdateBG:
 
 		scrollEnd
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; Wacky Workbench level data
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-WWZ_Layout:
-		incbin	"Zones/Wacky Workbench/Layout.bin"
-		even
-WWZ_Chunks:
-		incbin	"Zones/Wacky Workbench/Chunks.bin"
-		even
-WWZ_Blocks:
-		incbin	"Zones/Wacky Workbench/Blocks.bin"
-		even
-WWZ_Tiles:
-		incbin	"Zones/Wacky Workbench/Tiles.kosm.bin"
-		even
-		dc.w	$FFFF, 0, 0
-WWZ_Objects:
-		incbin	"Zones/Wacky Workbench/Objects.bin"
-		even
-WWZ_Rings:
-		incbin	"Zones/Wacky Workbench/Rings.bin"
-		even
-WWZ_Pal:
-		dc.w	$100>>1-1
-		incbin	"Zones/Wacky Workbench/Palette.pal.bin"
-		incbin	"Zones/Wacky Workbench/Palette (Water).pal.bin"
-		even
-WWZ_Collision:
-		dc.l	.ColData, .Angles, .Heights, .HeightsR
-.ColData:
-		incbin	"Zones/Wacky Workbench/Collision.bin"
-		even
-.Angles:
-		incbin	"Zones/Wacky Workbench/Angle Values.bin"
-		even
-.Heights:
-		incbin	"Zones/Wacky Workbench/Height Values.bin"
-		even
-.HeightsR:
-		incbin	"Zones/Wacky Workbench/Height Values (Rotated).bin"
-		even
-ArtUnc_Electricity:
-		incbin	"Zones/Wacky Workbench/Electricity.bin"
-		even
-ArtUnc_ElectricOrbs:
-		incbin	"Zones/Wacky Workbench/Electric Orbs.bin"
-		even
-ArtUnc_Sirens:
-		incbin	"Zones/Wacky Workbench/Sirens.bin"
-		even
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Main level PLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PLC_LevelMain:
@@ -558,18 +508,6 @@ PLC_WWZ:
 	;	dc.l	ArtKosM_WFZBoss
 	;	dc.w	$9000
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; Art
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ArtKosM_HUD:
-		incbin	"Objects/HUD/Art - HUD Base.kosm.bin"
-		even
-ArtKosM_RingSparkle:
-		incbin	"Objects/Ring/Art - Sparkle.kosm.bin"
-		even
-ArtUnc_Ring:
-		incbin	"Objects/Ring/Art - Ring.unc.bin"
-		even
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Object index
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_ObjIndex:
@@ -588,32 +526,5 @@ Level_ObjIndex:
 		dc.l	ObjNull			;ObjCNZBarrel
 		dc.l	ObjNull			;ObjDiamond
 		dc.l	ObjNull			;ObjOrbinaut
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; Objects
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjNull:
-		jmp	DeleteObject
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-		include	"Objects/Player/Code.asm"		; Player object
-		include	"Objects/Ring/Code.asm"		; Ring loss object
-		include	"Objects/Explosion/Code.asm"	; Explosion object
-		include	"Objects/Water Surface/Code.asm"	; Water surface object
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-		include	"Objects/Monitor/Code.asm"	; Monitor object
-		include	"Objects/Spikes/Code.asm"		; Spike object
-		include	"Objects/Spring/Code.asm"		; Spring object
-		include	"Objects/Checkpoint/Code.asm"	; Checkpoint object
-		include	"Objects/Wall Spring/Code.asm"	; Wall spring object
-		include	"Objects/Ball Mode/Code.asm"	; Ball mode switch object
-		include	"Objects/Bumper/Code.asm"		; Bumper object
-; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; Unused/Temporary
-;		include	"Objects/Slicer/Code.asm"		; Slicer object
-;		include	"Objects/Shellcracker/Code.asm"	; Shellcracker object
-;		include	"Objects/Asteron/Code.asm"	; Asteron object
-;		include	"Objects/Boss - WFZ/Code.asm"	; WFZ boss object
-;		include	"Objects/Harpoon/Code.asm"	; Harpoon object
-;		include	"Objects/CNZ Barrel/Code.asm"	; CNZ barrel object
-;		include	"Objects/Diamond/Code.asm"	; Diamond object
-;		include	"Objects/Orbinaut/Code.asm"	; Orbinaut object
+
 ; =========================================================================================================================================================

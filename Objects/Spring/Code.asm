@@ -373,13 +373,4 @@ Ani_ObjSpring:
 		include	"Objects/Spring/Animations.asm"
 Map_ObjSpring:
 		include	"Objects/Spring/Mappings.asm"
-ArtKosM_SpringH:
-		incbin	"Objects/Spring/Art - Horizontal.kosm.bin"
-		even
-ArtKosM_SpringV:
-		incbin	"Objects/Spring/Art - Vertical.kosm.bin"
-		even
-ArtKosM_SpringD:
-		incbin	"Objects/Spring/Art - Diagonal.kosm.bin"
-		even
 ; =========================================================================================================================================================
