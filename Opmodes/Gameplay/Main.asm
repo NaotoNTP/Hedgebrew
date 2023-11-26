@@ -57,7 +57,7 @@ Level_NoFade:
 		jsr	InitObjectList.w
 
 		jsr	FindFreeObj.w
-		move.l	#ObjMighty,oAddr(a1)		; Load Mighty object
+		move.l	#ObjPlayer,oAddr(a1)		; Load Player object
 		move.w	a1,rPlayer1Addr.w		; Store the address
 
 		tst.b	rWaterFlag.w			; Does the level have water?
@@ -594,7 +594,7 @@ Level_ObjIndex:
 ObjNull:
 		jmp	DeleteObject
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-		include	"Objects/Mighty/Code.asm"		; Mighty object
+		include	"Objects/Player/Code.asm"		; Player object
 		include	"Objects/Ring/Code.asm"		; Ring loss object
 		include	"Objects/Explosion/Code.asm"	; Explosion object
 		include	"Objects/Water Surface/Code.asm"	; Water surface object

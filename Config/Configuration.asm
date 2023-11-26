@@ -17,7 +17,7 @@
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Required
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-GAME_NAME	equs	"Mighty The Armadillo in -|=| PRISM PARADISE |=|-"; International name
+GAME_NAME	equs	"Hedgebrew Engine Project                        "; International name
 IO_SUPPORT	equs	"J"				; I/O support
 SRAM_SUPPORT	equ	$20202020			; SRAM support
 SRAM_START	equ	$20202020			; SRAM start address

@@ -213,7 +213,7 @@ ObjMonitorContents_GetType:
 		push.l	a0
 		movea.l	a0,a2
 		movea.w	rPlayer1Addr.w,a0
-		jsr	ObjMighty_GetHurt
+		jsr	ObjPlayer_GetHurt
 		pop.l	a0
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

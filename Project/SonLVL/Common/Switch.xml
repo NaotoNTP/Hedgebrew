@@ -2,8 +2,8 @@
 <ObjDef xmlns="http://www.sonicretro.org" Name="Switch" Image="switch">
   <Images>
     <ImageFromMappings id="switch">
-      <ArtFile filename="../Objects/Switch/Art.kosm.bin" offset="-128" compression="KosinskiM" />
-      <MapFile type="ASM" filename="../Objects/Switch/Mappings.asm" frame="0" startpal="0"/>
+      <ArtFile filename="../../Objects/Switch/Art.kosm.bin" offset="-128" compression="KosinskiM" />
+      <MapFile type="ASM" filename="../../Objects/Switch/Mappings.asm" frame="0" startpal="0"/>
     </ImageFromMappings>
   </Images>
   <Properties>

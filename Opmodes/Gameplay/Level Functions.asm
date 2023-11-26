@@ -1264,7 +1264,7 @@ SolidObject_Below:
 		
 		push.l	a0				; Store the current object's address
 		movea.l	a1,a0				; Replace with the player's address
-		jsr	ObjMighty_GetKilled		; Kill the player
+		jsr	ObjPlayer_GetKilled		; Kill the player
 		pop.l	a0				; Restore the current object's address
 		bset	#cTouchBtmBit,d6		; Set "touch bottom" flag
 		moveq	#-2,d4				; Set collision status to -2
@@ -1697,7 +1697,7 @@ PlayerDoObjCollision:
 		tst.w	oInvulTime(a0)			; Are we invulnerable?
 		bne.s	.NoHurt				; If so, branch
 		movea.l	a1,a2				; Copy harmful object's pointer
-		jmp	ObjMighty_GetHurt		; Get hurts
+		jmp	ObjPlayer_GetHurt		; Get hurts
 
 .NoHurt:
 		rts

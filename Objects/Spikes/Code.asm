@@ -1,7 +1,4 @@
 ; ===========================================================================
-; Mighty The Armadillo in PRISM PARADISE
-; By Nat The Porcupine 2021
-; ---------------------------------------------------------------------------
 ; Spike object
 ; ===========================================================================
 		rsset	oLvlSSTs
@@ -141,7 +138,7 @@ Touch_ChkHurt2:
 		move.l	d3,oYPos(a1)
 		movea.l	a0,a2
 		movea.l	a1,a0
-		jsr	ObjMighty_GetHurt
+		jsr	ObjPlayer_GetHurt
 		movea.l	a2,a0
 
 .End:

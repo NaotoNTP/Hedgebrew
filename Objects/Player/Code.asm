@@ -34,29 +34,29 @@ oFlipSpeed	rs.b	1				; Flip speed
 oBallMode	rs.b	1				; Ball mode flag
 oHangAniTime	rs.b	1				; Hang animation timer
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty:
+ObjPlayer:
 		moveq	#0,d0
 		move.b	oRoutine(a0),d0			; Get routine ID
 		jsr	.Index(pc,d0.w)			; Jump to it
 	nextObject
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Index:
-		bra.w	ObjMighty_Init			; Initialization(00)
-		bra.w	ObjMighty_Main			; Main		(04)
-		bra.w	ObjMighty_Hurt			; Hurt		(08)
-		bra.w	ObjMighty_Dead			; Dead		(0C)
-		bra.w	ObjMighty_Gone			; Gone		(10)
+		bra.w	ObjPlayer_Init			; Initialization(00)
+		bra.w	ObjPlayer_Main			; Main		(04)
+		bra.w	ObjPlayer_Hurt			; Hurt		(08)
+		bra.w	ObjPlayer_Dead			; Dead		(0C)
+		bra.w	ObjPlayer_Gone			; Gone		(10)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Initialization routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Init:
+ObjPlayer_Init:
 		addq.b	#4,oRoutine(a0)			; Next routine
 
 		move.b	#9,oColW(a0)			; Collision width
 		move.b	#$13,oColH(a0)			; Collision height
 		move.b	oColW(a0),oInitColW(a0)		; Set initial collision width
 		move.b	oColH(a0),oInitColH(a0)		; Set initial collision height
-		move.l	#Map_ObjMighty,oMap(a0)		; Mappings
+		move.l	#Map_ObjPlayer,oMap(a0)		; Mappings
 		move.w	#$780,oVRAM(a0)			; Sprite tile properties
 	displaySprite	2,a0,a1,0			; Priority
 		move.b	#$18,oDrawW(a0)			; Sprite width
@@ -72,7 +72,7 @@ ObjMighty_Init:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Main routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Main:
+ObjPlayer_Main:
 		tst.b	rMoveCheat.w
 		beq.s	.NoPlacementEnter
 		btst	#4,rP1Press.w			; Has the B button been pressed?
@@ -91,19 +91,19 @@ ObjMighty_Main:
 	;	bne.s	.NotOnGround
 
 ;.NotOnGround:
-		bsr.w	ObjMighty_Water			; Handle Sonic in water
-		bsr.w	ObjMighty_GetPhysics		; Update Sonic's physics
-		bsr.w	ObjMighty_DoModes		; Do modes
-		bsr.w	ObjMighty_LvlBound		; Handle level boundaries
+		bsr.w	ObjPlayer_Water			; Handle Sonic in water
+		bsr.w	ObjPlayer_GetPhysics		; Update Sonic's physics
+		bsr.w	ObjPlayer_DoModes		; Do modes
+		bsr.w	ObjPlayer_LvlBound		; Handle level boundaries
 		jsr	PlayerDoObjCollision		; Do object collision
 
-		bsr.w	ObjMighty_Animate		; Animate sprite
-		bsr.w	ObjMighty_Display		; Display sprite
-		bra.w	ObjMighty_LoadDPLCs		; Load DPLCs
+		bsr.w	ObjPlayer_Animate		; Animate sprite
+		bsr.w	ObjPlayer_Display		; Display sprite
+		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle the extended camera
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_ExtendedCam:
+ObjPlayer_ExtendedCam:
 		move.w	rCamXPosCenter.w,d1		; Get camera X center
 		move.w	oGVel(a0),d0			; Get ground velocity
 		bpl.s	.PosGVel			; Get absolute value
@@ -143,14 +143,14 @@ ObjMighty_ExtendedCam:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Update Sonic's physics
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_GetPhysics:
+ObjPlayer_GetPhysics:
 		moveq	#0,d0
 		btst	#6,oStatus(a0)			; Is Sonic underwater?
 		beq.s	.GetOffset			; If not, branch
 		moveq	#8,d0				; Set the underwater bit
 
 .GetOffset:
-		lea	ObjMighty_Physics(pc,d0.w),a1	; Get pointer to correct physics values
+		lea	ObjPlayer_Physics(pc,d0.w),a1	; Get pointer to correct physics values
 		move.l	(a1)+,oTopSpd(a0)		; Set top speed and acceleration
 		move.w	(a1),oDec(a0)			; Set deceleration
 		rts
@@ -160,13 +160,13 @@ ObjMighty_GetPhysics:
 ; FORMAT:
 ;	dc.w	TOP SPEED, ACCELERATION, DECELERATION, 0
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Physics:
+ObjPlayer_Physics:
 		dc.w	TOP_SPD,     ACC_SPD,     DEC_SPD,     0; Normal
 		dc.w	TOP_SPD/2,   ACC_SPD/2,   DEC_SPD/2,   0; Underwater
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle Sonic in the water
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Water:
+ObjPlayer_Water:
 	tst.b	rWaterFlag.w			; Is there water in the level?
 	bne.s	.HandleWater			; If so, branch
 
@@ -211,7 +211,7 @@ ObjMighty_Water:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do Sonic's modes
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_DoModes:
+ObjPlayer_DoModes:
 		btst	#0,oFlags(a0)			; Is running Sonic's mode disabled?
 		bne.s	.NoMode				; If so, branch
 
@@ -219,41 +219,41 @@ ObjMighty_DoModes:
 		move.b	oStatus(a0),d0			; Get status
 		andi.w	#6,d0				; Only get mode bits
 		add.w	d0,d0
-		jsr	ObjMighty_Modes(pc,d0.w)	; Jump to the right routine
+		jsr	ObjPlayer_Modes(pc,d0.w)	; Jump to the right routine
 
-		bsr.w	ObjMighty_ExtendedCam		; Handle extended camera
-		bsr.w	ObjMighty_ChkBounce		; Check for bouncy floor collision
-		bsr.w	ObjMighty_ChkHang		; Check for hanging
-		bra.w	ObjMighty_ChkElectric		; Check for electricity
+		bsr.w	ObjPlayer_ExtendedCam		; Handle extended camera
+		bsr.w	ObjPlayer_ChkBounce		; Check for bouncy floor collision
+		bsr.w	ObjPlayer_ChkHang		; Check for hanging
+		bra.w	ObjPlayer_ChkElectric		; Check for electricity
 
 .NoMode:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Sonic's modes
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Modes:
-		bra.w	ObjMighty_MdGround		; Ground
-		bra.w	ObjMighty_MdAir			; Air
-		bra.w	ObjMighty_MdRoll		; Roll
-		bra.w	ObjMighty_MdJump		; Jumping
+ObjPlayer_Modes:
+		bra.w	ObjPlayer_MdGround		; Ground
+		bra.w	ObjPlayer_MdAir			; Air
+		bra.w	ObjPlayer_MdRoll		; Roll
+		bra.w	ObjPlayer_MdJump		; Jumping
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Ground mode
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MdGround:
-		bsr.w	ObjMighty_Peelout		; Handle the peelout
-		bsr.w	ObjMighty_Spindash		; Handle the spindash
-		bsr.w	ObjMighty_ChkJump		; Check for jumping
-		bsr.w	ObjMighty_ChkRoll		; Check for rolling
-		bsr.w	ObjMighty_MoveGround		; Do movement on the ground
+ObjPlayer_MdGround:
+		bsr.w	ObjPlayer_Peelout		; Handle the peelout
+		bsr.w	ObjPlayer_Spindash		; Handle the spindash
+		bsr.w	ObjPlayer_ChkJump		; Check for jumping
+		bsr.w	ObjPlayer_ChkRoll		; Check for rolling
+		bsr.w	ObjPlayer_MoveGround		; Do movement on the ground
 		jsr	ObjectMove.w			; Allow movement
 		jsr	PlayerAnglePos			; Update position and angle along the ground
 
-		bsr.w	ObjMighty_SlopePush		; Affect Sonic's speed on a slope
-		bsr.w	ObjMighty_FallOffSlope		; Check if Sonic is going to fall off the slope
+		bsr.w	ObjPlayer_SlopePush		; Affect Sonic's speed on a slope
+		bsr.w	ObjPlayer_FallOffSlope		; Check if Sonic is going to fall off the slope
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Misc. updates
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MiscUpdates:
+ObjPlayer_MiscUpdates:
 		tst.b	oMoveLock(a0)			; Is the move lock timer finished?
 		beq.s	.NoMoveLock			; If so, branch
 		subq.b	#1,oMoveLock(a0)		; Decrement the timer
@@ -261,7 +261,7 @@ ObjMighty_MiscUpdates:
 .NoMoveLock:
 		jsr	sub_F846
 		tst.w	d1
-		bmi.w	ObjMighty_GetKilled
+		bmi.w	ObjPlayer_GetKilled
 		jsr	PlayerChkLeftWallDist		; Check for left wall collision
 		tst.w	d1				; Has Sonic entered the wall?
 		bpl.s	.ChkRight			; If not, branch
@@ -278,26 +278,26 @@ ObjMighty_MiscUpdates:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Air and jump modes
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MdJump:
-ObjMighty_MdAir:
+ObjPlayer_MdJump:
+ObjPlayer_MdAir:
 		clr.w	oInteract(a0)			; Sonic cannot be interacting with objects while in midair
 		bclr	#cStandBit,oStatus(a0)		; ''
 
 		btst	#3,oFlags(a0)			; Is Sonic hanging?
 		beq.s	.DoModes			; If not, branch
-		bsr.w	ObjMighty_Hang			; Hang
+		bsr.w	ObjPlayer_Hang			; Hang
 		bra.s	.DoCol				; Continue
 
 .DoModes:
-		bsr.w	ObjMighty_JumpHeight		; Handle jump height
-		bsr.w	ObjMighty_MoveAir		; Do movement
+		bsr.w	ObjPlayer_JumpHeight		; Handle jump height
+		bsr.w	ObjPlayer_MoveAir		; Do movement
 		jsr	ObjectMoveAndFall.w		; Allow movement
 		cmpi.w	#$1000,oYVel(a0)		; Is Sonic moving down too fasr?
 		ble.s	.NoCap				; If not, branch
 		move.w	#$1000,oYVel(a0)		; Cap the downward speed
 
 .NoCap:
-		bsr.w	ObjMighty_JumpAngle		; Reset Sonic's angle in mid air
+		bsr.w	ObjPlayer_JumpAngle		; Reset Sonic's angle in mid air
 
 .DoCol:
 		btst	#6,oStatus(a0)
@@ -306,27 +306,27 @@ ObjMighty_MdAir:
 
 .NoWater:
 		jsr	PlayerChkCollision		; Check for level collision
-		bra.s	ObjMighty_MiscUpdates
+		bra.s	ObjPlayer_MiscUpdates
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Roll mode
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MdRoll:
+ObjPlayer_MdRoll:
 		tst.b	oBallMode(a0)			; Are we in ball mode?
 		bne.s	.NoJump				; If so, branch
-		bsr.w	ObjMighty_ChkJump		; Check for jumping
+		bsr.w	ObjPlayer_ChkJump		; Check for jumping
 
 .NoJump:
-		bsr.w	ObjMighty_RollSlopePush		; Push Sonic on a slope while rolling
-		bsr.w	ObjMighty_MoveRoll		; Do movement
+		bsr.w	ObjPlayer_RollSlopePush		; Push Sonic on a slope while rolling
+		bsr.w	ObjPlayer_MoveRoll		; Do movement
 		jsr	ObjectMove.w			; Allow movement
 		jsr	PlayerAnglePos			; Update position and angle along the ground
 
-		bsr.w	ObjMighty_FallOffSlope		; Check if Sonic is going to fall off the slope
-		bra.w	ObjMighty_MiscUpdates		; Do misc. updates
+		bsr.w	ObjPlayer_FallOffSlope		; Check if Sonic is going to fall off the slope
+		bra.w	ObjPlayer_MiscUpdates		; Do misc. updates
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do movement on the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MoveGround:
+ObjPlayer_MoveGround:
 		move.w	oTopSpd(a0),d6			; Get top speed
 		move.w	oAcc(a0),d5			; Get acceleration
 		move.w	oDec(a0),d4			; Get deceleration
@@ -336,12 +336,12 @@ ObjMighty_MoveGround:
 
 		btst	#2,rCtrlHold.w		; Is left held?
 		beq.s	.NotLeft			; If so, branch
-		bsr.w	ObjMighty_MoveLeft		; Move left
+		bsr.w	ObjPlayer_MoveLeft		; Move left
 
 .NotLeft:
 		btst	#3,rCtrlHold.w		; Is right held?
 		beq.s	.NotRight			; If so, branch
-		bsr.w	ObjMighty_MoveRight		; Move right
+		bsr.w	ObjPlayer_MoveRight		; Move right
 
 .NotRight:
 		move.b	oAngle(a0),d0			; Get angle
@@ -467,7 +467,7 @@ ObjMighty_MoveGround:
 		move.w	d1,oXVel(a0)			; Set the X velocity
 		move.w	d0,oYVel(a0)			; Set the Y velocity
 
-ObjMighty_CheckWalls:
+ObjPlayer_CheckWalls:
 		move.b	oAngle(a0),d0			; Get angle
 		andi.b	#$3F,d0				; Is Sonic on an angle?
 		beq.s	.Skip				; If not, branch
@@ -525,7 +525,7 @@ ObjMighty_CheckWalls:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move left on the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MoveLeft:
+ObjPlayer_MoveLeft:
 		move.w	oGVel(a0),d0			; Get current speed
 		beq.s	.SetFlip			; If not moving yet, branch
 		bpl.s	.Skid				; If moving right, check for skidding
@@ -578,7 +578,7 @@ ObjMighty_MoveLeft:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move right on the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MoveRight:
+ObjPlayer_MoveRight:
 		move.w	oGVel(a0),d0			; Get current speed
 		bmi.s	.Skid				; If it's negative, skid
 		bclr	#0,oStatus(a0)			; Clear flip flag
@@ -626,7 +626,7 @@ ObjMighty_MoveRight:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do movement while rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MoveRoll:
+ObjPlayer_MoveRoll:
 		move.w	oTopSpd(a0),d6			; Get top speed
 		asl.w	#1,d6				; ''
 		move.w	oAcc(a0),d5			; Get acceleration
@@ -639,12 +639,12 @@ ObjMighty_MoveRoll:
 
 		btst	#2,rCtrlHold.w		; Is left being held?
 		beq.s	.ChkRight			; If not, branch
-		bsr.w	ObjMighty_RollLeft		; Handle left movement
+		bsr.w	ObjPlayer_RollLeft		; Handle left movement
 
 .ChkRight:
 		btst	#3,rCtrlHold.w		; Is right being held?
 		beq.s	.Decelerate			; If not, branch
-		bsr.w	ObjMighty_RollRight		; Handle right movement
+		bsr.w	ObjPlayer_RollRight		; Handle right movement
 
 .Decelerate:
 		move.w	oGVel(a0),d0			; Get ground velocity
@@ -706,11 +706,11 @@ ObjMighty_MoveRoll:
 
 .SetXVel:
 		move.w	d1,oXVel(a0)			; Set X velocity
-		bra.w	ObjMighty_CheckWalls		; Check wall collision
+		bra.w	ObjPlayer_CheckWalls		; Check wall collision
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle left movement for rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_RollLeft:
+ObjPlayer_RollLeft:
 		move.w	oGVel(a0),d0			; Get ground velocity
 		beq.s	.SetLeft			; If Sonic isn't moving, branch
 		bpl.s	.Dec				; If Sonic is moving right, branch
@@ -731,7 +731,7 @@ ObjMighty_RollLeft:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle left movement for rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_RollRight:
+ObjPlayer_RollRight:
 		move.w	oGVel(a0),d0			; Get ground velocity
 		bmi.s	.Dec				; If Sonic is moving left, branch
 		bclr	#0,oStatus(a0)			; Face right
@@ -749,7 +749,7 @@ ObjMighty_RollRight:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do movement in the air
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_MoveAir:
+ObjPlayer_MoveAir:
 		move.w	oTopSpd(a0),d6			; Get top speed
 		move.w	oAcc(a0),d5			; Get accleration
 		add.w	d5,d5				; Double it
@@ -820,7 +820,7 @@ ObjMighty_MoveAir:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle level boundaries
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_LvlBound:
+ObjPlayer_LvlBound:
 		tst.w	oYVel(a0)
 		bpl.s	.XBound
 		move.w	oYPos(a0),d1
@@ -860,7 +860,7 @@ ObjMighty_LvlBound:
 		move.w	rMaxCamY.w,d1		; Get current max camera Y position
 		cmp.w	d0,d1				; Are they the same?
 		blt.s	.NoKill				; If not, branch
-		bra.w	ObjMighty_GetKilled		; Get Sonic killed
+		bra.w	ObjPlayer_GetKilled		; Get Sonic killed
 
 .NoKill:
 		rts
@@ -874,7 +874,7 @@ ObjMighty_LvlBound:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle peelout
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Peelout:
+ObjPlayer_Peelout:
 		tst.b	oDashFlag(a0)			; Is Sonic doing the peelout?
 		beq.s	.ChkUp				; If not, branch
 		bmi.s	.ChkLaunch			; If so, branch
@@ -958,7 +958,7 @@ ObjMighty_Peelout:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle spindash
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Spindash:
+ObjPlayer_Spindash:
 		tst.b	oDashFlag(a0)			; Is Sonic doing the spindash?
 		beq.s	.ChkDown			; If not, branch
 		bpl.s	.ChkLaunch			; If so, branch
@@ -1049,7 +1049,7 @@ ObjMighty_Spindash:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Check for jumping
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_ChkJump:
+ObjPlayer_ChkJump:
 		move.b	rCtrlPress.w,d0		; Get pressed buttons
 		andi.b	#$70,d0				; Are A, B, or C pressed?
 		tst.b	rMoveCheat.w
@@ -1098,7 +1098,7 @@ ObjMighty_ChkJump:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle variable jumping
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_JumpHeight:
+ObjPlayer_JumpHeight:
 		tst.b	oJumping(a0)			; Is Sonic jumping?
 		beq.s	.UpVelCap			; If not, branch
 
@@ -1129,9 +1129,9 @@ ObjMighty_JumpHeight:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Gradually reset Sonic's angle in mid air
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_JumpAngle:
+ObjPlayer_JumpAngle:
 		move.b	oAngle(a0),d0			; Get angle
-		beq.s	ObjMighty_JumpFlip		; If it's already reset, branch
+		beq.s	ObjPlayer_JumpFlip		; If it's already reset, branch
 		bpl.s	.Decrease			; If it's positive, branch
 
 .Increase:
@@ -1150,7 +1150,7 @@ ObjMighty_JumpAngle:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Update Sonic's angle while he's tumbling in the air
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_JumpFlip:
+ObjPlayer_JumpFlip:
 		move.b	oFlipAngle(a0),d0		; Get flip angle
 		beq.s	.End				; If it's 0, branch
 		tst.w	oFlipDir(a0)			; Is Sonic flipping left?
@@ -1185,7 +1185,7 @@ ObjMighty_JumpFlip:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Check for rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_ChkRoll:
+ObjPlayer_ChkRoll:
 		move.w	oGVel(a0),d0			; Get ground velocity
 		bpl.s	.ChkSpd				; Get absolute value
 		neg.w	d0				; ''
@@ -1197,14 +1197,14 @@ ObjMighty_ChkRoll:
 		andi.b	#$C,d0				; Are left or right held?
 		bne.s	.NoRoll				; If not, branch
 		btst	#1,rCtrlHold.w		; Is down being held?
-		bne.s	ObjMighty_DoRoll			; If so, branch
+		bne.s	ObjPlayer_DoRoll			; If so, branch
 
 .NoRoll:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Make Sonic roll
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_DoRoll:
+ObjPlayer_DoRoll:
 		btst	#2,oStatus(a0)			; Is Sonic already rolling?
 		bne.s	.End				; If so, branch
 		bset	#2,oStatus(a0)			; Set roll flag
@@ -1223,7 +1223,7 @@ ObjMighty_DoRoll:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Slow Sonic down as he goes up a slope or speed him up when he does down one
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_SlopePush:
+ObjPlayer_SlopePush:
 		move.b	oAngle(a0),d0			; Get angle
 		addi.b	#$60,d0				; Shift it
 		cmpi.b	#$C0,d0				; Is Sonic on a steep slope or ceiling?
@@ -1241,7 +1241,7 @@ ObjMighty_SlopePush:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Check if Sonic is to fall off a slope
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_FallOffSlope:
+ObjPlayer_FallOffSlope:
 		tst.b	oMoveLock(a0)			; Is the move lock timer, active?
 		bne.s	.End				; If so, branch
 		move.b	oAngle(a0),d0			; Get angle
@@ -1264,7 +1264,7 @@ ObjMighty_FallOffSlope:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Affect Sonic's speed on slopes while rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_RollSlopePush:
+ObjPlayer_RollSlopePush:
 		move.b	oAngle(a0),d0			; Get angle
 		addi.b	#$60,d0				; ''
 		cmpi.b	#$C0,d0				; Is Sonic on a steep enough slope?
@@ -1298,7 +1298,7 @@ ObjMighty_RollSlopePush:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Check for bouncy floor collision
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_ChkBounce:
+ObjPlayer_ChkBounce:
 		tst.b	rFloorActive.w		; Is the floor active?
 		beq.w	.End				; If so, branch
 
@@ -1415,7 +1415,7 @@ ObjMighty_ChkBounce:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Check for bars to hang on to
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_ChkHang:
+ObjPlayer_ChkHang:
 		btst	#3,oFlags(a0)			; Are we already hanging?
 		bne.s	.End				; If so, branch
 
@@ -1447,7 +1447,7 @@ ObjMighty_ChkHang:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Hang onto the bars
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Hang:
+ObjPlayer_Hang:
 		move.w	oXPos(a0),d3			; X position
 		move.w	oYPos(a0),d2			; Y position
 		subi.w	#$18,d2				; ''
@@ -1507,7 +1507,7 @@ ObjMighty_Hang:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Check for electricity
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_ChkElectric:
+ObjPlayer_ChkElectric:
 		move.w	oXPos(a0),d3			; X position
 		move.w	oYPos(a0),d2			; Y position
 		jsr	Level_FindBlock			; Get the block located there
@@ -1519,7 +1519,7 @@ ObjMighty_ChkElectric:
 
 .ChkBlocks:
 		cmp.w	(a1)+,d0			; have we touched this block?
-		beq.s	ObjMighty_GetHurt		; If so, branch
+		beq.s	ObjPlayer_GetHurt		; If so, branch
 		dbf	d6,.ChkBlocks			; Loop
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1527,12 +1527,12 @@ ObjMighty_ChkElectric:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Get Sonic hurt
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_GetHurt:
+ObjPlayer_GetHurt:
 		displaySprite	2,a0,a1,1		; Add sprite if not already being displayed
 		tst.b	oInvulTime(a0)			; Are we invulnerable?
 		bne.w	.End				; If so, branch
 		tst.w	rRings.w			; Does Sonic have any rings?
-		beq.w	ObjMighty_GetKilled		; If not, branch
+		beq.w	ObjPlayer_GetKilled		; If not, branch
 		jsr	FindFreeObj.w
 		beq.s	.Hurt
 		move.l	#ObjRingLoss,oAddr(a1)
@@ -1575,7 +1575,7 @@ ObjMighty_GetHurt:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Hurt routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Hurt:
+ObjPlayer_Hurt:
 		tst.b	rMoveCheat.w
 		beq.s	.NoPlacementEnter
 		btst	#4,rP1Press.w			; Has the B button been pressed?
@@ -1604,15 +1604,15 @@ ObjMighty_Hurt:
 		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
 
 .Cont:
-		bsr.w	ObjMighty_LvlBound		; Handle level boundaries
-		bsr.w	ObjMighty_Animate		; Animate sprite
-		bra.w	ObjMighty_LoadDPLCs		; Load DPLCs
+		bsr.w	ObjPlayer_LvlBound		; Handle level boundaries
+		bsr.w	ObjPlayer_Animate		; Animate sprite
+		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkStop:
 		move.w	rMaxCamY.w,d0		; Get bottom boundary
 		addi.w	#224,d0				; ''
 		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
-		blt.s	ObjMighty_GetKilled		; If so, branch
+		blt.s	ObjPlayer_GetKilled		; If so, branch
 
 		jsr	PlayerChkCollision		; Check for level collision
 		btst	#1,oStatus(a0)			; Is Sonic still in midair?
@@ -1631,7 +1631,7 @@ ObjMighty_Hurt:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Get Sonic killed
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_GetKilled:
+ObjPlayer_GetKilled:
 		displaySprite	2,a0,a1,1		; Add sprite if not already being displayed
 		move.b	#$C,oRoutine(a0)			; Set to the death routine
 		jsr	PlayerResetOnFloorPart2	; Reset Sonic like he would touching the ground
@@ -1654,7 +1654,7 @@ ObjMighty_GetKilled:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Death routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Dead:
+ObjPlayer_Dead:
 		tst.b	rMoveCheat.w
 		beq.s	.NoPlacementEnter
 		btst	#4,rP1Press.w			; Has the B button been pressed?
@@ -1666,12 +1666,12 @@ ObjMighty_Dead:
 .NoPlacementEnter:
 		move.b	#$18,oAni(a0)			; Force the death animation
 		ori.w	#$8000,oVRAM(a0)		; Force high priority
-		bsr.s	ObjMighty_ChkBound		; Check for when Sonic goes off screen
+		bsr.s	ObjPlayer_ChkBound		; Check for when Sonic goes off screen
 		jsr	ObjectMoveAndFall.w		; Allow movement
-		bsr.w	ObjMighty_Animate		; Animate sprite
-		bra.w	ObjMighty_LoadDPLCs		; Load DPLCs
+		bsr.w	ObjPlayer_Animate		; Animate sprite
+		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_ChkBound:
+ObjPlayer_ChkBound:
 		move.w	rMaxCamY.w,d0		; Get bottom boundary
 		addi.w	#$100,d0			; ''
 		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
@@ -1685,7 +1685,7 @@ ObjMighty_ChkBound:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Wait for level reload or game/time over
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Gone:
+ObjPlayer_Gone:
 		tst.b	oDeathTimer(a0)
 		beq.s	.End
 		subq.b	#1,oDeathTimer(a0)		; Decrement the death counter
@@ -1697,7 +1697,7 @@ ObjMighty_Gone:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Display Sonic's sprite
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Display:
+ObjPlayer_Display:
 		move.b	oInvulTime(a0),d0		; Get invulnerability timer
 		beq.s	.Display			; If it's 0, branch
 		subq.b	#1,oInvulTime(a0)		; Decrement invulnerability timer
@@ -1712,16 +1712,16 @@ ObjMighty_Display:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load Sonic's DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_LoadDPLCs:
-		lea	DPLC_ObjMighty,a2		; DPLCs
+ObjPlayer_LoadDPLCs:
+		lea	DPLC_ObjPlayer,a2		; DPLCs
 		move.w	#$F000,d4			; VRAM location
 		move.l	#ArtUnc_Sonic,d6		; Art
 		jmp	LoadObjDPLCs.w			; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Animate Sonic's sprite
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ObjMighty_Animate:
-		lea	Ani_ObjMighty,a1			; Animation script
+ObjPlayer_Animate:
+		lea	Ani_ObjPlayer,a1			; Animation script
 		moveq	#0,d0
 		move.b	oAni(a0),d0			; Get animation ID
 		cmp.b	oPrevAni(a0),d0			; Has it changed?
@@ -1984,10 +1984,10 @@ Debug_Init:
 		clr.b	oStatus(a0)			; Reset status
 		andi.b	#$FC,oRender(a0)		; Mask out flip bits in render flags
 		move.b	#1,oFrame(a0)			; Display the standing frame
-		bsr.w	ObjMighty_LoadDPLCs		; Load DPLCs
+		bsr.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Debug_Main:
-		bsr.w	ObjMighty_ExtendedCam		; Handle extended camera
+		bsr.w	ObjPlayer_ExtendedCam		; Handle extended camera
 		bsr.s	Debug_Control			; Control
 	displaySprite	2,a0,a2,1
 		rts
@@ -2025,7 +2025,7 @@ Debug_Control:
 		move.w	d0,oGVel(a0)			; Reset ground velocity
 		andi.b	#1,oStatus(a0)			; Reset status
 		bset	#1,oStatus(a0)			; Set "in air" flag
-		move.l	#ObjMighty,oAddr(a0)		; Use normal Sonic object
+		move.l	#ObjPlayer,oAddr(a0)		; Use normal Sonic object
 		move.b	oInitColH(a0),oColH(a0)		; Reset collision height
 		move.b	oInitColW(a0),oColW(a0)		; Reset collision width
 
@@ -2035,18 +2035,18 @@ Debug_Control:
 ; Data
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ArtUnc_Sonic:
-		incbin	"Objects/Mighty/Art.unc.bin"
+		incbin	"Objects/Player/Art.unc.bin"
 		even
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-Map_ObjMighty:
-		include	"Objects/Mighty/Mappings.asm"
+Map_ObjPlayer:
+		include	"Objects/Player/Mappings.asm"
 		even
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-DPLC_ObjMighty:
-		include	"Objects/Mighty/DPLCs.asm"
+DPLC_ObjPlayer:
+		include	"Objects/Player/DPLCs.asm"
 		even
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-Ani_ObjMighty:
-		include	"Objects/Mighty/Animations.asm"
+Ani_ObjPlayer:
+		include	"Objects/Player/Animations.asm"
 		even
 ; =========================================================================================================================================================

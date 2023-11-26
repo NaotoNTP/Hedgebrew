@@ -24,7 +24,7 @@
 00000000                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 00000000                            ; Required
 00000000                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-00000000                            GAME_NAME	equs	"Mighty The Armadillo in -|=| PRISM PARADISE |=|-"; International name
+00000000                            GAME_NAME	equs	"Hedgebrew Engine Project                        "; International name
 00000000                            IO_SUPPORT	equs	"J"				; I/O support
 00000000 =20202020                  SRAM_SUPPORT	equ	$20202020			; SRAM support
 00000000 =20202020                  SRAM_START	equ	$20202020			; SRAM start address
@@ -5032,7 +5032,7 @@
 00000150 =00000150                M p	=	*
 00000150 2020 2020 2020 2020 2020+M 	dcb.b	$30," "
 00000180                          M 	org	p
-00000150 4D69 6768 7479 2054 6865+M 	dc.b	"Mighty The Armadillo in -|=| PRISM PARADISE |=|-"
+00000150 4865 6467 6562 7265 7720+M 	dc.b	"Hedgebrew Engine Project                        "
 00000180                          M 	org	p+$30
 00000180 474D 2030 3030 3030 3030+  		dc.b	"GM 00000000-00"		; Version
 0000018E 0000                       		dc.w	0				; Checksum value (replaced by external program)
@@ -9830,7 +9830,7 @@
 000024FC 4EB8 19BE                  		jsr	InitObjectList.w
 00002500                            
 00002500 4EB8 1A1C                  		jsr	FindFreeObj.w
-00002504 22BC 0000 0000             		move.l	#ObjMighty,oAddr(a1)		; Load Mighty object
+00002504 22BC 0000 0000             		move.l	#ObjPlayer,oAddr(a1)		; Load Player object
 0000250A 31C9 F86C                  		move.w	a1,rPlayer1Addr.w		; Store the address
 0000250E                            
 0000250E 4A38 F8F4                  		tst.b	rWaterFlag.w			; Does the level have water?
@@ -14171,7 +14171,7 @@
 000046E2                            		push.l	a0				; Store the current object's address
 000046E2 2F08                     M 	move.l	a0,-(sp)
 000046E4 2049                       		movea.l	a1,a0				; Replace with the player's address
-000046E6 4EB9 0000 0000             		jsr	ObjMighty_GetKilled		; Kill the player
+000046E6 4EB9 0000 0000             		jsr	ObjPlayer_GetKilled		; Kill the player
 000046EC                            		pop.l	a0				; Restore the current object's address
 000046EC 205F                     M 	move.l	(sp)+,a0
 000046EE 08C6 0002                  		bset	#cTouchBtmBit,d6		; Set "touch bottom" flag
@@ -14605,7 +14605,7 @@
 00004A66 4A68 0000                  		tst.w	oInvulTime(a0)			; Are we invulnerable?
 00004A6A 6600                       		bne.s	.NoHurt				; If so, branch
 00004A6C 2449                       		movea.l	a1,a2				; Copy harmful object's pointer
-00004A6E 4EF9 0000 0000             		jmp	ObjMighty_GetHurt		; Get hurts
+00004A6E 4EF9 0000 0000             		jmp	ObjPlayer_GetHurt		; Get hurts
 00004A74                            
 00004A74                            .NoHurt:
 00004A74 4E75                       		rts
@@ -15025,7 +15025,7 @@
 0000B0C0                            ObjNull:
 0000B0C0 4EF8 1A72                  		jmp	DeleteObject
 0000B0C4                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B0C4                            		include	"Objects/Mighty/Code.asm"		; Mighty object
+0000B0C4                            		include	"Objects/Player/Code.asm"		; Player object
 0000B0C4                            ; =========================================================================================================================================================
 0000B0C4                            ; Sonic object
 0000B0C4                            ; =========================================================================================================================================================
@@ -15062,7 +15062,7 @@
 0000B0C4 =0000004B                  oBallMode	rs.b	1				; Ball mode flag
 0000B0C4 =0000004C                  oHangAniTime	rs.b	1				; Hang animation timer
 0000B0C4                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B0C4                            ObjMighty:
+0000B0C4                            ObjPlayer:
 0000B0C4 7000                       		moveq	#0,d0
 0000B0C6 1028 0025                  		move.b	oRoutine(a0),d0			; Get routine ID
 0000B0CA 4EBB 0000                  		jsr	.Index(pc,d0.w)			; Jump to it
@@ -15072,22 +15072,22 @@
 0000B0D4 4ED1                     M 	jmp	(a1)
 0000B0D6                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B0D6                            .Index:
-0000B0D6 6000 0000                  		bra.w	ObjMighty_Init			; Initialization(00)
-0000B0DA 6000 0000                  		bra.w	ObjMighty_Main			; Main		(04)
-0000B0DE 6000 0000                  		bra.w	ObjMighty_Hurt			; Hurt		(08)
-0000B0E2 6000 0000                  		bra.w	ObjMighty_Dead			; Dead		(0C)
-0000B0E6 6000 0000                  		bra.w	ObjMighty_Gone			; Gone		(10)
+0000B0D6 6000 0000                  		bra.w	ObjPlayer_Init			; Initialization(00)
+0000B0DA 6000 0000                  		bra.w	ObjPlayer_Main			; Main		(04)
+0000B0DE 6000 0000                  		bra.w	ObjPlayer_Hurt			; Hurt		(08)
+0000B0E2 6000 0000                  		bra.w	ObjPlayer_Dead			; Dead		(0C)
+0000B0E6 6000 0000                  		bra.w	ObjPlayer_Gone			; Gone		(10)
 0000B0EA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B0EA                            ; Initialization routine
 0000B0EA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B0EA                            ObjMighty_Init:
+0000B0EA                            ObjPlayer_Init:
 0000B0EA 5828 0025                  		addq.b	#4,oRoutine(a0)			; Next routine
 0000B0EE                            
 0000B0EE 117C 0009 002C             		move.b	#9,oColW(a0)			; Collision width
 0000B0F4 117C 0013 002D             		move.b	#$13,oColH(a0)			; Collision height
 0000B0FA 1168 002C 0031             		move.b	oColW(a0),oInitColW(a0)		; Set initial collision width
 0000B100 1168 002D 0030             		move.b	oColH(a0),oInitColH(a0)		; Set initial collision height
-0000B106 217C 0000 0000 0010        		move.l	#Map_ObjMighty,oMap(a0)		; Mappings
+0000B106 217C 0000 0000 0010        		move.l	#Map_ObjPlayer,oMap(a0)		; Mappings
 0000B10E 317C 0780 000E             		move.w	#$780,oVRAM(a0)			; Sprite tile properties
 0000B114                            	displaySprite	2,a0,a1,0			; Priority
 0000B114 317C BE6A 0008           M 	move.w	#rdispinput+(2*dsize),odrawnext(a0)
@@ -15109,7 +15109,7 @@
 0000B15A                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B15A                            ; Main routine
 0000B15A                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B15A                            ObjMighty_Main:
+0000B15A                            ObjPlayer_Main:
 0000B15A 4A38 C768                  		tst.b	rMoveCheat.w
 0000B15E 6700                       		beq.s	.NoPlacementEnter
 0000B160 0838 0004 C741             		btst	#4,rP1Press.w			; Has the B button been pressed?
@@ -15128,19 +15128,19 @@
 0000B184                            	;	bne.s	.NotOnGround
 0000B184                            
 0000B184                            ;.NotOnGround:
-0000B184 6100 0000                  		bsr.w	ObjMighty_Water			; Handle Sonic in water
-0000B188 6100 0000                  		bsr.w	ObjMighty_GetPhysics		; Update Sonic's physics
-0000B18C 6100 0000                  		bsr.w	ObjMighty_DoModes		; Do modes
-0000B190 6100 0000                  		bsr.w	ObjMighty_LvlBound		; Handle level boundaries
+0000B184 6100 0000                  		bsr.w	ObjPlayer_Water			; Handle Sonic in water
+0000B188 6100 0000                  		bsr.w	ObjPlayer_GetPhysics		; Update Sonic's physics
+0000B18C 6100 0000                  		bsr.w	ObjPlayer_DoModes		; Do modes
+0000B190 6100 0000                  		bsr.w	ObjPlayer_LvlBound		; Handle level boundaries
 0000B194 4EB8 4944                  		jsr	PlayerDoObjCollision		; Do object collision
 0000B198                            
-0000B198 6100 0000                  		bsr.w	ObjMighty_Animate		; Animate sprite
-0000B19C 6100 0000                  		bsr.w	ObjMighty_Display		; Display sprite
-0000B1A0 6000 0000                  		bra.w	ObjMighty_LoadDPLCs		; Load DPLCs
+0000B198 6100 0000                  		bsr.w	ObjPlayer_Animate		; Animate sprite
+0000B19C 6100 0000                  		bsr.w	ObjPlayer_Display		; Display sprite
+0000B1A0 6000 0000                  		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 0000B1A4                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B1A4                            ; Handle the extended camera
 0000B1A4                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B1A4                            ObjMighty_ExtendedCam:
+0000B1A4                            ObjPlayer_ExtendedCam:
 0000B1A4 3238 F8D2                  		move.w	rCamXPosCenter.w,d1		; Get camera X center
 0000B1A8 3028 003A                  		move.w	oGVel(a0),d0			; Get ground velocity
 0000B1AC 6A00                       		bpl.s	.PosGVel			; Get absolute value
@@ -15180,14 +15180,14 @@
 0000B1EC                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B1EC                            ; Update Sonic's physics
 0000B1EC                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B1EC                            ObjMighty_GetPhysics:
+0000B1EC                            ObjPlayer_GetPhysics:
 0000B1EC 7000                       		moveq	#0,d0
 0000B1EE 0828 0006 0028             		btst	#6,oStatus(a0)			; Is Sonic underwater?
 0000B1F4 6700                       		beq.s	.GetOffset			; If not, branch
 0000B1F6 7008                       		moveq	#8,d0				; Set the underwater bit
 0000B1F8                            
 0000B1F8                            .GetOffset:
-0000B1F8 43FB 0000                  		lea	ObjMighty_Physics(pc,d0.w),a1	; Get pointer to correct physics values
+0000B1F8 43FB 0000                  		lea	ObjPlayer_Physics(pc,d0.w),a1	; Get pointer to correct physics values
 0000B1FC 2159 0034                  		move.l	(a1)+,oTopSpd(a0)		; Set top speed and acceleration
 0000B200 3151 0038                  		move.w	(a1),oDec(a0)			; Set deceleration
 0000B204 4E75                       		rts
@@ -15197,13 +15197,13 @@
 0000B206                            ; FORMAT:
 0000B206                            ;	dc.w	TOP SPEED, ACCELERATION, DECELERATION, 0
 0000B206                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B206                            ObjMighty_Physics:
+0000B206                            ObjPlayer_Physics:
 0000B206 0600 000C 0080 0000        		dc.w	TOP_SPD,     ACC_SPD,     DEC_SPD,     0; Normal
 0000B20E 0300 0006 0040 0000        		dc.w	TOP_SPD/2,   ACC_SPD/2,   DEC_SPD/2,   0; Underwater
 0000B216                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B216                            ; Handle Sonic in the water
 0000B216                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B216                            ObjMighty_Water:
+0000B216                            ObjPlayer_Water:
 0000B216 4A38 F8F4                  	tst.b	rWaterFlag.w			; Is there water in the level?
 0000B21A 6600                       	bne.s	.HandleWater			; If so, branch
 0000B21C                            
@@ -15250,7 +15250,7 @@
 0000B276                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B276                            ; Do Sonic's modes
 0000B276                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B276                            ObjMighty_DoModes:
+0000B276                            ObjPlayer_DoModes:
 0000B276 0828 0000 000C             		btst	#0,oFlags(a0)			; Is running Sonic's mode disabled?
 0000B27C 6600                       		bne.s	.NoMode				; If so, branch
 0000B27E                            
@@ -15258,41 +15258,41 @@
 0000B280 1028 0028                  		move.b	oStatus(a0),d0			; Get status
 0000B284 0240 0006                  		andi.w	#6,d0				; Only get mode bits
 0000B288 D040                       		add.w	d0,d0
-0000B28A 4EBB 0000                  		jsr	ObjMighty_Modes(pc,d0.w)	; Jump to the right routine
+0000B28A 4EBB 0000                  		jsr	ObjPlayer_Modes(pc,d0.w)	; Jump to the right routine
 0000B28E                            
-0000B28E 6100 FF14                  		bsr.w	ObjMighty_ExtendedCam		; Handle extended camera
-0000B292 6100 0000                  		bsr.w	ObjMighty_ChkBounce		; Check for bouncy floor collision
-0000B296 6100 0000                  		bsr.w	ObjMighty_ChkHang		; Check for hanging
-0000B29A 6000 0000                  		bra.w	ObjMighty_ChkElectric		; Check for electricity
+0000B28E 6100 FF14                  		bsr.w	ObjPlayer_ExtendedCam		; Handle extended camera
+0000B292 6100 0000                  		bsr.w	ObjPlayer_ChkBounce		; Check for bouncy floor collision
+0000B296 6100 0000                  		bsr.w	ObjPlayer_ChkHang		; Check for hanging
+0000B29A 6000 0000                  		bra.w	ObjPlayer_ChkElectric		; Check for electricity
 0000B29E                            
 0000B29E                            .NoMode:
 0000B29E 4E75                       		rts
 0000B2A0                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B2A0                            ; Sonic's modes
 0000B2A0                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B2A0                            ObjMighty_Modes:
-0000B2A0 6000 0000                  		bra.w	ObjMighty_MdGround		; Ground
-0000B2A4 6000 0000                  		bra.w	ObjMighty_MdAir			; Air
-0000B2A8 6000 0000                  		bra.w	ObjMighty_MdRoll		; Roll
-0000B2AC 6000 0000                  		bra.w	ObjMighty_MdJump		; Jumping
+0000B2A0                            ObjPlayer_Modes:
+0000B2A0 6000 0000                  		bra.w	ObjPlayer_MdGround		; Ground
+0000B2A4 6000 0000                  		bra.w	ObjPlayer_MdAir			; Air
+0000B2A8 6000 0000                  		bra.w	ObjPlayer_MdRoll		; Roll
+0000B2AC 6000 0000                  		bra.w	ObjPlayer_MdJump		; Jumping
 0000B2B0                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B2B0                            ; Ground mode
 0000B2B0                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B2B0                            ObjMighty_MdGround:
-0000B2B0 6100 0000                  		bsr.w	ObjMighty_Peelout		; Handle the peelout
-0000B2B4 6100 0000                  		bsr.w	ObjMighty_Spindash		; Handle the spindash
-0000B2B8 6100 0000                  		bsr.w	ObjMighty_ChkJump		; Check for jumping
-0000B2BC 6100 0000                  		bsr.w	ObjMighty_ChkRoll		; Check for rolling
-0000B2C0 6100 0000                  		bsr.w	ObjMighty_MoveGround		; Do movement on the ground
+0000B2B0                            ObjPlayer_MdGround:
+0000B2B0 6100 0000                  		bsr.w	ObjPlayer_Peelout		; Handle the peelout
+0000B2B4 6100 0000                  		bsr.w	ObjPlayer_Spindash		; Handle the spindash
+0000B2B8 6100 0000                  		bsr.w	ObjPlayer_ChkJump		; Check for jumping
+0000B2BC 6100 0000                  		bsr.w	ObjPlayer_ChkRoll		; Check for rolling
+0000B2C0 6100 0000                  		bsr.w	ObjPlayer_MoveGround		; Do movement on the ground
 0000B2C4 4EB8 1D4C                  		jsr	ObjectMove.w			; Allow movement
 0000B2C8 4EB8 32BC                  		jsr	PlayerAnglePos			; Update position and angle along the ground
 0000B2CC                            
-0000B2CC 6100 0000                  		bsr.w	ObjMighty_SlopePush		; Affect Sonic's speed on a slope
-0000B2D0 6100 0000                  		bsr.w	ObjMighty_FallOffSlope		; Check if Sonic is going to fall off the slope
+0000B2CC 6100 0000                  		bsr.w	ObjPlayer_SlopePush		; Affect Sonic's speed on a slope
+0000B2D0 6100 0000                  		bsr.w	ObjPlayer_FallOffSlope		; Check if Sonic is going to fall off the slope
 0000B2D4                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B2D4                            ; Misc. updates
 0000B2D4                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B2D4                            ObjMighty_MiscUpdates:
+0000B2D4                            ObjPlayer_MiscUpdates:
 0000B2D4 4A28 003F                  		tst.b	oMoveLock(a0)			; Is the move lock timer finished?
 0000B2D8 6700                       		beq.s	.NoMoveLock			; If so, branch
 0000B2DA 5328 003F                  		subq.b	#1,oMoveLock(a0)		; Decrement the timer
@@ -15300,7 +15300,7 @@
 0000B2DE                            .NoMoveLock:
 0000B2DE 4EB8 2FD4                  		jsr	sub_F846
 0000B2E2 4A41                       		tst.w	d1
-0000B2E4 6B00 0000                  		bmi.w	ObjMighty_GetKilled
+0000B2E4 6B00 0000                  		bmi.w	ObjPlayer_GetKilled
 0000B2E8 4EB8 3264                  		jsr	PlayerChkLeftWallDist		; Check for left wall collision
 0000B2EC 4A41                       		tst.w	d1				; Has Sonic entered the wall?
 0000B2EE 6A00                       		bpl.s	.ChkRight			; If not, branch
@@ -15317,26 +15317,26 @@
 0000B302                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B302                            ; Air and jump modes
 0000B302                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B302                            ObjMighty_MdJump:
-0000B302                            ObjMighty_MdAir:
+0000B302                            ObjPlayer_MdJump:
+0000B302                            ObjPlayer_MdAir:
 0000B302 4268 003C                  		clr.w	oInteract(a0)			; Sonic cannot be interacting with objects while in midair
 0000B306 08A8 0003 0028             		bclr	#cStandBit,oStatus(a0)		; ''
 0000B30C                            
 0000B30C 0828 0003 000C             		btst	#3,oFlags(a0)			; Is Sonic hanging?
 0000B312 6700                       		beq.s	.DoModes			; If not, branch
-0000B314 6100 0000                  		bsr.w	ObjMighty_Hang			; Hang
+0000B314 6100 0000                  		bsr.w	ObjPlayer_Hang			; Hang
 0000B318 6000                       		bra.s	.DoCol				; Continue
 0000B31A                            
 0000B31A                            .DoModes:
-0000B31A 6100 0000                  		bsr.w	ObjMighty_JumpHeight		; Handle jump height
-0000B31E 6100 0000                  		bsr.w	ObjMighty_MoveAir		; Do movement
+0000B31A 6100 0000                  		bsr.w	ObjPlayer_JumpHeight		; Handle jump height
+0000B31E 6100 0000                  		bsr.w	ObjPlayer_MoveAir		; Do movement
 0000B322 4EB8 1D66                  		jsr	ObjectMoveAndFall.w		; Allow movement
 0000B326 0C68 1000 001E             		cmpi.w	#$1000,oYVel(a0)		; Is Sonic moving down too fasr?
 0000B32C 6F00                       		ble.s	.NoCap				; If not, branch
 0000B32E 317C 1000 001E             		move.w	#$1000,oYVel(a0)		; Cap the downward speed
 0000B334                            
 0000B334                            .NoCap:
-0000B334 6100 0000                  		bsr.w	ObjMighty_JumpAngle		; Reset Sonic's angle in mid air
+0000B334 6100 0000                  		bsr.w	ObjPlayer_JumpAngle		; Reset Sonic's angle in mid air
 0000B338                            
 0000B338                            .DoCol:
 0000B338 0828 0006 0028             		btst	#6,oStatus(a0)
@@ -15345,27 +15345,27 @@
 0000B346                            
 0000B346                            .NoWater:
 0000B346 4EB8 2C42                  		jsr	PlayerChkCollision		; Check for level collision
-0000B34A 6088                       		bra.s	ObjMighty_MiscUpdates
+0000B34A 6088                       		bra.s	ObjPlayer_MiscUpdates
 0000B34C                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B34C                            ; Roll mode
 0000B34C                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B34C                            ObjMighty_MdRoll:
+0000B34C                            ObjPlayer_MdRoll:
 0000B34C 4A28 004B                  		tst.b	oBallMode(a0)			; Are we in ball mode?
 0000B350 6600                       		bne.s	.NoJump				; If so, branch
-0000B352 6100 0000                  		bsr.w	ObjMighty_ChkJump		; Check for jumping
+0000B352 6100 0000                  		bsr.w	ObjPlayer_ChkJump		; Check for jumping
 0000B356                            
 0000B356                            .NoJump:
-0000B356 6100 0000                  		bsr.w	ObjMighty_RollSlopePush		; Push Sonic on a slope while rolling
-0000B35A 6100 0000                  		bsr.w	ObjMighty_MoveRoll		; Do movement
+0000B356 6100 0000                  		bsr.w	ObjPlayer_RollSlopePush		; Push Sonic on a slope while rolling
+0000B35A 6100 0000                  		bsr.w	ObjPlayer_MoveRoll		; Do movement
 0000B35E 4EB8 1D4C                  		jsr	ObjectMove.w			; Allow movement
 0000B362 4EB8 32BC                  		jsr	PlayerAnglePos			; Update position and angle along the ground
 0000B366                            
-0000B366 6100 0000                  		bsr.w	ObjMighty_FallOffSlope		; Check if Sonic is going to fall off the slope
-0000B36A 6000 FF68                  		bra.w	ObjMighty_MiscUpdates		; Do misc. updates
+0000B366 6100 0000                  		bsr.w	ObjPlayer_FallOffSlope		; Check if Sonic is going to fall off the slope
+0000B36A 6000 FF68                  		bra.w	ObjPlayer_MiscUpdates		; Do misc. updates
 0000B36E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B36E                            ; Do movement on the ground
 0000B36E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B36E                            ObjMighty_MoveGround:
+0000B36E                            ObjPlayer_MoveGround:
 0000B36E 3C28 0034                  		move.w	oTopSpd(a0),d6			; Get top speed
 0000B372 3A28 0036                  		move.w	oAcc(a0),d5			; Get acceleration
 0000B376 3828 0038                  		move.w	oDec(a0),d4			; Get deceleration
@@ -15375,12 +15375,12 @@
 0000B382                            
 0000B382 0838 0002 F8D4             		btst	#2,rCtrlHold.w		; Is left held?
 0000B388 6700                       		beq.s	.NotLeft			; If so, branch
-0000B38A 6100 0000                  		bsr.w	ObjMighty_MoveLeft		; Move left
+0000B38A 6100 0000                  		bsr.w	ObjPlayer_MoveLeft		; Move left
 0000B38E                            
 0000B38E                            .NotLeft:
 0000B38E 0838 0003 F8D4             		btst	#3,rCtrlHold.w		; Is right held?
 0000B394 6700                       		beq.s	.NotRight			; If so, branch
-0000B396 6100 0000                  		bsr.w	ObjMighty_MoveRight		; Move right
+0000B396 6100 0000                  		bsr.w	ObjPlayer_MoveRight		; Move right
 0000B39A                            
 0000B39A                            .NotRight:
 0000B39A 1028 0041                  		move.b	oAngle(a0),d0			; Get angle
@@ -15506,7 +15506,7 @@
 0000B4CC 3141 001C                  		move.w	d1,oXVel(a0)			; Set the X velocity
 0000B4D0 3140 001E                  		move.w	d0,oYVel(a0)			; Set the Y velocity
 0000B4D4                            
-0000B4D4                            ObjMighty_CheckWalls:
+0000B4D4                            ObjPlayer_CheckWalls:
 0000B4D4 1028 0041                  		move.b	oAngle(a0),d0			; Get angle
 0000B4D8 0200 003F                  		andi.b	#$3F,d0				; Is Sonic on an angle?
 0000B4DC 6700                       		beq.s	.Skip				; If not, branch
@@ -15566,7 +15566,7 @@
 0000B55A                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B55A                            ; Move left on the ground
 0000B55A                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B55A                            ObjMighty_MoveLeft:
+0000B55A                            ObjPlayer_MoveLeft:
 0000B55A 3028 003A                  		move.w	oGVel(a0),d0			; Get current speed
 0000B55E 6700                       		beq.s	.SetFlip			; If not moving yet, branch
 0000B560 6A00                       		bpl.s	.Skid				; If moving right, check for skidding
@@ -15620,7 +15620,7 @@
 0000B5C8                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B5C8                            ; Move right on the ground
 0000B5C8                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B5C8                            ObjMighty_MoveRight:
+0000B5C8                            ObjPlayer_MoveRight:
 0000B5C8 3028 003A                  		move.w	oGVel(a0),d0			; Get current speed
 0000B5CC 6B00                       		bmi.s	.Skid				; If it's negative, skid
 0000B5CE 08A8 0000 0028             		bclr	#0,oStatus(a0)			; Clear flip flag
@@ -15669,7 +15669,7 @@
 0000B632                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B632                            ; Do movement while rolling
 0000B632                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B632                            ObjMighty_MoveRoll:
+0000B632                            ObjPlayer_MoveRoll:
 0000B632 3C28 0034                  		move.w	oTopSpd(a0),d6			; Get top speed
 0000B636 E346                       		asl.w	#1,d6				; ''
 0000B638 3A28 0036                  		move.w	oAcc(a0),d5			; Get acceleration
@@ -15682,12 +15682,12 @@
 0000B64C                            
 0000B64C 0838 0002 F8D4             		btst	#2,rCtrlHold.w		; Is left being held?
 0000B652 6700                       		beq.s	.ChkRight			; If not, branch
-0000B654 6100 0000                  		bsr.w	ObjMighty_RollLeft		; Handle left movement
+0000B654 6100 0000                  		bsr.w	ObjPlayer_RollLeft		; Handle left movement
 0000B658                            
 0000B658                            .ChkRight:
 0000B658 0838 0003 F8D4             		btst	#3,rCtrlHold.w		; Is right being held?
 0000B65E 6700                       		beq.s	.Decelerate			; If not, branch
-0000B660 6100 0000                  		bsr.w	ObjMighty_RollRight		; Handle right movement
+0000B660 6100 0000                  		bsr.w	ObjPlayer_RollRight		; Handle right movement
 0000B664                            
 0000B664                            .Decelerate:
 0000B664 3028 003A                  		move.w	oGVel(a0),d0			; Get ground velocity
@@ -15749,11 +15749,11 @@
 0000B6EA                            
 0000B6EA                            .SetXVel:
 0000B6EA 3141 001C                  		move.w	d1,oXVel(a0)			; Set X velocity
-0000B6EE 6000 FDE4                  		bra.w	ObjMighty_CheckWalls		; Check wall collision
+0000B6EE 6000 FDE4                  		bra.w	ObjPlayer_CheckWalls		; Check wall collision
 0000B6F2                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B6F2                            ; Handle left movement for rolling
 0000B6F2                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B6F2                            ObjMighty_RollLeft:
+0000B6F2                            ObjPlayer_RollLeft:
 0000B6F2 3028 003A                  		move.w	oGVel(a0),d0			; Get ground velocity
 0000B6F6 6700                       		beq.s	.SetLeft			; If Sonic isn't moving, branch
 0000B6F8 6A00                       		bpl.s	.Dec				; If Sonic is moving right, branch
@@ -15774,7 +15774,7 @@
 0000B716                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B716                            ; Handle left movement for rolling
 0000B716                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B716                            ObjMighty_RollRight:
+0000B716                            ObjPlayer_RollRight:
 0000B716 3028 003A                  		move.w	oGVel(a0),d0			; Get ground velocity
 0000B71A 6B00                       		bmi.s	.Dec				; If Sonic is moving left, branch
 0000B71C 08A8 0000 0028             		bclr	#0,oStatus(a0)			; Face right
@@ -15792,7 +15792,7 @@
 0000B738                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B738                            ; Do movement in the air
 0000B738                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B738                            ObjMighty_MoveAir:
+0000B738                            ObjPlayer_MoveAir:
 0000B738 3C28 0034                  		move.w	oTopSpd(a0),d6			; Get top speed
 0000B73C 3A28 0036                  		move.w	oAcc(a0),d5			; Get accleration
 0000B740 DA45                       		add.w	d5,d5				; Double it
@@ -15863,7 +15863,7 @@
 0000B7C0                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B7C0                            ; Handle level boundaries
 0000B7C0                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B7C0                            ObjMighty_LvlBound:
+0000B7C0                            ObjPlayer_LvlBound:
 0000B7C0 4A68 001E                  		tst.w	oYVel(a0)
 0000B7C4 6A00                       		bpl.s	.XBound
 0000B7C6 3228 0018                  		move.w	oYPos(a0),d1
@@ -15903,7 +15903,7 @@
 0000B81E 3238 F8C2                  		move.w	rMaxCamY.w,d1		; Get current max camera Y position
 0000B822 B240                       		cmp.w	d0,d1				; Are they the same?
 0000B824 6D00                       		blt.s	.NoKill				; If not, branch
-0000B826 6000 0000                  		bra.w	ObjMighty_GetKilled		; Get Sonic killed
+0000B826 6000 0000                  		bra.w	ObjPlayer_GetKilled		; Get Sonic killed
 0000B82A                            
 0000B82A                            .NoKill:
 0000B82A 4E75                       		rts
@@ -15917,7 +15917,7 @@
 0000B83E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B83E                            ; Handle peelout
 0000B83E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B83E                            ObjMighty_Peelout:
+0000B83E                            ObjPlayer_Peelout:
 0000B83E 4A28 0045                  		tst.b	oDashFlag(a0)			; Is Sonic doing the peelout?
 0000B842 6700                       		beq.s	.ChkUp				; If not, branch
 0000B844 6B00                       		bmi.s	.ChkLaunch			; If so, branch
@@ -16004,7 +16004,7 @@
 0000B90E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000B90E                            ; Handle spindash
 0000B90E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000B90E                            ObjMighty_Spindash:
+0000B90E                            ObjPlayer_Spindash:
 0000B90E 4A28 0045                  		tst.b	oDashFlag(a0)			; Is Sonic doing the spindash?
 0000B912 6700                       		beq.s	.ChkDown			; If not, branch
 0000B914 6A00                       		bpl.s	.ChkLaunch			; If so, branch
@@ -16098,7 +16098,7 @@
 0000BA04                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BA04                            ; Check for jumping
 0000BA04                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BA04                            ObjMighty_ChkJump:
+0000BA04                            ObjPlayer_ChkJump:
 0000BA04 1038 F8D5                  		move.b	rCtrlPress.w,d0		; Get pressed buttons
 0000BA08 0200 0070                  		andi.b	#$70,d0				; Are A, B, or C pressed?
 0000BA0C 4A38 C768                  		tst.b	rMoveCheat.w
@@ -16148,7 +16148,7 @@
 0000BA90                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BA90                            ; Handle variable jumping
 0000BA90                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BA90                            ObjMighty_JumpHeight:
+0000BA90                            ObjPlayer_JumpHeight:
 0000BA90 4A28 0040                  		tst.b	oJumping(a0)			; Is Sonic jumping?
 0000BA94 6700                       		beq.s	.UpVelCap			; If not, branch
 0000BA96                            
@@ -16179,9 +16179,9 @@
 0000BAD2                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BAD2                            ; Gradually reset Sonic's angle in mid air
 0000BAD2                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BAD2                            ObjMighty_JumpAngle:
+0000BAD2                            ObjPlayer_JumpAngle:
 0000BAD2 1028 0041                  		move.b	oAngle(a0),d0			; Get angle
-0000BAD6 6700                       		beq.s	ObjMighty_JumpFlip		; If it's already reset, branch
+0000BAD6 6700                       		beq.s	ObjPlayer_JumpFlip		; If it's already reset, branch
 0000BAD8 6A00                       		bpl.s	.Decrease			; If it's positive, branch
 0000BADA                            
 0000BADA                            .Increase:
@@ -16200,7 +16200,7 @@
 0000BAEC                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BAEC                            ; Update Sonic's angle while he's tumbling in the air
 0000BAEC                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BAEC                            ObjMighty_JumpFlip:
+0000BAEC                            ObjPlayer_JumpFlip:
 0000BAEC 1028 0047                  		move.b	oFlipAngle(a0),d0		; Get flip angle
 0000BAF0 6700                       		beq.s	.End				; If it's 0, branch
 0000BAF2 4A68 003A                  		tst.w	oFlipDir(a0)			; Is Sonic flipping left?
@@ -16235,7 +16235,7 @@
 0000BB2E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BB2E                            ; Check for rolling
 0000BB2E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BB2E                            ObjMighty_ChkRoll:
+0000BB2E                            ObjPlayer_ChkRoll:
 0000BB2E 3028 003A                  		move.w	oGVel(a0),d0			; Get ground velocity
 0000BB32 6A00                       		bpl.s	.ChkSpd				; Get absolute value
 0000BB34 4440                       		neg.w	d0				; ''
@@ -16247,14 +16247,14 @@
 0000BB40 0200 000C                  		andi.b	#$C,d0				; Are left or right held?
 0000BB44 6600                       		bne.s	.NoRoll				; If not, branch
 0000BB46 0838 0001 F8D4             		btst	#1,rCtrlHold.w		; Is down being held?
-0000BB4C 6600                       		bne.s	ObjMighty_DoRoll			; If so, branch
+0000BB4C 6600                       		bne.s	ObjPlayer_DoRoll			; If so, branch
 0000BB4E                            
 0000BB4E                            .NoRoll:
 0000BB4E 4E75                       		rts
 0000BB50                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BB50                            ; Make Sonic roll
 0000BB50                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BB50                            ObjMighty_DoRoll:
+0000BB50                            ObjPlayer_DoRoll:
 0000BB50 0828 0002 0028             		btst	#2,oStatus(a0)			; Is Sonic already rolling?
 0000BB56 6600                       		bne.s	.End				; If so, branch
 0000BB58 08E8 0002 0028             		bset	#2,oStatus(a0)			; Set roll flag
@@ -16273,7 +16273,7 @@
 0000BB82                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BB82                            ; Slow Sonic down as he goes up a slope or speed him up when he does down one
 0000BB82                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BB82                            ObjMighty_SlopePush:
+0000BB82                            ObjPlayer_SlopePush:
 0000BB82 1028 0041                  		move.b	oAngle(a0),d0			; Get angle
 0000BB86 0600 0060                  		addi.b	#$60,d0				; Shift it
 0000BB8A 0C00 00C0                  		cmpi.b	#$C0,d0				; Is Sonic on a steep slope or ceiling?
@@ -16291,7 +16291,7 @@
 0000BBAA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BBAA                            ; Check if Sonic is to fall off a slope
 0000BBAA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BBAA                            ObjMighty_FallOffSlope:
+0000BBAA                            ObjPlayer_FallOffSlope:
 0000BBAA 4A28 003F                  		tst.b	oMoveLock(a0)			; Is the move lock timer, active?
 0000BBAE 6600                       		bne.s	.End				; If so, branch
 0000BBB0 1028 0041                  		move.b	oAngle(a0),d0			; Get angle
@@ -16314,7 +16314,7 @@
 0000BBDE                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BBDE                            ; Affect Sonic's speed on slopes while rolling
 0000BBDE                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BBDE                            ObjMighty_RollSlopePush:
+0000BBDE                            ObjPlayer_RollSlopePush:
 0000BBDE 1028 0041                  		move.b	oAngle(a0),d0			; Get angle
 0000BBE2 0600 0060                  		addi.b	#$60,d0				; ''
 0000BBE6 0C00 00C0                  		cmpi.b	#$C0,d0				; Is Sonic on a steep enough slope?
@@ -16348,7 +16348,7 @@
 0000BC18                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BC18                            ; Check for bouncy floor collision
 0000BC18                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BC18                            ObjMighty_ChkBounce:
+0000BC18                            ObjPlayer_ChkBounce:
 0000BC18 4A38 F8FF                  		tst.b	rFloorActive.w		; Is the floor active?
 0000BC1C 6700 0000                  		beq.w	.End				; If so, branch
 0000BC20                            
@@ -16467,7 +16467,7 @@
 0000BD66                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BD66                            ; Check for bars to hang on to
 0000BD66                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BD66                            ObjMighty_ChkHang:
+0000BD66                            ObjPlayer_ChkHang:
 0000BD66 0828 0003 000C             		btst	#3,oFlags(a0)			; Are we already hanging?
 0000BD6C 6600                       		bne.s	.End				; If so, branch
 0000BD6E                            
@@ -16499,7 +16499,7 @@
 0000BDCA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BDCA                            ; Hang onto the bars
 0000BDCA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BDCA                            ObjMighty_Hang:
+0000BDCA                            ObjPlayer_Hang:
 0000BDCA 3628 0014                  		move.w	oXPos(a0),d3			; X position
 0000BDCE 3428 0018                  		move.w	oYPos(a0),d2			; Y position
 0000BDD2 0442 0018                  		subi.w	#$18,d2				; ''
@@ -16559,7 +16559,7 @@
 0000BE70                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BE70                            ; Check for electricity
 0000BE70                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BE70                            ObjMighty_ChkElectric:
+0000BE70                            ObjPlayer_ChkElectric:
 0000BE70 3628 0014                  		move.w	oXPos(a0),d3			; X position
 0000BE74 3428 0018                  		move.w	oYPos(a0),d2			; Y position
 0000BE78 4EB8 384C                  		jsr	Level_FindBlock			; Get the block located there
@@ -16571,7 +16571,7 @@
 0000BE88                            
 0000BE88                            .ChkBlocks:
 0000BE88 B059                       		cmp.w	(a1)+,d0			; have we touched this block?
-0000BE8A 6700                       		beq.s	ObjMighty_GetHurt		; If so, branch
+0000BE8A 6700                       		beq.s	ObjPlayer_GetHurt		; If so, branch
 0000BE8C 51CE FFFA                  		dbf	d6,.ChkBlocks			; Loop
 0000BE90 4E75                       		rts
 0000BE92                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -16579,7 +16579,7 @@
 0000BE98                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BE98                            ; Get Sonic hurt
 0000BE98                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BE98                            ObjMighty_GetHurt:
+0000BE98                            ObjPlayer_GetHurt:
 0000BE98                            		displaySprite	2,a0,a1,1		; Add sprite if not already being displayed
 0000BE98 4A68 0008                M 	tst.w	odrawnext(a0)
 0000BE9C 6600                     M 	bne.s	.no_221
@@ -16592,7 +16592,7 @@
 0000BEB4 4A28 0042                  		tst.b	oInvulTime(a0)			; Are we invulnerable?
 0000BEB8 6600 0000                  		bne.w	.End				; If so, branch
 0000BEBC 4A78 F3D4                  		tst.w	rRings.w			; Does Sonic have any rings?
-0000BEC0 6700 0000                  		beq.w	ObjMighty_GetKilled		; If not, branch
+0000BEC0 6700 0000                  		beq.w	ObjPlayer_GetKilled		; If not, branch
 0000BEC4 4EB8 1A1C                  		jsr	FindFreeObj.w
 0000BEC8 6700                       		beq.s	.Hurt
 0000BECA 22BC 0000 0000             		move.l	#ObjRingLoss,oAddr(a1)
@@ -16636,7 +16636,7 @@
 0000BF44                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BF44                            ; Hurt routine
 0000BF44                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BF44                            ObjMighty_Hurt:
+0000BF44                            ObjPlayer_Hurt:
 0000BF44 4A38 C768                  		tst.b	rMoveCheat.w
 0000BF48 6700                       		beq.s	.NoPlacementEnter
 0000BF4A 0838 0004 C741             		btst	#4,rP1Press.w			; Has the B button been pressed?
@@ -16665,15 +16665,15 @@
 0000BF8E 5578 F8CC                  		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
 0000BF92                            
 0000BF92                            .Cont:
-0000BF92 6100 F82C                  		bsr.w	ObjMighty_LvlBound		; Handle level boundaries
-0000BF96 6100 0000                  		bsr.w	ObjMighty_Animate		; Animate sprite
-0000BF9A 6000 0000                  		bra.w	ObjMighty_LoadDPLCs		; Load DPLCs
+0000BF92 6100 F82C                  		bsr.w	ObjPlayer_LvlBound		; Handle level boundaries
+0000BF96 6100 0000                  		bsr.w	ObjPlayer_Animate		; Animate sprite
+0000BF9A 6000 0000                  		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 0000BF9E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BF9E                            .ChkStop:
 0000BF9E 3038 F8C2                  		move.w	rMaxCamY.w,d0		; Get bottom boundary
 0000BFA2 0640 00E0                  		addi.w	#224,d0				; ''
 0000BFA6 B068 0018                  		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
-0000BFAA 6D00                       		blt.s	ObjMighty_GetKilled		; If so, branch
+0000BFAA 6D00                       		blt.s	ObjPlayer_GetKilled		; If so, branch
 0000BFAC                            
 0000BFAC 4EB8 2C42                  		jsr	PlayerChkCollision		; Check for level collision
 0000BFB0 0828 0001 0028             		btst	#1,oStatus(a0)			; Is Sonic still in midair?
@@ -16692,7 +16692,7 @@
 0000BFD6                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000BFD6                            ; Get Sonic killed
 0000BFD6                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000BFD6                            ObjMighty_GetKilled:
+0000BFD6                            ObjPlayer_GetKilled:
 0000BFD6                            		displaySprite	2,a0,a1,1		; Add sprite if not already being displayed
 0000BFD6 4A68 0008                M 	tst.w	odrawnext(a0)
 0000BFDA 6600                     M 	bne.s	.no_223
@@ -16724,7 +16724,7 @@
 0000C02A                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000C02A                            ; Death routine
 0000C02A                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000C02A                            ObjMighty_Dead:
+0000C02A                            ObjPlayer_Dead:
 0000C02A 4A38 C768                  		tst.b	rMoveCheat.w
 0000C02E 6700                       		beq.s	.NoPlacementEnter
 0000C030 0838 0004 C741             		btst	#4,rP1Press.w			; Has the B button been pressed?
@@ -16736,12 +16736,12 @@
 0000C046                            .NoPlacementEnter:
 0000C046 117C 0018 0020             		move.b	#$18,oAni(a0)			; Force the death animation
 0000C04C 0068 8000 000E             		ori.w	#$8000,oVRAM(a0)		; Force high priority
-0000C052 6100                       		bsr.s	ObjMighty_ChkBound		; Check for when Sonic goes off screen
+0000C052 6100                       		bsr.s	ObjPlayer_ChkBound		; Check for when Sonic goes off screen
 0000C054 4EB8 1D66                  		jsr	ObjectMoveAndFall.w		; Allow movement
-0000C058 6100 0000                  		bsr.w	ObjMighty_Animate		; Animate sprite
-0000C05C 6000 0000                  		bra.w	ObjMighty_LoadDPLCs		; Load DPLCs
+0000C058 6100 0000                  		bsr.w	ObjPlayer_Animate		; Animate sprite
+0000C05C 6000 0000                  		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 0000C060                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000C060                            ObjMighty_ChkBound:
+0000C060                            ObjPlayer_ChkBound:
 0000C060 3038 F8C2                  		move.w	rMaxCamY.w,d0		; Get bottom boundary
 0000C064 0640 0100                  		addi.w	#$100,d0			; ''
 0000C068 B068 0018                  		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
@@ -16755,7 +16755,7 @@
 0000C07C                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000C07C                            ; Wait for level reload or game/time over
 0000C07C                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000C07C                            ObjMighty_Gone:
+0000C07C                            ObjPlayer_Gone:
 0000C07C 4A28 0043                  		tst.b	oDeathTimer(a0)
 0000C080 6700                       		beq.s	.End
 0000C082 5328 0043                  		subq.b	#1,oDeathTimer(a0)		; Decrement the death counter
@@ -16767,7 +16767,7 @@
 0000C08E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000C08E                            ; Display Sonic's sprite
 0000C08E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000C08E                            ObjMighty_Display:
+0000C08E                            ObjPlayer_Display:
 0000C08E 1028 0042                  		move.b	oInvulTime(a0),d0		; Get invulnerability timer
 0000C092 6700                       		beq.s	.Display			; If it's 0, branch
 0000C094 5328 0042                  		subq.b	#1,oInvulTime(a0)		; Decrement invulnerability timer
@@ -16799,16 +16799,16 @@
 0000C0DA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000C0DA                            ; Load Sonic's DPLCs
 0000C0DA                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000C0DA                            ObjMighty_LoadDPLCs:
-0000C0DA 45F9 0000 0000             		lea	DPLC_ObjMighty,a2		; DPLCs
+0000C0DA                            ObjPlayer_LoadDPLCs:
+0000C0DA 45F9 0000 0000             		lea	DPLC_ObjPlayer,a2		; DPLCs
 0000C0E0 383C F000                  		move.w	#$F000,d4			; VRAM location
 0000C0E4 2C3C 0000 0000             		move.l	#ArtUnc_Sonic,d6		; Art
 0000C0EA 4EF8 1D0C                  		jmp	LoadObjDPLCs.w			; Load DPLCs
 0000C0EE                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000C0EE                            ; Animate Sonic's sprite
 0000C0EE                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-0000C0EE                            ObjMighty_Animate:
-0000C0EE 43F9 0000 0000             		lea	Ani_ObjMighty,a1			; Animation script
+0000C0EE                            ObjPlayer_Animate:
+0000C0EE 43F9 0000 0000             		lea	Ani_ObjPlayer,a1			; Animation script
 0000C0F4 7000                       		moveq	#0,d0
 0000C0F6 1028 0020                  		move.b	oAni(a0),d0			; Get animation ID
 0000C0FA B028 0021                  		cmp.b	oPrevAni(a0),d0			; Has it changed?
@@ -17074,10 +17074,10 @@
 0000C35A 4228 0028                  		clr.b	oStatus(a0)			; Reset status
 0000C35E 0228 00FC 000D             		andi.b	#$FC,oRender(a0)		; Mask out flip bits in render flags
 0000C364 117C 0001 0010             		move.b	#1,oFrame(a0)			; Display the standing frame
-0000C36A 6100 FD6E                  		bsr.w	ObjMighty_LoadDPLCs		; Load DPLCs
+0000C36A 6100 FD6E                  		bsr.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 0000C36E                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000C36E                            Debug_Main:
-0000C36E 6100 EE34                  		bsr.w	ObjMighty_ExtendedCam		; Handle extended camera
+0000C36E 6100 EE34                  		bsr.w	ObjPlayer_ExtendedCam		; Handle extended camera
 0000C372 6100                       		bsr.s	Debug_Control			; Control
 0000C374                            	displaySprite	2,a0,a2,1
 0000C374 4A68 0008                M 	tst.w	odrawnext(a0)
@@ -17123,7 +17123,7 @@
 0000C3E2 3140 003A                  		move.w	d0,oGVel(a0)			; Reset ground velocity
 0000C3E6 0228 0001 0028             		andi.b	#1,oStatus(a0)			; Reset status
 0000C3EC 08E8 0001 0028             		bset	#1,oStatus(a0)			; Set "in air" flag
-0000C3F2 20BC 0000 B0C4             		move.l	#ObjMighty,oAddr(a0)		; Use normal Sonic object
+0000C3F2 20BC 0000 B0C4             		move.l	#ObjPlayer,oAddr(a0)		; Use normal Sonic object
 0000C3F8 1168 0030 002D             		move.b	oInitColH(a0),oColH(a0)		; Reset collision height
 0000C3FE 1168 0031 002C             		move.b	oInitColW(a0),oColW(a0)		; Reset collision width
 0000C404                            
@@ -17133,11 +17133,11 @@
 0000C406                            ; Data
 0000C406                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 0000C406                            ArtUnc_Sonic:
-0000C406                            		incbin	"Objects/Mighty/Art.unc.bin"
+0000C406                            		incbin	"Objects/Player/Art.unc.bin"
 00017EC6                            		even
 00017EC6                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-00017EC6                            Map_ObjMighty:
-00017EC6                            		include	"Objects/Mighty/Mappings.asm"
+00017EC6                            Map_ObjPlayer:
+00017EC6                            		include	"Objects/Player/Mappings.asm"
 00017EC6                            ; --------------------------------------------------------------------------------
 00017EC6                            ; Sprite mappings - output from SonMapEd - Sonic 3 & Knuckles format
 00017EC6                            ; --------------------------------------------------------------------------------
@@ -17631,8 +17631,8 @@
 000187AE                            		even
 000187AE                            		even
 000187AE                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-000187AE                            DPLC_ObjMighty:
-000187AE                            		include	"Objects/Mighty/DPLCs.asm"
+000187AE                            DPLC_ObjPlayer:
+000187AE                            		include	"Objects/Player/DPLCs.asm"
 000187AE                            ; --------------------------------------------------------------------------------
 000187AE                            ; Dynamic Pattern Loading Cues - output from SonMapEd - Sonic 3 & Knuckles format; --------------------------------------------------------------------------------
 000187AE                            
@@ -17829,8 +17829,8 @@
 00018BF4                            		even
 00018BF4                            		even
 00018BF4                            ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-00018BF4                            Ani_ObjMighty:
-00018BF4                            		include	"Objects/Mighty/Animations.asm"
+00018BF4                            Ani_ObjPlayer:
+00018BF4                            		include	"Objects/Player/Animations.asm"
 00018BF4                            ; ---------------------------------------------------------------------------
 00018BF4                            ; Animation script - Sonic
 00018BF4                            ; ---------------------------------------------------------------------------
@@ -18517,7 +18517,7 @@
 000199B8 2F08                     M 	move.l	a0,-(sp)
 000199BA 2448                       		movea.l	a0,a2
 000199BC 3078 F86C                  		movea.w	rPlayer1Addr.w,a0
-000199C0 4EB9 0000 BE98             		jsr	ObjMighty_GetHurt
+000199C0 4EB9 0000 BE98             		jsr	ObjPlayer_GetHurt
 000199C6                            		pop.l	a0
 000199C6 205F                     M 	move.l	(sp)+,a0
 000199C8 4E75                       		rts
@@ -18603,9 +18603,6 @@
 00019DCE                            ; =========================================================================================================================================================
 00019DCE                            		include	"Objects/Spikes/Code.asm"		; Spike object
 00019DCE                            ; ===========================================================================
-00019DCE                            ; Mighty The Armadillo in PRISM PARADISE
-00019DCE                            ; By Nat The Porcupine 2021
-00019DCE                            ; ---------------------------------------------------------------------------
 00019DCE                            ; Spike object
 00019DCE                            ; ===========================================================================
 00019DCE                            		rsset	oLvlSSTs
@@ -18754,7 +18751,7 @@
 00019F3C 2343 0018                  		move.l	d3,oYPos(a1)
 00019F40 2448                       		movea.l	a0,a2
 00019F42 2049                       		movea.l	a1,a0
-00019F44 4EB9 0000 BE98             		jsr	ObjMighty_GetHurt
+00019F44 4EB9 0000 BE98             		jsr	ObjPlayer_GetHurt
 00019F4A 204A                       		movea.l	a2,a0
 00019F4C                            
 00019F4C                            .End:
@@ -19696,7 +19693,7 @@
 0001AE9A                            .MakeSonicRoll:
 0001AE9A 2248                       		movea.l	a0,a1				; Save a0
 0001AE9C 204A                       		movea.l	a2,a0				; Make Sonic roll
-0001AE9E 4EB9 0000 BB50             		jsr	ObjMighty_DoRoll			; ''
+0001AE9E 4EB9 0000 BB50             		jsr	ObjPlayer_DoRoll			; ''
 0001AEA4 2049                       		movea.l	a1,a0				; Restore a0
 0001AEA6                            	nextObject
 0001AEA6 3068 0004                M 	movea.w	onext(a0),a0

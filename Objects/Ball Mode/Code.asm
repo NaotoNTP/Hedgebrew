@@ -36,7 +36,7 @@ ObjBallMode_Main:
 .MakeSonicRoll:
 		movea.l	a0,a1				; Save a0
 		movea.l	a2,a0				; Make Sonic roll
-		jsr	ObjMighty_DoRoll			; ''
+		jsr	ObjPlayer_DoRoll			; ''
 		movea.l	a1,a0				; Restore a0
 	nextObject
 
