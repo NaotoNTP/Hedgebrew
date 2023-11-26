@@ -1,0 +1,5 @@
+.vscode
+*.log
+*.lst
+*.sym
+*.mdrv
