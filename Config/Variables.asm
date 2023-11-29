@@ -12,7 +12,7 @@ rBuffer		rs.b	0				; General buffer
 rChunks		rs.b	$8000				; Chunk table (uses same space as general buffer)
 rBuffer_End	rs.b	0
 
-		rsset	$FF000000|(RAM_START+$8000)
+		rsset	RAM_WORD_START
 
 rKosPBuf	rs.b	$1000				; Kosinski decompression buffer
 
@@ -304,10 +304,10 @@ rAnimCnts	rs.b	$10				; Level art animation counters
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Camera variables
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-rCamXPos		equ	rFGCam+cXPos			; Camera X position
-rCamYPos		equ	rFGCam+cYPos			; Camera Y position
-rCamBGXPos		equ	rBGCam+cXPos			; Background camera X position
-rCamBGYPos		equ	rBGCam+cYPos			; Background camera Y position
+rCamXPos	equ	rFGCam+cXPos			; Camera X position
+rCamYPos	equ	rFGCam+cYPos			; Camera Y position
+rCamBGXPos	equ	rBGCam+cXPos			; Background camera X position
+rCamBGYPos	equ	rBGCam+cYPos			; Background camera Y position
 rFGRedraw	equ	rFGCam+cRedraw		; Foreground redraw flag
 rBGRedraw	equ	rBGCam+cRedraw		; Background redraw flag
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
