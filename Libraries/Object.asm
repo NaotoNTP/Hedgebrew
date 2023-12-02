@@ -573,13 +573,13 @@ ObjectManagerInit:
 		bra.s	.ChkObjsRight			; Loop
 
 .ChkDone2:
-		move.l	a0,rObjLoadL.w		; Store new addresses
-		move.w	a3,rObjRespL.w		; ''
+		move.l	a0,rObjLoadL.w			; Store new addresses
+		move.w	a3,rObjRespL.w			; ''
 
-		move.w	#-1,rObjManX.w		; Reset manager's camera X position
+		move.w	#-1,rObjManX.w			; Reset manager's camera X position
 		move.w	rCamYPos.w,d0			; Get camera's Y position
 		andi.w	#$FF80,d0			; Keep in range
-		move.w	d0,rObjManY.w		; Store it so unnecessary Y checks shouldn't be done
+		move.w	d0,rObjManY.w			; Store it so unnecessary Y checks shouldn't be done
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjectManagerMain:
 		move.w	rCamYPos.w,d1			; Get camera's Y position
@@ -606,14 +606,14 @@ ObjectManagerMain:
 		move.w	#$FFF,d5
 		move.w	rCamXPos.w,d6			; Get camera's X position
 		andi.w	#$FF80,d6			; Keep in range
-		cmp.w	rObjManX.w,d6		; Check against last range
+		cmp.w	rObjManX.w,d6			; Check against last range
 		beq.w	Level_LoadObjs_SameXRange	; Branch if they are the same
 		bge.s	Level_LoadObjs_Forward		; If new range is greater than the last, branch
 
-		move.w	d6,rObjManX.w		; Set new range
+		move.w	d6,rObjManX.w			; Set new range
 
-		movea.l	rObjLoadL.w,a0		; Get current objects on the left side of the screen
-		movea.w	rObjRespL.w,a3		; And the appropriate respawn list
+		movea.l	rObjLoadL.w,a0			; Get current objects on the left side of the screen
+		movea.w	rObjRespL.w,a3			; And the appropriate respawn list
 
 		subi.w	#$80,d6				; Subtract 128 from the X position
 		blo.s	.EndLoad			; If outside of the level boundary, branch
@@ -640,11 +640,11 @@ ObjectManagerMain:
 		jsr	DeleteOtherObj.w
 
 .EndLoad:
-		move.l	a0,rObjLoadL.w		; Store new addresses
+		move.l	a0,rObjLoadL.w			; Store new addresses
 		move.w	a3,rObjRespL.w
 
-		movea.l	rObjLoadR.w,a0		; Get current objects on the right side of the screen
-		movea.w	rObjRespR.w,a3		; And the appropriate respawn list
+		movea.l	rObjLoadR.w,a0			; Get current objects on the right side of the screen
+		movea.w	rObjRespR.w,a3			; And the appropriate respawn list
 
 		addi.w	#$300,d6			; Load 2 chunks forward
 
@@ -656,15 +656,15 @@ ObjectManagerMain:
 		bra.s	.ChkLoop			; Check next object
 
 .ChkDone:
-		move.l	a0,rObjLoadR.w		; Store new addresses
+		move.l	a0,rObjLoadR.w			; Store new addresses
 		move.w	a3,rObjRespR.w
 		bra.s	Level_LoadObjs_SameXRange	; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_LoadObjs_Forward:
-		move.w	d6,rObjManX.w		; Set new range
+		move.w	d6,rObjManX.w			; Set new range
 
-		movea.l	rObjLoadR.w,a0		; Get current objects on the right side of the screen
-		movea.w	rObjRespR.w,a3		; And the appropriate respawn list
+		movea.l	rObjLoadR.w,a0			; Get current objects on the right side of the screen
+		movea.w	rObjRespR.w,a3			; And the appropriate respawn list
 
 		addi.w	#$280,d6			; Load 2 chunks forward
 
@@ -683,11 +683,11 @@ Level_LoadObjs_Forward:
 		jsr	DeleteOtherObj.w
 
 .EndLoad:
-		move.l	a0,rObjLoadR.w		; Store new addresses
+		move.l	a0,rObjLoadR.w			; Store new addresses
 		move.w	a3,rObjRespR.w
 
-		movea.l	rObjLoadL.w,a0		; Get current objects on the left side of the screen
-		movea.w	rObjRespL.w,a3		; And the appropriate respawn list
+		movea.l	rObjLoadL.w,a0			; Get current objects on the left side of the screen
+		movea.w	rObjRespL.w,a3			; And the appropriate respawn list
 
 		subi.w	#$300,d6			; Check 1 chunk backwards
 		blo.s	.ChkDone			; If outside of level, branch
@@ -700,14 +700,14 @@ Level_LoadObjs_Forward:
 		bra.s	.ChkLoop			; Check next object
 
 .ChkDone:
-		move.l	a0,rObjLoadL.w		; Store new addresses
+		move.l	a0,rObjLoadL.w			; Store new addresses
 		move.w	a3,rObjRespL.w
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_LoadObjs_SameXRange:
 		move.w	rCamYPos.w,d6			; Get camera's X position
 		andi.w	#$FF80,d6			; Keep in range
 		move.w	d6,d3				; Copy
-		cmp.w	rObjManY.w,d6		; Check against last range
+		cmp.w	rObjManY.w,d6			; Check against last range
 		beq.w	.LoadEnd			; Branch if they are the same
 		bge.s	.MovingDown			; If the new raqnge is greater than the last, branch
 
@@ -726,9 +726,9 @@ Level_LoadObjs_SameXRange:
 		addi.w	#$80,d4				; Look one chunk down
 		move.w	#$FFF,d5
 
-		movea.l	rObjLoadL.w,a0		; Get current objects on the left side of the screen
-		movea.w	rObjRespL.w,a3		; And the appropriate respawn list
-		move.l	rObjLoadR.w,d7		; Get current objects on the right side of the screen
+		movea.l	rObjLoadL.w,a0			; Get current objects on the left side of the screen
+		movea.w	rObjRespL.w,a3			; And the appropriate respawn list
+		move.l	rObjLoadR.w,d7			; Get current objects on the right side of the screen
 		sub.l	a0,d7				; Subtract the left position from the right
 		beq.s	.LoadEndRst			; Branch if no objects
 		addq.l	#2,a0				; Align to object's Y position
