@@ -185,13 +185,15 @@ rStackBase	rs.b	0				; ''
 		rsset	rGameVars
 rBlocks		rs.b	$1800				; Block table
 
-rLayout		rs.b	$1000				; Level layout
-
 rScrlSecs	rs.b	$384				; Scroll sections
 rScrlSecs_End	rs.b	0				; ''
 
 rColList	rs.b	$80				; Collision response list
 rColList_End	rs.b	0				; ''
+
+rLayout		rs.b	0				; Level layout ROM addresses
+rLayoutFG	rs.l	1				
+rLayoutBG	rs.l	1				
 
 rRings		rs.w	1				; Ring count
 

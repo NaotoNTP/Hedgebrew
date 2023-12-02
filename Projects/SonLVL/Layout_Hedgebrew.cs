@@ -3,77 +3,70 @@ using System.Collections.Generic;
 
 namespace SonicRetro.SonLVL.API.S3K
 {
-	public class Layout : LayoutFormatCombined
-	{
-		public override void ReadLayout(byte[] rawdata, LayoutData layout)
+	public class Layout : LayoutFormatSeparate
+	{	
+		// Internal Read Generic Layout
+		private void ReadLayoutInternal(byte[] rawdata, ref ushort[,] layout)
 		{
-			int fgw = ByteConverter.ToUInt16(rawdata, 0);
-			int bgw = ByteConverter.ToUInt16(rawdata, 2);
-			int fgh = Math.Min((int)ByteConverter.ToUInt16(rawdata, 4), MaxSize.Height);
-			int bgh = Math.Min((int)ByteConverter.ToUInt16(rawdata, 6), MaxSize.Height);
-			layout.FGLayout = new ushort[fgw, fgh];
-			layout.BGLayout = new ushort[bgw, bgh];
-
-			// Read Foreground Layout
-			for (int la = 0; la < fgh * 2; la += 2)
+			int width = rawdata[0] + 1;
+			int height = rawdata[1] + 1;
+			layout = new ushort[width, height];
+			
+			for (int row = 0; row < height; row++)
 			{
-				ushort lfp = ByteConverter.ToUInt16(rawdata, 8 + la);
-				if (lfp != 0)
-					for (int laf = 0; laf < fgw; laf++)
-						layout.FGLayout[laf, la / 2] = rawdata[lfp + laf];
-			}
-
-			// Read Background Layout
-			for (int la = 0; la < bgh * 2; la += 2)
-			{
-				ushort lbp = ByteConverter.ToUInt16(rawdata, 8 + 0x80 + la);
-				if (lbp != 0)
-					for (int lab = 0; lab < bgw; lab++)
-						layout.BGLayout[lab, la / 2] = rawdata[lbp + lab];
+				ushort ptr = ByteConverter.ToUInt16(rawdata, 2 + (row * 2));
+				if (ptr != 0)
+					for (int col = 0; col < width; col++)
+						layout[col, row] = rawdata[ptr + col];
 			}
 		}
 
-		public override void WriteLayout(LayoutData layout, out byte[] rawdata)
+		// Read Foreground Override
+		public override void ReadFG(byte[] rawdata, LayoutData layout)
+		{
+			ReadLayoutInternal(rawdata, ref layout.FGLayout);
+		}
+
+		// Read Foreground Override
+		public override void ReadBG(byte[] rawdata, LayoutData layout)
+		{
+			ReadLayoutInternal(rawdata, ref layout.BGLayout);
+		}
+
+		// Internal Write Generic Layout
+		private void WriteLayoutInternal(ushort[,] layout, out byte[] rawdata)
 		{
 			List<byte> tmp = new List<byte>();
-			ushort fgw = (ushort)layout.FGLayout.GetLength(0);
-			ushort bgw = (ushort)layout.BGLayout.GetLength(0);
-			ushort fgh = (ushort)layout.FGLayout.GetLength(1);
-			ushort bgh = (ushort)layout.BGLayout.GetLength(1);
-			tmp.AddRange(ByteConverter.GetBytes(fgw));
-			tmp.AddRange(ByteConverter.GetBytes(bgw));
-			tmp.AddRange(ByteConverter.GetBytes(fgh));
-			tmp.AddRange(ByteConverter.GetBytes(bgh));
-
-			// Foreground Row Pointers
-			for (int la = 0; la < MaxSize.Height; la++)
+			
+			int width = layout.GetLength(0);
+			int height = layout.GetLength(1);
+			tmp.Add((byte)(width - 1));
+			tmp.Add((byte)(height - 1));
+			
+			// Layout Pointers
+			for (int row = 0; row < height; row++)
 			{
-				if (la < fgh)
-					tmp.AddRange(ByteConverter.GetBytes((ushort)(8 + 0x100 + (la * fgw))));
-				else
-					tmp.AddRange(new byte[2]);
+				tmp.AddRange(ByteConverter.GetBytes((ushort)(2 + (height * 2) + (row * width))));
 			}
 
-			// Background Row Pointers
-			for (int la = 0; la < MaxSize.Height; la++)
-			{
-				if (la < bgh)
-					tmp.AddRange(ByteConverter.GetBytes((ushort)(8 + 0x100 + (fgh * fgw) + (la * bgw))));
-				else
-					tmp.AddRange(new byte[2]);
-			}
-
-			// Foreground Layout Data
-			for (int y = 0; y < fgh; y++)
-				for (int x = 0; x < fgw; x++)
-					tmp.Add((byte)layout.FGLayout[x, y]);
-
-			// Background Layout Data
-			for (int y = 0; y < bgh; y++)
-				for (int x = 0; x < bgw; x++)
-					tmp.Add((byte)layout.BGLayout[x, y]);
+			// Layout Data
+			for (int row = 0; row < height; row++)
+				for (int col = 0; col < width; col++)
+					tmp.Add((byte)layout[col, row]);
 
 			rawdata = tmp.ToArray();
+		}
+
+		// Write Foreground Override
+		public override void WriteFG(LayoutData layout, out byte[] rawdata)
+		{
+			WriteLayoutInternal(layout.FGLayout, out rawdata);
+		}
+
+		// Write Background Override
+		public override void WriteBG(LayoutData layout, out byte[] rawdata)
+		{
+			WriteLayoutInternal(layout.BGLayout, out rawdata);
 		}
 
 		public override bool IsResizable { get { return true; } }

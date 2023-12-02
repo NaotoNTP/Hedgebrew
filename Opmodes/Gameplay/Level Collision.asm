@@ -1394,21 +1394,24 @@ Level_FindWall2:
 ;	(a1).w	- The block ID in the chunk where the object is standing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_FindBlock:
+		movea.l	rLayout.w,a1			; Get level layout pointer address
+
 		move.w	d2,d0				; Get the object's Y position
-		add.w	d0,d0				; Double it
-		andi.w	#$F00,d0			; Get chunk row offset
+		andi.w	#$780,d0			; Get Y within layout data
+		lsr.w	#6,d0				; ''						
+		move.w	2(a1,d0.w),d0			; Get chunk row offset
 		
 		move.w	d3,d1				; Get the object's X position
 		lsr.w	#3,d1				; Divide by 8
 		move.w	d1,d4				; Save for later
 		
 		lsr.w	#4,d1				; Divide by 16 to get the offset of the chunk in the chunk row
-		andi.w	#$7F,d1				; Only 128 chunks per row
+		andi.w	#$FF,d1				; Only 256 chunks per row
 		add.w	d1,d0				; Get offset in the level layout
 
 		moveq	#-1,d1				; Prepare the chunk table pointer
 		clr.w	d1				; ''
-		lea	rLayout.w,a1			; Get layout pointer
+		
 		move.b	(a1,d0.w),d1			; Get chunk ID
 		add.w	d1,d1				; Turn into offset
 		move.w	.ChunkOffsets(pc,d1.w),d1	; Get offset in chunk table

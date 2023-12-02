@@ -33,7 +33,7 @@ Level_InitPlanes:
 		lea	rBGRowBuf.w,a4			; Get background row plane buffer
 		
 		move.l	#$60000003,cVDP(a1)		; Set the base VDP command for drawing tils
-		move.w	#$80,cLayout(a1)		; Set the offset for the level layout (background)
+		move.w	#4,cLayout(a1)			; Set the offset for the level layout (background)
 		
 		move.w	rLevel.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
@@ -387,6 +387,7 @@ calcHiVDP	macro
 ;	a6.l	- Pointer in chunk data to the correct block
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 getChunk	macro
+		moveq	#-1,d1				; Prepare chunk pointer
 		move.b	(a2,d0.w),d1			; Get chunk ID
 		andi.w	#$FF,d1				; ''
 		lsl.w	#7,d1				; Turn into offset
@@ -406,8 +407,10 @@ getChunk	macro
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_GetRow:
-		lea	rLayout.w,a2			; Get level layout address
-		adda.w	cLayout(a1),a2			; Add offset
+		lea	rLayout.w,a2			; Get level layout pointer address
+		adda.w	cLayout(a1),a2			; Add camera offset value
+		movea.l	(a2),a2				; Load address stored within the pointer
+
 		lea	rBlocks.w,a3			; Get block table address
 		lea	$82(a4),a5			; Store plane buffer address for the bottom tiles in the row
 
@@ -433,10 +436,9 @@ Level_GetRow:
 		lsr.w	#4,d0				; Get X within layout data
 		andi.w	#$FF,d0				; ''
 		andi.w	#$780,d1			; Get Y within layout data
-		add.w	d1,d1				; ''
-		add.w	d1,d0				; Combine X and Y to get layout offset
+		lsr.w	#6,d1				; ''
 
-		moveq	#-1,d1				; Prepare chunk pointer
+		add.w	2(a2,d1.w),d0			; Combine X and Y to get layout offset
 		getChunk				; Get chunk pointer at current location
 
 .DrawBlock_Loop:
@@ -469,6 +471,7 @@ Level_GetRow:
 		addq.w	#2,d2				; Go to the next block
 		andi.w	#$E,d2				; Have we gone outside of the chunk?
 		bne.s	.DrawBlock_Cont			; If not, branch
+		
 		addq.w	#1,d0				; Next chunk
 		getChunk				; ''
 
@@ -491,8 +494,10 @@ Level_GetRow:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_GetCol:
-		lea	rLayout.w,a2			; Get level layout address
-		adda.w	cLayout(a1),a2			; Add offset
+		lea	rLayout.w,a2			; Get level layout pointer address
+		adda.w	cLayout(a1),a2			; Add camera offset value
+		movea.l	(a2),a2				; Load address stored within the pointer
+		
 		lea	rBlocks.w,a4			; Get block table address
 		lea	$42(a3),a5			; Store plane buffer address for the right tiles in the column
 		
@@ -518,10 +523,10 @@ Level_GetCol:
 		lsr.w	#4,d0				; Get X within layout data
 		andi.w	#$FF,d0				; ''
 		andi.w	#$780,d1			; Get Y within layout data
-		add.w	d1,d1				; ''
-		add.w	d1,d0				; Combine X and Y to get layout offset
-
-		moveq	#-1,d1				; Prepare chunk pointer
+		lsr.w	#6,d1				; ''				
+		movem.w	d0-d1,-(sp)			; Backup layout X and Y 
+		
+		add.w	2(a2,d1.w),d0			; Combine X and Y to get layout offset
 		getChunk				; Get chunk pointer at current location
 
 .DrawBlock_Loop:
@@ -558,13 +563,19 @@ Level_GetCol:
 		addi.w	#$10,d3				; Go to the next block
 		andi.w	#$70,d3				; Have we gone outside of the chunk?
 		bne.s	.DrawBlock_Cont			; If not, branch
-		addi.w	#$100,d0			; Next chunk
+
+		movem.w	(sp)+,d0-d1			; Get saved layout X and Y from the stack
+		addq.w	#2,d1				; Increase layout data Y offset to the next pointer
+		movem.w	d0-d1,-(sp)			; Push a backup copy back onto the stack
+		
+		add.w	2(a2,d1.w),d0			; Next chunk
 		getChunk				; ''
 
 .DrawBlock_Cont:
 		add.w	d2,d3				; Recombine X and Y to get chunk offset
 		dbf	d4,.DrawBlock_Loop		; Loop
 
+		movem.w	(sp)+,d0-d1			; Discard backup layout X and Y from the stack 
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Refresh a plane

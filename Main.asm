@@ -193,8 +193,11 @@ ArtUnc_HUDNumbers:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Wacky Workbench Zone
 
-WWZ_Layout:
-		incbin	"Zones/Wacky Workbench/Layout_S2.bin"
+WWZ_FGLayout:
+		incbin	"Zones/Wacky Workbench/Foreground.lvl"
+		even
+WWZ_BGLayout:
+		incbin	"Zones/Wacky Workbench/Background.lvl"
 		even
 WWZ_Objects:
 		incbin	"Zones/Wacky Workbench/Objects.bin"

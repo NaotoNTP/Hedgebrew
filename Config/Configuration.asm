@@ -26,7 +26,7 @@ NOTES		equs	""; Notes
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; User defined
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-DEBUG_BUILD	equ	0				; Debug build flag (0 = Disabled)
+DEBUG_BUILD	equ	1				; Debug build flag (0 = Disabled)
 ENABLE_HANDLER	equ	0|DEBUG				; Vladikcomper's error handler enable flag (0 = Disabled)
 ENABLE_LAGMETER	equ	0				; Lag meter enable flag (0 = Disabled)
 DEBUG		equ	DEBUG_BUILD			; Hack

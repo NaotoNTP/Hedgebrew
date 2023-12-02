@@ -92,9 +92,8 @@ Level_LoadData:
 		move.w	(a0)+,d0			; Size of palette data
 		jsr	LoadTargetPal.w			; Load the palette
 
-		movea.l	(a3)+,a0			; Get layout pointer
-		lea	rLayout.w,a1			; Decompress into layout buffer
-		jsr	KosDec.w			; ''
+		move.l	(a3)+,rLayoutFG.w		; Move layout addresses to variables
+		move.l	(a3)+,rLayoutBG.w
 
 		move.l	(a3)+,rObjPosAddr.w		; Set object position data pointer
 		move.l	(a3)+,rRingPosAddr.w		; Set ring position data pointer

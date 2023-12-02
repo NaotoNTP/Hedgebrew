@@ -258,13 +258,17 @@ Level_WaterLevels:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; FORMAT:
 ;	dc.l	CHUNKS, BLOCKS, TILES, PALETTE
-;	dc.l	LAYOUT, OBJECTS, RINGS, COLLISION
+;	dc.l	FG LAYOUT, BG LAYOUT 
+;	dc.l	OBJECTS, RINGS, COLLISION
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_DataPointers:
-		dc.l	WWZ_Chunks, WWZ_Blocks,  WWZ_Tiles, WWZ_Pal
-		dc.l	WWZ_Layout, WWZ_Objects, WWZ_Rings, WWZ_Collision
-		dc.l	WWZ_Chunks, WWZ_Blocks,  WWZ_Tiles, WWZ_Pal
-		dc.l	WWZ_Layout, WWZ_Objects, WWZ_Rings, WWZ_Collision
+		dc.l	WWZ_Chunks, WWZ_Blocks, WWZ_Tiles, WWZ_Pal
+		dc.l	WWZ_FGLayout, WWZ_BGLayout
+		dc.l	WWZ_Objects, WWZ_Rings, WWZ_Collision
+
+		dc.l	WWZ_Chunks, WWZ_Blocks, WWZ_Tiles, WWZ_Pal
+		dc.l	WWZ_FGLayout, WWZ_BGLayout
+		dc.l	WWZ_Objects, WWZ_Rings, WWZ_Collision
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Size and start position data
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
