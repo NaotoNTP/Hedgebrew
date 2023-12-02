@@ -622,6 +622,9 @@ ObjectManagerMain:
 		beq.s	.EndLoad			; Branch if it failed
 
 .LoadLoop:
+		cmpa.l	rObjPosAddr.w,a0		; Bounds Check
+		beq.s	.EndLoadRst
+
 		cmp.w	-6(a0),d6			; Check if the last object is in range
 		bge.s	.EndLoadRst			; If not, branch
 		subq.l	#6,a0				; Get actual object address
@@ -649,6 +652,9 @@ ObjectManagerMain:
 		addi.w	#$300,d6			; Load 2 chunks forward
 
 .ChkLoop:
+		cmpa.l	rObjPosAddr.w,a0		; Bounds Check
+		beq.s	.ChkDone		
+		
 		cmp.w	-6(a0),d6			; Check if the last object is out of range
 		bgt.s	.ChkDone			; If so, branch
 		subq.l	#6,a0				; Get the object before this
