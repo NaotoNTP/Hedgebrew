@@ -12,8 +12,8 @@
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_InitPlanes:
 		lea	rFGCam.w,a1			; Get foreground level drawing RAM
-		lea	rFGColBuf.w,a3		; Get foreground column plane buffer
-		lea	rFGRowBuf.w,a4		; Get foreground row plane buffer
+		lea	rFGColBuf.w,a3			; Get foreground column plane buffer
+		lea	rFGRowBuf.w,a4			; Get foreground row plane buffer
 
 		move.l	#$40000003,cVDP(a1)		; Set the base VDP command for drawing tiles
 		clr.w	cLayout(a1)			; Set the offset for the level layout (foreground)
@@ -29,8 +29,8 @@ Level_InitPlanes:
 		move.w	cYPos(a1),rVScrollFG.w		; Set the V-Scroll value for the foreground
 
 		lea	rBGCam.w,a1			; Get background level drawing RAM
-		lea	rBGColBuf.w,a3		; Get background column plane buffer
-		lea	rBGRowBuf.w,a4		; Get background row plane buffer
+		lea	rBGColBuf.w,a3			; Get background column plane buffer
+		lea	rBGRowBuf.w,a4			; Get background row plane buffer
 		
 		move.l	#$60000003,cVDP(a1)		; Set the base VDP command for drawing tils
 		move.w	#$80,cLayout(a1)		; Set the offset for the level layout (background)
@@ -426,12 +426,12 @@ Level_GetRow:
 		lsr.w	#3,d0				; Get X within chunk data
 		move.w	d0,d2				; ''
 		andi.w	#$E,d2				; ''
-		lsr.w	#4,d0				; Get X within layout data
-		andi.w	#$7F,d0				;''
 		move.w	d1,d3				; Get Y within chunk data
 		andi.w	#$70,d3				; ''
 		add.w	d3,d2				; Combine X and Y to get chunk offset
-
+		
+		lsr.w	#4,d0				; Get X within layout data
+		andi.w	#$FF,d0				; ''
 		andi.w	#$780,d1			; Get Y within layout data
 		add.w	d1,d1				; ''
 		add.w	d1,d0				; Combine X and Y to get layout offset
@@ -511,12 +511,12 @@ Level_GetCol:
 		lsr.w	#3,d0				; Get X within chunk data
 		move.w	d0,d2				; ''
 		andi.w	#$E,d2				; ''
-		lsr.w	#4,d0				; Get X within layout data
-		andi.w	#$7F,d0				;''
 		move.w	d1,d3				; Get Y within chunk data
 		andi.w	#$70,d3				; ''
 		add.w	d2,d3				; Combine X and Y to get chunk offset
 
+		lsr.w	#4,d0				; Get X within layout data
+		andi.w	#$FF,d0				; ''
 		andi.w	#$780,d1			; Get Y within layout data
 		add.w	d1,d1				; ''
 		add.w	d1,d0				; Combine X and Y to get layout offset

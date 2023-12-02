@@ -1397,12 +1397,15 @@ Level_FindBlock:
 		move.w	d2,d0				; Get the object's Y position
 		add.w	d0,d0				; Double it
 		andi.w	#$F00,d0			; Get chunk row offset
+		
 		move.w	d3,d1				; Get the object's X position
 		lsr.w	#3,d1				; Divide by 8
 		move.w	d1,d4				; Save for later
+		
 		lsr.w	#4,d1				; Divide by 16 to get the offset of the chunk in the chunk row
 		andi.w	#$7F,d1				; Only 128 chunks per row
 		add.w	d1,d0				; Get offset in the level layout
+
 		moveq	#-1,d1				; Prepare the chunk table pointer
 		clr.w	d1				; ''
 		lea	rLayout.w,a1			; Get layout pointer
@@ -1410,10 +1413,12 @@ Level_FindBlock:
 		add.w	d1,d1				; Turn into offset
 		move.w	.ChunkOffsets(pc,d1.w),d1	; Get offset in chunk table
 		move.w	d2,d0				; Get the object's Y position
+		
 		andi.w	#$70,d0				; Get Y position within chunk
 		add.w	d0,d1				; Add onto the offset
 		andi.w	#$E,d4				; Get the previously saved X position divided by 8 (for the row offset)
 		add.w	d4,d1				; Add onto the offset
+		
 		movea.l	d1,a1				; Get pointer in chunk table
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

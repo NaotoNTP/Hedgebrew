@@ -194,7 +194,7 @@ ArtUnc_HUDNumbers:
 ; Wacky Workbench Zone
 
 WWZ_Layout:
-		incbin	"Zones/Wacky Workbench/Layout.bin"
+		incbin	"Zones/Wacky Workbench/Layout_S2.bin"
 		even
 WWZ_Objects:
 		incbin	"Zones/Wacky Workbench/Objects.bin"
