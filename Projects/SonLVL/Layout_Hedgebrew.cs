@@ -71,7 +71,7 @@ namespace SonicRetro.SonLVL.API.S3K
 
 		public override bool IsResizable { get { return true; } }
 
-		public override System.Drawing.Size MaxSize { get { return new System.Drawing.Size(256, 64); } }
+		public override System.Drawing.Size MaxSize { get { return new System.Drawing.Size(256, 256); } }
 
 		public override System.Drawing.Size DefaultSize { get { return new System.Drawing.Size(128, 16); } }
 

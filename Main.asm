@@ -235,7 +235,6 @@ WWZ_Pal:
 WWZ_Tiles:
 		incbin	"Graphics/Tilesets/Wacky Workbench/Tiles.kosm"
 		even
-;		dc.w	$FFFF, 0, 0
 ArtUnc_Electricity:
 		incbin	"Graphics/Tilesets/Wacky Workbench/Electricity.unc"
 		even
