@@ -199,6 +199,8 @@ WWZ_FGLayout:
 WWZ_BGLayout:
 		incbin	"Zones/Wacky Workbench/Background.lvl"
 		even
+
+		dc.w	$FFFF, 0, 0				; Null object list entry
 WWZ_Objects:
 		incbin	"Zones/Wacky Workbench/Objects.bin"
 		even
