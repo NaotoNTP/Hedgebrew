@@ -56,6 +56,9 @@ rKosPMDest	equ	rKosPMList+4			; ''
 rKosPMList_End	rs.b	0				; ''
 rKosPVars_End	rs.b	0				; End of Kosinski decompression queue variables
 
+rRespawns	rs.b	$300				; Object respawn table
+rRespawns_End	rs.b	0				; ''
+
 rObjects	rs.b	0				; Object SSTs
 		maxObjRAM $2400				; ''
 rObjects_End	rs.b	0
@@ -70,9 +73,6 @@ rFreeHead	rs.w	1				; pointer to the first object that is not loaded
 rDispInput	equ __rs-dnext
 		rs.b	dSize*8				; Sprite display input list (8 priority levels)
 rDispInput_End	rs.b	0				; 
-
-rRespawns	rs.b	$300				; Object respawn table
-rRespawns_End	rs.b	0				; ''
 
 rFGRowBuf	rs.b	$102				; Foreground horizontal plane buffer
 rFGColBuf	rs.b	$82				; Foreground vertical plane buffer
