@@ -20,31 +20,31 @@ Level_NoFade:
 		move.w	#$8B03,(a5)			; V-Scroll by screen, H-Scroll by scanline
 		move.w	#$9001,(a5)			; 64x32 cell plane area
 		move.w	#$9200,d0			; Make the window invisible
-		move.w	d0,rWindowY.w			; ''
+		move.w	d0,vdpWindowY.w			; ''
 		move.w	d0,(a5)				; ''
-		clr.w	rDMAQueue.w			; Set stop token at the beginning of the DMA queue
-		move.w	#rDMAQueue,rDMASlot.w	; Reset the DMA queue slot
+		clr.w	dmaQueue.w			; Set stop token at the beginning of the DMA queue
+		move.w	#dmaQueue,dmaSlot.w	; Reset the DMA queue slot
 
 		jsr	ClearScreen.w			; Clear the screen
 
 		; --- Clear some RAM ---
 
-		clrRAM	rKosPVars			; Clear Kosinski queue variables
-		clrRAM	rGameVars			; Clear variables
-		clrRAM	rOscNums			; Clear oscillation data
+		clrRAM	kosVars			; Clear Kosinski queue variables
+		clrRAM	opmodeVars			; Clear variables
+		clrRAM	oscillators			; Clear oscillation data
 
 		; --- Do some final initializing and play the level music ---
 
-		move.b	#3,rRingAniTime.w		; Set ring animation timer
+		move.b	#3,ringAnimTime.w		; Set ring animation timer
 		move.w	#30,rFloorTimer.w		; Set floor timer
-		clr.w	rPalCycTimer.w		; Reset palette cycle
+		clr.w	palCycTimer.w		; Reset palette cycle
 
 		lea	Level_MusicIDs(pc),a0		; Music ID list
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#7,d0				; ''
 		move.b	(a0,d0.w),d0			; Get music ID
-		move.b	d0,rLevelMusic.w		; Store it
+		move.b	d0,lvlMusic.w		; Store it
 		playSnd	d0, 1				; Play it
 
 		intsOn					; Enable interrupts
@@ -58,51 +58,51 @@ Level_NoFade:
 
 		jsr	FindFreeObj.w
 		move.l	#ObjPlayer,oAddr(a1)		; Load Player object
-		move.w	a1,rPlayer1Addr.w		; Store the address
+		move.w	a1,playerPtrP1.w		; Store the address
 
-		tst.b	rWaterFlag.w			; Does the level have water?
+		tst.b	lvlHasWater.w			; Does the level have water?
 		beq.s	.NoSurface			; If not, branch
 
 							; Load water surfaces
 		jsr	FindFreeObj.w
 		move.l	#ObjWaterSurface,oAddr(a1)
 		move.w	#$60,oXPos(a1)
-		move.w	a1,rWater1Addr.w		; Store the address
+		move.w	a1,waterObjPtr1.w		; Store the address
 
 		jsr	FindFreeObj.w
 		move.l	#ObjWaterSurface,oAddr(a1)
 		move.w	#$120,oXPos(a1)
-		move.w	a1,rWater2Addr.w		; Store the address
+		move.w	a1,waterObjPtr2.w		; Store the address
 
 .NoSurface:
 		bsr.w	Level_LoadData			; Load level data
 
 .WaitPLCs:
-		move.b	#vGeneral,rVINTRout.w		; Level load V-INT routine
+		move.b	#vGeneral,vIntRoutine.w		; Level load V-INT routine
 		jsr	ProcessKos.w			; Process Kosinski queue
 		jsr	VSync_Routine.w			; V-SYNC
 		jsr	ProcessKosM.w			; Process Kosinski Moduled queue
-		tst.b	rKosPMMods.w			; Are there still modules left?
+		tst.b	kosMModules.w			; Are there still modules left?
 		bne.s	.WaitPLCs			; If so, branch
 
-		clr.b	rWaterFlag.w			; Clear the water flag
+		clr.b	lvlHasWater.w			; Clear the water flag
 
-		lea	Level_WaterLevels(pc),a0	; Water heights
-		move.w	rLevel.w,d0			; Get level ID
+		lea	Level_WatelevelIDs(pc),a0	; Water heights
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#6,d0				; ''
 		move.w	(a0,d0.w),d0			; Get water height
 		bmi.s	.NoWater			; If it's negative, branch
-		move.w	d0,rWaterLvl.w		; Set the water height
-		move.w	d0,rDestWtrLvl.w
+		move.w	d0,waterYPos.w		; Set the water height
+		move.w	d0,destWaterYPos.w
 
-		st	rWaterFlag.w			; Set the water flag
+		st	lvlHasWater.w			; Set the water flag
 		move.w	#$8014,VDP_CTRL			; Enable H-INT
 		bsr.w	Level_WaterHeight		; Update water height
-		move.w	rHIntReg.w,VDP_CTRL		; Set H-INT counter
+		move.w	hIntCntReg.w,VDP_CTRL		; Set H-INT counter
 
 .NoWater:
-		move.w	#320/2,rCamXPosCenter.w		; Set camera X center
+		move.w	#320/2,panCamXPos.w		; Set camera X center
 
 		jsr	InitOscillation.w		; Initialize oscillation
 
@@ -115,24 +115,24 @@ Level_NoFade:
 		; --- Load the planes ---
 
 		intsOff					; Disable interrupts
-		move.l	#VInt_RunSMPS,rVIntAddr.w	; Swap V-INT
+		move.l	#VInt_RunSMPS,vIntAddress.w	; Swap V-INT
 		intsOn					; Enable interrupts
 		bsr.w	Level_InitPlanes		; Initialize the planes
 		intsOff					; Disable interrupts
-		move.l	#VInt_Standard,rVIntAddr.w	; Swap V-INT
+		move.l	#VInt_Standard,vIntAddress.w	; Swap V-INT
 		intsOn					; Enable interrupts
-		move.b	#vLvlLoad,rVINTRout.w		; Level load V-INT routine
+		move.b	#vLvlLoad,vIntRoutine.w		; Level load V-INT routine
 		jsr	VSync_Routine.w			; V-SYNC
 
 		; --- Load the level objects and rings ---
 
-		sf	rObjManInit.w			; Reset object manager routine
+		sf	objMgrInit.w			; Reset object manager routine
 		bsr.w	Level_RingsManager		; Initialize the ring manager
 		jsr	ObjectManager.w			; Run the object manager
 	runObjects
-		jsr	RenderObjects.w			; Render objects
+		jsr	RendeobjMemory.w			; Render objects
 
-		clr.b	rLvlReload.w			; Clear the level reload flag
+		clr.b	lvlReload.w			; Clear the level reload flag
 
 		displayOn				; Enable display
 		jsr	FadeFromBlack.w			; Fade from black
@@ -140,12 +140,12 @@ Level_NoFade:
 ; Main loop
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Loop:
-		move.b	#vLevel,rVINTRout.w		; Level V-INT routine
+		move.b	#vLevel,vIntRoutine.w		; Level V-INT routine
 		jsr	ProcessKos.w			; Process Kosinski queue
 		jsr	VSync_Routine.w			; V-SYNC
 
 		jsr	CheckPause.w			; Check for pausing
-		addq.w	#1,rLvlFrames.w			; Increment frame counter
+		addq.w	#1,lvlFrameCnt.w			; Increment frame counter
 
 		jsr	UpdateOscillation.w		; Update oscillation
 
@@ -154,28 +154,28 @@ Level_NoFade:
 
 	runObjects
 
-		tst.b	rLvlReload.w			; Does the level need to be reloaded?
+		tst.b	lvlReload.w			; Does the level need to be reloaded?
 		bne.w	Level				; If so, branch
 
 		bsr.w	Level_HandleCamera		; Handle the camera
 		bsr.w	Level_UpdatePlanes		; Update the planes (draw new tiles and scroll)
 		bsr.w	Level_UpdateWaterSurface	; Update the water surface
 
-		jsr	RenderObjects.w			; Render objects
+		jsr	RendeobjMemory.w			; Render objects
 
 		bsr.w	Level_WaterHeight		; Update water height
 		bsr.w	Level_AnimateArt		; Animate level art
 		bsr.w	Level_PalCycle			; Do palette cycling
 		bsr.w	Level_DynEvents			; Run dynamic events
 
-		subq.b	#1,rRingAniTime.w		; Decrement ring animation timer
+		subq.b	#1,ringAnimTime.w		; Decrement ring animation timer
 		bpl.s	.NoRingAni			; If it hasn't run out, branch
-		move.b	#3,rRingAniTime.w		; Reset animation timer
-		addq.b	#1,rRingFrame.w			; Next ring frame
-		andi.b	#7,rRingFrame.w			; Limit it
+		move.b	#3,ringAnimTime.w		; Reset animation timer
+		addq.b	#1,ringAnimFrame.w			; Next ring frame
+		andi.b	#7,ringAnimFrame.w			; Limit it
 
 		moveq	#0,d0
-		move.b	rRingFrame.w,d0			; Get ring frame
+		move.b	ringAnimFrame.w,d0			; Get ring frame
 		lsl.w	#7,d0				; Convert to offset
 		move.l	#ArtUnc_Ring,d1			; Source address
 		add.l	d0,d1				; ''
@@ -184,19 +184,19 @@ Level_NoFade:
 		jsr	QueueDMATransfer.w		; Queue a transfer
 
 .NoRingAni:
-		tst.b	rRLossAniT.w
+		tst.b	ringLossAnimT.w
 		beq.s	.NoRingLossAni
 		moveq	#0,d0
-		move.b	rRLossAniT.w,d0
-		add.w	rRLossAniA.w,d0
-		move.w	d0,rRLossAniA.w
+		move.b	ringLossAnimT.w,d0
+		add.w	ringLossAnimA.w,d0
+		move.w	d0,ringLossAnimA.w
 		rol.w	#8,d0
 		andi.w	#7,d0
-		move.b	d0,rRLossAniF.w
-		subq.b	#1,rRLossAniT.w
+		move.b	d0,ringLossAnimF.w
+		subq.b	#1,ringLossAnimT.w
 
 		moveq	#0,d0
-		move.b	rRLossAniF.w,d0		; Get ring frame
+		move.b	ringLossAnimF.w,d0		; Get ring frame
 		lsl.w	#7,d0				; Convert to offset
 		move.l	#ArtUnc_Ring,d1			; Source address
 		add.l	d0,d1				; ''
@@ -207,7 +207,7 @@ Level_NoFade:
 .NoRingLossAni:
 		jsr	ProcessKosM.w			; Process Kosinski Moduled queue
 
-		cmpi.b	#gLevel,rGameMode.w		; Is the game mode level?
+		cmpi.b	#gLevel,opmode.w		; Is the game mode level?
 		beq.w	.Loop				; If so, branch
 		jmp	GotoGameMode.w			; Go to the correct game mode
 
@@ -215,23 +215,23 @@ Level_NoFade:
 ; Check for pausing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 CheckPause:
-		tst.b	rPauseFlag.w			; Is the game already paused?
+		tst.b	pauseFlag.w			; Is the game already paused?
 		bne.s	.SetPause			; If so, branch
-		btst	#7,rP1Press.w			; Has the start button been pressed?
+		btst	#7,ctrlPressP1.w			; Has the start button been pressed?
 		beq.s	.End				; If not, branch
 
 .SetPause:
-		st	rPauseFlag.w			; Pause the game
+		st	pauseFlag.w			; Pause the game
 		AMPS_MUSPAUSE				; Pause the music
 
 .PauseLoop:
-		move.b	#vGeneral,rVINTRout.w		; General V-INT routine
+		move.b	#vGeneral,vIntRoutine.w		; General V-INT routine
 		bsr.w	VSync_Routine			; V-SYNC
-		btst	#7,rP1Press.w			; Has the start button been pressed?
+		btst	#7,ctrlPressP1.w			; Has the start button been pressed?
 		beq.s	.PauseLoop			; If not, branch
 
 		AMPS_MUSUNPAUSE				; Unpause the music
-		clr.b	rPauseFlag.w			; Unpause the game
+		clr.b	pauseFlag.w			; Unpause the game
 
 .End:
 		rts
@@ -250,7 +250,7 @@ Level_MusicIDs:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Level water heights (-1 for no water)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-Level_WaterLevels:
+Level_WatelevelIDs:
 		;dc.w	$490, -1			; Wacky Workbench
 		dc.w	-1, -1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ Level_DynEvenRouts:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 DynEv_WWZ:
 		moveq	#0,d0
-		move.b	rDynEvRout.w,d0
+		move.b	dynEventRout.w,d0
 		move.w	.Index(pc,d0.w),d0
 		jmp	.Index(pc,d0.w)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -297,13 +297,13 @@ DynEv_WWZ:
 		dc.w	.Done-.Index
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .WaitBoss:
-		cmpi.w	#$2EE0,rCamXPos.w
+		cmpi.w	#$2EE0,fgCamXPos.w
 		blt.s	.Done
-		move.w	#$340,rMinCamY.w
-		move.w	#$340,rDestMaxY.w
-		move.w	#$2EE0,rMinCamX.w
-		move.w	#$2EE0,rMaxCamX.w
-		addq.b	#2,rDynEvRout.w
+		move.w	#$340,minCamYPos.w
+		move.w	#$340,targetMaxCamY.w
+		move.w	#$2EE0,minCamXPos.w
+		move.w	#$2EE0,maxCamXPos.w
+		addq.b	#2,dynEventRout.w
 
 .Done:
 		rts
@@ -317,42 +317,42 @@ Level_PalCycRouts:
 ; Wacky Workbench palette cycle routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PalCycle_WWZ:
-		tst.b	rFloorActive.w		; Is the floor active?
+		tst.b	rFlooactIDive.w		; Is the floor active?
 		bne.s	.Flash				; If so, branch
 
 		subq.w	#1,rFloorTimer.w		; Decrement the floor timer
 		bpl.s	.ResetPal			; If it hasn't run out, branch
-		st	rFloorActive.w		; Set the floor active flag
+		st	rFlooactIDive.w		; Set the floor active flag
 		move.w	#180,rFloorTimer.w		; Set the floor timer
 
 .ResetPal:
-		clr.w	rPalCycTimer.w		; Reset the palette cycle
-		move.w	#$C28,(rPalette+$62).w		; Set the floor color to be deactivated
-		move.w	#$E48,(rWaterPal+$62).w	; ''
+		clr.w	palCycTimer.w		; Reset the palette cycle
+		move.w	#$C28,(paletteBuff+$62).w		; Set the floor color to be deactivated
+		move.w	#$E48,(paletteBuffAlt+$62).w	; ''
 		rts
 
 .Flash:
 		subq.w	#1,rFloorTimer.w		; Decrement the floor timer
 		bpl.s	.UpdatePal			; If it hasn't run out, branch
-		clr.b	rFloorActive.w		; Clear the floor active flag
+		clr.b	rFlooactIDive.w		; Clear the floor active flag
 		move.w	#30,rFloorTimer.w		; Set the floor timer
 
 .UpdatePal:
-		subq.b	#1,rPalCycTimer.w		; Decrement the palette cycle timer
+		subq.b	#1,palCycTimer.w		; Decrement the palette cycle timer
 		bpl.s	.End				; If it hasn't run out, branch
-		move.b	#1,rPalCycTimer.w		; Reset the palette cycle timer
+		move.b	#1,palCycTimer.w		; Reset the palette cycle timer
 
 		moveq	#0,d0
-		move.b	rPalCycIndex.w,d0		; Get the palette cycle index
+		move.b	palCycIndex.w,d0		; Get the palette cycle index
 		add.w	d0,d0				; Turn into offset
 							; Set the floor color
-		move.w	PalCyc_WWZFloor(pc,d0.w),(rPalette+$62).w
-		move.w	PalCyc_WWZFloorUW(pc,d0.w),(rWaterPal+$62).w
+		move.w	PalCyc_WWZFloor(pc,d0.w),(paletteBuff+$62).w
+		move.w	PalCyc_WWZFloorUW(pc,d0.w),(paletteBuffAlt+$62).w
 
-		addq.b	#1,rPalCycIndex.w		; Increment the palette cycle index
-		cmpi.b	#5,rPalCycIndex.w		; Has it reached the end of the cycle?
+		addq.b	#1,palCycIndex.w		; Increment the palette cycle index
+		cmpi.b	#5,palCycIndex.w		; Has it reached the end of the cycle?
 		bcs.s	.End				; If not, branch
-		clr.b	rPalCycIndex.w		; Reset the palette cycle index
+		clr.b	palCycIndex.w		; Reset the palette cycle index
 
 .End:
 		rts
@@ -409,7 +409,7 @@ Level_RenderRouts:
 ; Wacky Workbench background initialization
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 WWZ_InitBG:
-		lea	rFGCam.w,a2			; Get foreground camera RAM
+		lea	fgCamVars.w,a2			; Get foreground camera RAM
 		move.w	cYPos(a2),d0			; Get foreground Y position
 		asr.w	#2,d0				; Divide by $20
 		move.w	d0,cYPos(a1)			; Set as background Y position
@@ -422,7 +422,7 @@ WWZ_InitBG:
 ; Wacky Workbench background update
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 WWZ_UpdateBG:
-		lea	rFGCam.w,a2			; Get foreground camera RAM
+		lea	fgCamVars.w,a2			; Get foreground camera RAM
 		move.w	cYPos(a2),d0			; Get foreground Y position
 		asr.w	#2,d0				; Divide by $20
 		move.w	d0,cYPos(a1)			; Set as background Y position

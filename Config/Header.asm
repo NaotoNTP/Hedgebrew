@@ -8,7 +8,7 @@
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; PARAMETERS:
 ;	string	- The string
-;	limit	- Character limit
+;	limit	- character limit
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; RETURNS:
 ;	Nothing
@@ -218,7 +218,7 @@ ICD_BLK		EQU	.PrgInit
 		move.w	d2,4(sp)			; Initialize port C
 
 .WarmBoot:
-		lea	rStackBase.w,sp		; Set the stack pointer
+		lea	stack.w,sp		; Set the stack pointer
 		movem.l	(a4),d0-a6			; Clear registers
 
 		jmp	GameInit			; Go to the game initialization

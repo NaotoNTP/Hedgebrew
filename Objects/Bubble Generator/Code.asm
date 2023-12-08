@@ -59,7 +59,7 @@ ObjBubbles_Main:
 		st	oBubInhale(a0)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBubbles_ChkWater:
-		move.w	rWaterLvl.w,d0		; Get water level
+		move.w	waterYPos.w,d0		; Get water level
 		cmp.w	oYPos(a0),d0			; Have we gone beyond it?
 		bcs.s	.Wobble				; If not, branch
 		move.b	#6,oRoutine(a0)			; Next routine
@@ -100,7 +100,7 @@ ObjBubbles_Display:
 ObjBubbles_Maker:
 		tst.w	oBub_Unk36(a0)
 		bne.s	.loc_12874
-		move.w	rWaterLvl.w,d0		; Get water level
+		move.w	waterYPos.w,d0		; Get water level
 		cmp.w	oYPos(a0),d0			; Have we gone beyond it?
 		bcc.w	.ChkDel				; If so, branch
 		tst.b	oRender(a0)
@@ -182,10 +182,10 @@ ObjBubbles_Maker:
 .ChkDel:
 		move.w	oXPos(a0),d0
 		andi.w	#$FF80,d0
-		sub.w	rObjXCoarse.w,d0
+		sub.w	objMgrCoarseX.w,d0
 		cmpi.w	#$280,d0
 		bhi.s	.Delete
-		move.w	rWaterLvl.w,d0
+		move.w	waterYPos.w,d0
 		cmp.w	oYPos(a0),d0
 		blo.s	.Display
 		rts
@@ -209,7 +209,7 @@ ObjBubbles_Maker:
 ObjBubbles_ChkSonic:
 		lea	rObj_Player.w,a1
 		
-		tst.b	rDebugMode.w
+		tst.b	debugMode.w
 		bne.w	.End
 		btst	#0,oFlags(a1)
 		bne.w	.End

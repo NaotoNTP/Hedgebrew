@@ -33,10 +33,10 @@ ObjMonitorMain:
 		move.w	#$10,d2
 		move.w	d2,d3
 		move.w	oXPos(a0),d4
-		movea.w	rPlayer1Addr.w,a1
+		movea.w	playerPtrP1.w,a1
 		bsr.s	SolidObject_Monitor
 
-		move.w	rMaxCamY.w,d0
+		move.w	maxCamYPos.w,d0
 		addi.w	#$E0,d0
 		cmp.w	oYPos(a0),d0
 		blt.s	ObjMonitorDelete
@@ -128,7 +128,7 @@ ObjMonitorBreakOpen:
 		move.b	oStatus(a0),d0
 		andi.b	#cStand|cPush,d0
 		beq.s	ObjMonitorSpawnIcon
-		movea.w	rPlayer1Addr.w,a1
+		movea.w	playerPtrP1.w,a1
 		andi.b	#$D7,oStatus(a1)
 		ori.b	#2,oStatus(a1)
 
@@ -212,7 +212,7 @@ ObjMonitorContents_GetType:
 		bne.s	.ChkRings
 		push.l	a0
 		movea.l	a0,a2
-		movea.w	rPlayer1Addr.w,a0
+		movea.w	playerPtrP1.w,a0
 		jsr	ObjPlayer_GetHurt
 		pop.l	a0
 		rts
@@ -220,8 +220,8 @@ ObjMonitorContents_GetType:
 .ChkRings:
 		cmpi.b	#2,d0
 		bne.s	.Display
-		addi.w	#10,rRings.w 				; add 10 rings to the number of rings you have
-		ori.b	#1,rUpdateRings.w 			; update the ring counter
+		addi.w	#10,ringCount.w 				; add 10 rings to the number of rings you have
+		ori.b	#1,hudUpdateRings.w 			; update the ring counter
 		playSnd	#sRing, 2				; Play ring sound
 
 .Display:

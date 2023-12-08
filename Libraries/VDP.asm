@@ -11,8 +11,8 @@
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 InitVDP:
-		move.w	#$8134,rVDPReg1.w		; Save VDP register 1 in RAM
-		move.w	#$8AFF,rHIntReg.w		; Save H-INT counter register in RAM
+		move.w	#$8134,vdpReg1.w		; Save VDP register 1 in RAM
+		move.w	#$8AFF,hIntCntReg.w		; Save H-INT counter register in RAM
 
 		bra.w	InitSpriteTable			; Initialize the sprite table
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ ClearScreen:
 		lea	VDP_CTRL,a6			; VDP control port
 		dmaFill	0,$C000,$3000			; Clear planes
 
-		clrRAM	rHScroll, rVScroll_End	; Clear scroll tables
+		clrRAM	hScrollBuff, vScrollBuff_End	; Clear scroll tables
 		
 		bra.w	InitSpriteTable			; Initialize the sprite table
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -197,8 +197,8 @@ QueueDMATransfer:
 			intsOff				; Mask off interrupts
 		endif
 
-		movea.w	rDMASlot.w,a1
-		cmpa.w	#rDMASlot,a1
+		movea.w	dmaSlot.w,a1
+		cmpa.w	#dmaSlot,a1
 		beq.s	.Done				; Return if there's no more room in the queue
 
 		lsr.l	#1,d1				; Source address is in words for the VDP registers
@@ -226,7 +226,7 @@ QueueDMATransfer:
 		move.l	d2,(a1)+			; Store command
 
 		clr.w	(a1)				; Put a stop token at the end of the used part of the queue
-		move.w	a1,rDMASlot.w			; Set the next free slot address, potentially undoing the above clr (this is intentional!)
+		move.w	a1,dmaSlot.w			; Set the next free slot address, potentially undoing the above clr (this is intentional!)
 
 .Done:
 		if UseVIntSafeDMA=1
@@ -262,7 +262,7 @@ QueueDMATransfer:
 			vdpCommReg d2,VRAM,DMA,1	; Make DMA destination command
 			move.l	d2,(a1)+		; Store command
 
-			cmpa.w	#rDMASlot,a1		; Did this command fill the queue?
+			cmpa.w	#dmaSlot,a1		; Did this command fill the queue?
 			beq.s	.SkipSecondTransfer	; Branch if so
 
 			; Store VDP commands for specifying DMA into the queue
@@ -285,7 +285,7 @@ QueueDMATransfer:
 			move.l	d1,(a1)+		; Store command
 
 			clr.w	(a1)			; Put a stop token at the end of the used part of the queue
-			move.w	a1,rDMASlot.w		; Set the next free slot address, potentially undoing the above clr (this is intentional!)
+			move.w	a1,dmaSlot.w		; Set the next free slot address, potentially undoing the above clr (this is intentional!)
 
 			if UseVIntSafeDMA=1
 				move.w	(sp)+,sr	; Restore interrupts to previous state
@@ -310,10 +310,10 @@ QueueDMATransfer:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ProcessDMAQueue:
-		lea	rDMAQueue.w,a1
-		move.w	a1,rDMASlot.w
+		lea	dmaQueue.w,a1
+		move.w	a1,dmaSlot.w
 
-		rept (rDMASlot-rDMAQueue)/(7*2)
+		rept (dmaSlot-dmaQueue)/(7*2)
 			move.w	(a1)+,d0
 			beq.w	.Done			; Branch if we reached a stop token
 			
@@ -326,7 +326,7 @@ ProcessDMAQueue:
 		moveq	#0,d0
 
 .Done:
-		move.w	d0,rDMAQueue.w
+		move.w	d0,dmaQueue.w
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Initialize the DMA queue
@@ -338,12 +338,12 @@ ProcessDMAQueue:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 InitDMAQueue:
-		lea	rDMAQueue.w,a1
+		lea	dmaQueue.w,a1
 		move.w	#0,(a1)
-		move.w	a1,rDMASlot.w
+		move.w	a1,dmaSlot.w
 		move.l	#$96959493,d1
 c		= 0
-		rept (rDMASlot-rDMAQueue)/(7*2)
+		rept (dmaSlot-dmaQueue)/(7*2)
 			movep.l	d1,2+c(a1)
 c			= c+14
 		endr
@@ -356,7 +356,7 @@ c			= c+14
 ;	a0.l	- Pointer to palette data
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 LoadPalette:
-		lea	rPalette.w,a1			; Main palette buffer
+		lea	paletteBuff.w,a1			; Main palette buffer
 		bra.s	LoadPalToBuf			; Load the palette
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load a palette into the target palette buffer
@@ -366,7 +366,7 @@ LoadPalette:
 ;	a0.l	- Pointer to palette data
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 LoadTargetPal:
-		lea	rDestPal.w,a1			; Target palette buffer
+		lea	palFadeBuff.w,a1			; Target palette buffer
 		bra.s	LoadPalToBuf			; Load the palette
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load a palette into the main water palette buffer
@@ -376,7 +376,7 @@ LoadTargetPal:
 ;	a0.l	- Pointer to palette data
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 LoadWaterPal:
-		lea	rWaterPal.w,a1		; Main water palette buffer
+		lea	paletteBuffAlt.w,a1		; Main water palette buffer
 		bra.s	LoadPalToBuf			; Load the palette
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load a palette into the target water palette buffer
@@ -386,7 +386,7 @@ LoadWaterPal:
 ;	a0.l	- Pointer to palette data
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 LoadTargetWaterPal:
-		lea	rDestWtrPal.w,a1		; Target water palette buffer
+		lea	palFadeBuffAlt.w,a1		; Target water palette buffer
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load a palette into a palette buffer
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -409,14 +409,14 @@ LoadPalToBuf:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeToBlack:
-		move.w	#$003F,rPalFade.w		; Set to fade everything
+		move.w	#$003F,palFadeVars.w		; Set to fade everything
 
 FadeToBlack_Custom:
 		moveq	#7,d4				; Set repeat times
 		
 .FadeLoop:
 		rept	2
-			move.b	#vFade,rVINTRout.w	; Set V-INT routine
+			move.b	#vFade,vIntRoutine.w	; Set V-INT routine
 			bsr.w	VSync_Routine		; Do V-SYNC
 		endr
 		bsr.s	FadeToBlack_Once		; Fade the colors once
@@ -425,20 +425,20 @@ FadeToBlack_Custom:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeToBlack_Once:
 		moveq	#0,d0
-		lea	rPalette.w,a0			; Palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuff.w,a0			; Palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoop:
 		bsr.s	.FadeColor			; Fade a color			
 		dbf	d0,.FadeLoop			; Loop
 
 		moveq	#0,d0
-		lea	rWaterPal.w,a0		; Water palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuffAlt.w,a0		; Water palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoopWater:
 		bsr.s	.FadeColor			; Fade a color			
@@ -479,43 +479,43 @@ FadeToBlack_Once:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeFromBlack:
-		move.w	#$003F,rPalFade.w		; Set to fade everything
+		move.w	#$003F,palFadeVars.w		; Set to fade everything
 
 FadeFromBlack_Custom:
 		moveq	#$E,d4				; Maximum color check
 
 .FadeLoop:
 		rept	2
-			move.b	#vFade,rVINTRout.w	; Set V-INT routine
+			move.b	#vFade,vIntRoutine.w	; Set V-INT routine
 			bsr.w	VSync_Routine		; Do V-SYNC
 		endr
 		bsr.s	FadeFromBlack_Once		; Fade the colors once
 		subq.b	#2,d4				; Decrement color check
 		bne.s	.FadeLoop			; If we are not done, branch
 
-		move.b	#vFade,rVINTRout.w		; Set V-INT routine
+		move.b	#vFade,vIntRoutine.w		; Set V-INT routine
 		bra.w	VSync_Routine			; Do V-SYNC so that the colors transfer
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeFromBlack_Once:
 		moveq	#0,d0
-		lea	rPalette.w,a0			; Palette buffer
-		lea	rDestPal.w,a1			; Target palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuff.w,a0			; Palette buffer
+		lea	palFadeBuff.w,a1			; Target palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
 		adda.w	d0,a1				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoop:
 		bsr.s	.FadeColor			; Fade a color			
 		dbf	d0,.FadeLoop			; Loop
 
 		moveq	#0,d0
-		lea	rWaterPal.w,a0		; Water palette buffer
-		lea	rDestWtrPal.w,a1		; Target water palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuffAlt.w,a0		; Water palette buffer
+		lea	palFadeBuffAlt.w,a1		; Target water palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
 		adda.w	d0,a1				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoopWater:
 		bsr.s	.FadeColor			; Fade a color			
@@ -557,14 +557,14 @@ FadeFromBlack_Once:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeToWhite:
-		move.w	#$003F,rPalFade.w		; Set to fade everything
+		move.w	#$003F,palFadeVars.w		; Set to fade everything
 
 FadeToWhite_Custom:
 		moveq	#7,d4				; Set repeat times
 
 .FadeLoop:
 		rept	2
-			move.b	#vFade,rVINTRout.w	; Set V-INT routine
+			move.b	#vFade,vIntRoutine.w	; Set V-INT routine
 			bsr.w	VSync_Routine		; Do V-SYNC
 		endr
 		bsr.s	FadeToWhite_Once		; Fade the colors once
@@ -573,20 +573,20 @@ FadeToWhite_Custom:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeToWhite_Once:
 		moveq	#0,d0
-		lea	rPalette.w,a0			; Palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuff.w,a0			; Palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoop:
 		bsr.s	.FadeColor			; Fade a color			
 		dbf	d0,.FadeLoop			; Loop
 
 		moveq	#0,d0
-		lea	rWaterPal.w,a0		; Water palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuffAlt.w,a0		; Water palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoopWater:
 		bsr.s	.FadeColor			; Fade a color			
@@ -631,14 +631,14 @@ FadeToWhite_Once:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeFromWhite:
-		move.w	#$003F,rPalFade.w		; Set to fade everything
+		move.w	#$003F,palFadeVars.w		; Set to fade everything
 
 FadeFromWhite_Custom:
 		moveq	#0,d4				; Minimum color check
 		
 .FadeLoop:
 		rept	2
-			move.b	#vFade,rVINTRout.w	; Set V-INT routine
+			move.b	#vFade,vIntRoutine.w	; Set V-INT routine
 			bsr.w	VSync_Routine		; Do V-SYNC
 		endr
 		bsr.s	FadeFromWhite_Once		; Fade the colors once
@@ -646,29 +646,29 @@ FadeFromWhite_Custom:
 		cmpi.b	#$E,d4				; Are we done?
 		bne.s	.FadeLoop			; If not, branch
 
-		move.b	#vFade,rVINTRout.w		; Set V-INT routine
+		move.b	#vFade,vIntRoutine.w		; Set V-INT routine
 		bra.w	VSync_Routine			; Do V-SYNC so that the colors transfer
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeFromWhite_Once:
 		moveq	#0,d0
-		lea	rPalette.w,a0			; Palette buffer
-		lea	rDestPal.w,a1			; Target palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuff.w,a0			; Palette buffer
+		lea	palFadeBuff.w,a1			; Target palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
 		adda.w	d0,a1				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoop:
 		bsr.s	.FadeColor			; Fade a color			
 		dbf	d0,.FadeLoop			; Loop
 
 		moveq	#0,d0
-		lea	rWaterPal.w,a0		; Water palette buffer
-		lea	rDestWtrPal.w,a1		; Target water palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuffAlt.w,a0		; Water palette buffer
+		lea	palFadeBuffAlt.w,a1		; Target water palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
 		adda.w	d0,a1				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoopWater:
 		bsr.s	.FadeColor			; Fade a color			
@@ -710,19 +710,19 @@ FadeFromWhite_Once:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeToPalette:
-		move.w	#$003F,rPalFade.w		; Set to fade everything
+		move.w	#$003F,palFadeVars.w		; Set to fade everything
 
 FadeToPalette_Custom:
 		moveq	#0,d0
-		lea	rPalette.w,a0			; Palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuff.w,a0			; Palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
 
 		moveq	#7,d4				; Set repeat times
 
 .FadeLoop:
 		rept	2
-			move.b	#vFade,rVINTRout.w	; Set V-INT routine
+			move.b	#vFade,vIntRoutine.w	; Set V-INT routine
 			bsr.w	VSync_Routine		; Do V-SYNC
 		endr
 		bsr.s	FadeToPalette_Once		; Fade the colors once
@@ -731,24 +731,24 @@ FadeToPalette_Custom:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FadeToPalette_Once:
 		moveq	#0,d0
-		lea	rPalette.w,a0			; Palette buffer
-		lea	rDestPal.w,a1			; Target palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuff.w,a0			; Palette buffer
+		lea	palFadeBuff.w,a1			; Target palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
 		adda.w	d0,a1				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoop:
 		bsr.s	.FadeColor			; Fade a color			
 		dbf	d0,.FadeLoop			; Loop
 
 		moveq	#0,d0
-		lea	rWaterPal.w,a0		; Water palette buffer
-		lea	rDestWtrPal.w,a1		; Target water palette buffer
-		move.b	rFadeStart.w,d0		; Add starting index offset
+		lea	paletteBuffAlt.w,a0		; Water palette buffer
+		lea	palFadeBuffAlt.w,a1		; Target water palette buffer
+		move.b	palFadeStart.w,d0		; Add starting index offset
 		adda.w	d0,a0				; ''
 		adda.w	d0,a1				; ''
-		move.b	rFadeLen.w,d0			; Get fade size
+		move.b	palFadeLength.w,d0			; Get fade size
 
 .FadeLoopWater:
 		bsr.s	.FadeColor			; Fade a color			
@@ -807,7 +807,7 @@ FadeToPalette_Once:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 InitSpriteTable:
 		moveq	#0,d0
-		lea	rSprites.w,a0			; Sprite table buffer
+		lea	spriteBuff.w,a0			; Sprite table buffer
 		moveq	#1,d1				; Link value
 		moveq	#($280/8)-1,d7			; Number of sprites
 

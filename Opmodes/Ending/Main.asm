@@ -19,17 +19,17 @@ Ending:
 ;		move.w	#$9200,(a5)			; $9200 - Window V position at default
 ;		move.w	#$8B00,(a5)			; $8B03 - V-Scroll by screen, H-Scroll by screen
 ;		move.w	#$8700,(a5)			; $8700 - BG color pal 0 color 0
-;		clr.w	rDMAQueue.w			; Set stop token at the beginning of the DMA queue
-;		move.w	#rDMAQueue,rDMASlot.w	; Reset the DMA queue slot
+;		clr.w	dmaQueue.w			; Set stop token at the beginning of the DMA queue
+;		move.w	#dmaQueue,dmaSlot.w	; Reset the DMA queue slot
 ;
 ;		jsr	ClearScreen.w			; Clear screen
 ;
 ;		lea	MapEni_End(pc),a0		; Decompress background mappings
-;		lea	rBuffer,a1			; Decompress into RAM
+;		lea	miscBuff,a1			; Decompress into RAM
 ;		moveq	#1,d0				; Base tile properties: Tile ID 1, no flags
 ;		jsr	EniDec.w			; Decompress!
 ;
-;		lea	rBuffer,a1			; Load mappings
+;		lea	miscBuff,a1			; Load mappings
 ;		move.l	#$60000003,d0			; At (0, 0) on plane A
 ;		moveq	#$27,d1				; $28x$1C tiles
 ;		moveq	#$1B,d2				; ''
@@ -41,13 +41,13 @@ Ending:
 ;		jsr	QueueKosMData.w			; ''
 ;
 ;.WaitPLCs:
-;		move.b	#vGeneral,rVINTRout.w		; Level load V-INT routine
+;		move.b	#vGeneral,vIntRoutine.w		; Level load V-INT routine
 ;		jsr	ProcessKos.w			; Process Kosinski queue
 ;		jsr	VSync_Routine.w			; V-SYNC
 ;		jsr	ProcessKosM.w			; Process Kosinski Moduled queue
-;		tst.b	rKosPMMods.w			; Are there still modules left?
+;		tst.b	kosMModules.w			; Are there still modules left?
 ;		bne.s	.WaitPLCs			; If so, branch
-;		move.b	#vGeneral,rVINTRout.w		; Level load V-INT routine
+;		move.b	#vGeneral,vIntRoutine.w		; Level load V-INT routine
 ;		jsr	VSync_Routine.w			; V-SYNC
 ;
 ;		lea	SampleList+$F0,a3
@@ -60,7 +60,7 @@ Ending:
 ;		displayOn
 ;
 ;.Loop:
-;		move.b	#vTitle,rVINTRout.w		; V-SYNC
+;		move.b	#vTitle,vIntRoutine.w		; V-SYNC
 ;		jsr	VSync_Routine.w			; ''
 ;		bra.s	.Loop
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

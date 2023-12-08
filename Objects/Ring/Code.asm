@@ -7,7 +7,7 @@
 ObjRingLoss:
 		movea.l	a0,a1
 		moveq	#0,d5
-		move.w	rRings.w,d5
+		move.w	ringCount.w,d5
 		moveq	#32,d0
 		cmp.w	d0,d5
 		bcs.s	.BelowMax
@@ -37,18 +37,18 @@ ObjRingLoss:
 		move.w	(a3)+,oXVel(a1)
 		move.w	(a3)+,oYVel(a1)
 		dbf	d5,.Loop
-		move.b	#-1,rRLossAniT.w
+		move.b	#-1,ringLossAnimT.w
 
 .ResetCounter:
-		clr.w	rRings.w
-		move.b	#1,rUpdateRings.w
+		clr.w	ringCount.w
+		move.b	#1,hudUpdateRings.w
 		playSnd	#sRingLoss, 2
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjLostRing:
 		jsr	ObjectMove.w
 		addi.w	#$18,oYVel(a0)
 		bmi.s	.ChkCol
-		move.b	(rFrameCnt+3).w,d0
+		move.b	(frameCounter+3).w,d0
 		add.w	a0,d0
 		andi.b	#6,d0
 		bne.s	.ChkCol
@@ -63,7 +63,7 @@ ObjLostRing:
 
 .ChkCol:
 		lea	.RangeData(pc),a1		; Range data
-		movea.w	rPlayer1Addr.w,a2		; Player object
+		movea.w	playerPtrP1.w,a2		; Player object
 		jsr	CheckObjInRange.w		; Is the player in range?
 		tst.w	d0				; ''
 		beq.s	.ChkDel				; If not, branch
@@ -72,9 +72,9 @@ ObjLostRing:
 		bra.s	ObjLostRing_Collect
 
 .ChkDel:
-		tst.b	rRLossAniT.w
+		tst.b	ringLossAnimT.w
 		beq.w	ObjLostRing_Delete
-		move.w	rMaxCamY.w,d0		; Get max camera Y position
+		move.w	maxCamYPos.w,d0		; Get max camera Y position
 		addi.w	#224,d0				; Get bottom boundary position
 		cmp.w	oYPos(a0),d0			; Have we touched the bottom boundary?
 		blt.s	ObjLostRing_Delete		; If so, branch

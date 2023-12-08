@@ -394,7 +394,7 @@ lagOff		macro
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 displayOff	macro
-		move.w	rVDPReg1.w,d0
+		move.w	vdpReg1.w,d0
 		andi.b	#%10111111,d0
 		move.w	d0,VDP_CTRL
 		endm
@@ -408,7 +408,7 @@ displayOff	macro
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 displayOn	macro
-		move.w	rVDPReg1.w,d0
+		move.w	vdpReg1.w,d0
 		ori.b	#%01000000,d0
 		move.w	d0,VDP_CTRL
 		endm
@@ -573,7 +573,7 @@ strpos			= strpos+1
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 runObjects		macro
-		movea.w	rTailNext.w,a0				; load first object slot into a0
+		movea.w	objExecFirst.w,a0				; load first object slot into a0
 		move.l	oAddr(a0),a1				; load its pointer to a1
 		jsr	(a1)					; jump to its code
 	endm
@@ -610,15 +610,15 @@ displaySprite		macro	layer, obj, fre, chk
 		bne.s	.no\@						; if yes, skip
 	endif
 
-		move.w	#rDispInput+(\layer*dSize),oDrawNext(\obj)	; put end marker as the next pointer
-		move.w	rDispInput+dPrev+(\layer*dSize).w,\fre		; copy the pointer from the end marker to dst register
+		move.w	#objDisplay+(\layer*dSize),oDrawNext(\obj)	; put end marker as the next pointer
+		move.w	objDisplay+dPrev+(\layer*dSize).w,\fre		; copy the pointer from the end marker to dst register
 		move.w	\fre,oDrawPrev(\obj)				; copy that to prev pointer
 		move.w	\obj,oDrawNext(\fre)				;
-		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w		; copy the pointer from the end marker to dst register
+		move.w	\obj,objDisplay+dPrev+(\layer*dSize).w		; copy the pointer from the end marker to dst register
 
-;		cmp.w	#rDispInput+(\layer*dSize),rDispInput+dPrev+(\layer*dSize).w	; special case: points to itself
+;		cmp.w	#objDisplay+(\layer*dSize),objDisplay+dPrev+(\layer*dSize).w	; special case: points to itself
 ;		bne.s	.no\@								; if no, skip
-;		move.w	\obj,rDispInput+dPrev+(\layer*dSize).w				; else, copy over
+;		move.w	\obj,objDisplay+dPrev+(\layer*dSize).w				; else, copy over
 
 .no\@
 	endm

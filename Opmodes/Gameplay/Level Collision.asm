@@ -5,10 +5,10 @@
 ; Check if a player object has touched any level collision
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkCollision:
-		move.l	r1stCol.w,rColAddr.w	; Get primary collision address
+		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
 		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
-		move.l	r2ndCol.w,rColAddr.w	; Get secondary collision address
+		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
 		move.b	oLRBSolid(a0),d5		; Get LRB solid bits
@@ -234,10 +234,10 @@ PlayerResetOnFloorPart3:
 ; Calculate the room in front of a player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerCalcRoomInFront:
-		move.l	r1stCol.w,rColAddr.w	; Get primary collision address
+		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
 		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
-		move.l	r2ndCol.w,rColAddr.w	; Get secondary collision address
+		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
 		move.b	oLRBSolid(a0),d5		; Get LRB solid bits
@@ -279,10 +279,10 @@ PlayerCalcRoomInFront:
 ; Calculate the room over a player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerCalcRoomOverHead:
-		move.l	r1stCol.w,rColAddr.w	; Get primary collision address
+		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
 		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
-		move.l	r2ndCol.w,rColAddr.w	; Get secondary collision address
+		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
 		move.b	oLRBSolid(a0),d5		; Get LRB solid bits
@@ -301,10 +301,10 @@ PlayerCalcRoomOverHead:
 ; Get the distance between the floor and a player object (with primary and secondary angles)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkFloor:
-		move.l	r1stCol.w,rColAddr.w	; Get primary collision address
+		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
 		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
-		move.l	r2ndCol.w,rColAddr.w	; Get secondary collision address
+		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
 		move.b	oTopSolid(a0),d5		; Get top solid bits
@@ -386,10 +386,10 @@ sub_F846:
 		move.w	oXPos(a0),d3
 		move.w	oYPos(a0),d2
 		subq.w	#4,d2
-		move.l	r1stCol.w,rColAddr.w	; Get primary collision address
+		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
 		cmpi.b	#$D,oLRBSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
-		move.l	r2ndCol.w,rColAddr.w	; Get secondary collision address
+		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
 		lea	oNextTilt(a0),a4		; Primary angle
@@ -419,10 +419,10 @@ PlayerChkFloorEdge_Part2:
 		add.w	d0,d2				; Add onto Y position
 
 PlayerChkFloorEdge_Part3:
-		move.l	r1stCol.w,rColAddr.w	; Get primary collision address
+		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
 		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
-		move.l	r2ndCol.w,rColAddr.w	; Get secondary collision address
+		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
 		lea	oNextTilt(a0),a4		; Primary angle
@@ -698,10 +698,10 @@ ObjCheckLeftWallDist:
 ; Move a player object along on the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerAnglePos:
-		move.l	r1stCol.w,rColAddr.w	; Get primary collision address
+		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
 		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
-		move.l	r2ndCol.w,rColAddr.w	; Get secondary collision address
+		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
 		move.b	oTopSolid(a0),d5		; Get top solid bits
@@ -1088,13 +1088,13 @@ Level_FindFloor:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .IsSolid:
-		movea.l	rColAddr.w,a2			; Get collision data pointer
+		movea.l	currentColAddr.w,a2			; Get collision data pointer
 		add.w	d0,d0				; Turn ID into offset
 		move.b	(a2,d0.w),d0			; Get collision block ID
 		andi.w	#$FF,d0				; ''
 		beq.s	.IsBlank			; If the angle is 0, branch
 
-		movea.l	rAngleVals.w,a2		; Angle value array
+		movea.l	angleValPtr.w,a2		; Angle value array
 		move.b	(a2,d0.w),(a4)			; Get angle value and store it
 		lsl.w	#4,d0				; Turn collision block ID into offset
 
@@ -1115,7 +1115,7 @@ Level_FindFloor:
 		andi.w	#$F,d1				; Get the X offset in the collsion block
 		add.w	d0,d1				; Add the collision block's offset
 
-		movea.l	rColArrayN.w,a2		; Get the normal collision array
+		movea.l	normColArrayPtr.w,a2		; Get the normal collision array
 		move.b	(a2,d1.w),d0			; Get height value
 		ext.w	d0				; ''
 		eor.w	d6,d4				; Flip the flip bits from the block
@@ -1166,13 +1166,13 @@ Level_FindFloor2:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .IsSolid:
-		movea.l	rColAddr.w,a2			; Get collision data pointer
+		movea.l	currentColAddr.w,a2			; Get collision data pointer
 		add.w	d0,d0				; Turn ID into offset
 		move.b	(a2,d0.w),d0			; Get collision block ID
 		andi.w	#$FF,d0				; ''
 		beq.s	.IsBlank			; If the angle is 0, branch
 
-		movea.l	rAngleVals.w,a2		; Angle value array
+		movea.l	angleValPtr.w,a2		; Angle value array
 		move.b	(a2,d0.w),(a4)			; Get angle value and store it
 		lsl.w	#4,d0				; Turn collision block ID into offset
 
@@ -1193,7 +1193,7 @@ Level_FindFloor2:
 		andi.w	#$F,d1				; Get the X offset in the collsion block
 		add.w	d0,d1				; Add the collision block's offset
 
-		movea.l	rColArrayN.w,a2		; Get the normal collision array
+		movea.l	normColArrayPtr.w,a2		; Get the normal collision array
 		move.b	(a2,d1.w),d0			; Get height value
 		ext.w	d0				; ''
 		eor.w	d6,d4				; Flip the flip bits from the block
@@ -1252,13 +1252,13 @@ Level_FindWall:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .IsSolid:
-		movea.l	rColAddr.w,a2			; Get collision data pointer
+		movea.l	currentColAddr.w,a2			; Get collision data pointer
 		add.w	d0,d0				; Turn ID into offset
 		move.b	(a2,d0.w),d0			; Get collision block ID
 		andi.w	#$FF,d0				; ''
 		beq.s	.IsBlank			; If the angle is 0, branch
 
-		movea.l	rAngleVals.w,a2		; Angle value array
+		movea.l	angleValPtr.w,a2		; Angle value array
 		move.b	(a2,d0.w),(a4)			; Get angle value and store it
 		lsl.w	#4,d0				; Turn collision block ID into offset
 
@@ -1279,7 +1279,7 @@ Level_FindWall:
 		andi.w	#$F,d1				; Get the X offset in the collsion block
 		add.w	d0,d1				; Add the collision block's offset
 
-		movea.l	rColArrayR.w,a2		; Get the normal collision array
+		movea.l	rotColArrayPtr.w,a2		; Get the normal collision array
 		move.b	(a2,d1.w),d0			; Get height value
 		ext.w	d0				; ''
 		eor.w	d6,d4				; Flip the flip bits from the block
@@ -1330,13 +1330,13 @@ Level_FindWall2:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .IsSolid:
-		movea.l	rColAddr.w,a2			; Get collision data pointer
+		movea.l	currentColAddr.w,a2			; Get collision data pointer
 		add.w	d0,d0				; Turn ID into offset
 		move.b	(a2,d0.w),d0			; Get collision block ID
 		andi.w	#$FF,d0				; ''
 		beq.s	.IsBlank			; If the angle is 0, branch
 
-		movea.l	rAngleVals.w,a2		; Angle value array
+		movea.l	angleValPtr.w,a2		; Angle value array
 		move.b	(a2,d0.w),(a4)			; Get angle value and store it
 		lsl.w	#4,d0				; Turn collision block ID into offset
 
@@ -1357,7 +1357,7 @@ Level_FindWall2:
 		andi.w	#$F,d1				; Get the X offset in the collsion block
 		add.w	d0,d1				; Add the collision block's offset
 
-		movea.l	rColArrayR.w,a2		; Get the normal collision array
+		movea.l	rotColArrayPtr.w,a2		; Get the normal collision array
 		move.b	(a2,d1.w),d0			; Get height value
 		ext.w	d0				; ''
 		eor.w	d6,d4				; Flip the flip bits from the block
@@ -1394,7 +1394,7 @@ Level_FindWall2:
 ;	(a1).w	- The block ID in the chunk where the object is standing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_FindBlock:
-		movea.l	rLayout.w,a1			; Get level layout pointer address
+		movea.l	lvlLayout.w,a1			; Get level layout pointer address
 
 		move.w	d2,d0				; Get the object's Y position
 		andi.w	#$780,d0			; Get Y within layout data

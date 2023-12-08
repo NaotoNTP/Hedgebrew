@@ -34,7 +34,7 @@ ObjChkpoint_Init:
 		bne.s	.AlreadySet			; If so, branch
 
 		move.b	oSubtype(a0),d1			; Get checkpoint ID
-		cmp.b	rLastChkpoint.w,d1		; Has a later checkpoint already been hit?
+		cmp.b	chkIDLast.w,d1		; Has a later checkpoint already been hit?
 		bgt.s	ObjChkpoint_Main		; If not, branch
 
 .AlreadySet:
@@ -42,11 +42,11 @@ ObjChkpoint_Init:
 		move.b	#2,oAni(a0)			; ''
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjChkpoint_Main:
-		tst.b	rDebugMode.w			; Are we in debug placement mode?
+		tst.b	debugMode.w			; Are we in debug placement mode?
 		bne.w	ObjChkpoint_Animate		; If so, branch
 		
-		movea.w	rPlayer1Addr.w,a1		; Player object
-		move.b	rLastChkpoint.w,d1		; Get last checkpoint hit
+		movea.w	playerPtrP1.w,a1		; Player object
+		move.b	chkIDLast.w,d1		; Get last checkpoint hit
 		cmp.b	oSubtype(a0),d1			; Has a later checkpoint already been hit?
 		bhs.w	.ChkSetAnim			; If so, branch
 
@@ -85,7 +85,7 @@ ObjChkpoint_Main:
 		bset	#0,(a2)				; Mark as set
 		
 		move.b	#1,oAni(a0)			; Use dongling animation
-		move.b	oSubtype(a0),rLastChkpoint.w	; Set checkpoint ID
+		move.b	oSubtype(a0),chkIDLast.w	; Set checkpoint ID
 
 		addq.b	#4,oRoutine(a0)
 		pea	ObjChkpoint_Animate		; Animate

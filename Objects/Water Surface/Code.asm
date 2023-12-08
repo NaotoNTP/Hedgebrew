@@ -14,20 +14,20 @@ ObjWaterSurface:
 		move.b	#$20,oDrawH(a0)			; Sprite height
 
 ObjWaterSurface_Main:
-		move.w	rWaterLvl.w,d1		; Get water height
+		move.w	waterYPos.w,d1		; Get water height
 		subq.w	#6,d1				; Shift it
 		move.w	d1,oYPos(a0)			; Set Y position
 
 		tst.b	oSurfPause(a0)			; Is the animation paused?
 		bne.s	.ChkUnpause			; If so, branch
-		btst	#7,rP1Press.w			; Has the start button been pressed?
+		btst	#7,ctrlPressP1.w			; Has the start button been pressed?
 		beq.s	.Animate			; If not, branch
 		addq.b	#3,oFrame(a0)			; Use different frames
 		st	oSurfPause(a0)			; Pause the animation
 		bra.s	.Animate			; Continue
 
 .ChkUnpause:
-		tst.b	rPauseFlag.w			; Is the game paused?
+		tst.b	pauseFlag.w			; Is the game paused?
 		bne.s	.Animate			; If so, branch
 		clr.b	oSurfPause(a0)			; Resume animation
 		subq.b	#3,oFrame(a0)			; Use normal frames

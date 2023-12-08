@@ -73,7 +73,7 @@ ObjSpike_Upright:
 		jsr	SolidObject
 		btst	#cStandBit,oStatus(a0)
 		beq.s	ObjSpike_UprightEnd
-		movea.w	rPlayer1Addr.w,a1
+		movea.w	playerPtrP1.w,a1
 		bsr.w	Touch_ChkHurt2
 
 ObjSpike_UprightEnd:
@@ -96,7 +96,7 @@ ObjSpike_Sideways:
 		jsr	SolidObject
 		btst	#cTouchSideBit,d6
 		beq.s	ObjSpike_SidewaysEnd
-		movea.w	rPlayer1Addr.w,a1
+		movea.w	playerPtrP1.w,a1
 		bsr.w	Touch_ChkHurt2
 
 ObjSpike_SidewaysEnd:
@@ -118,7 +118,7 @@ ObjSpike_UpsideDown:
 		jsr	SolidObject
 		btst	#cTouchBtmBit,d6
 		beq.s	ObjSpike_UpsideDownEnd
-		movea.w	rPlayer1Addr.w,a1
+		movea.w	playerPtrP1.w,a1
 		bsr.w	Touch_ChkHurt2
 
 ObjSpike_UpsideDownEnd:

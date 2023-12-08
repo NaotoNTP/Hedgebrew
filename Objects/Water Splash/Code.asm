@@ -27,7 +27,7 @@ ObjWaterSplash_Main:
 		bra.s	.Animate				; Continue
 
 .ChkUnpause:
-		tst.b	rPauseFlag.w				; Is the game paused?
+		tst.b	pauseFlag.w				; Is the game paused?
 		bne.s	.Animate				; If so, branch
 		clr.b	oSurfacePause(a0)			; Resume animation
 		subq.b	#3,oMapFrame(a0)			; Use normal frames

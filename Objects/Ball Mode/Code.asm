@@ -15,7 +15,7 @@ ObjBallMode:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBallMode_Main:
 		lea	.RangeData(pc),a1		; Range data
-		movea.w	rPlayer1Addr.w,a2		; Player object
+		movea.w	playerPtrP1.w,a2		; Player object
 		jsr	CheckObjInRange.w		; Is the player in range?
 		tst.w	d0				; ''
 		beq.s	.NotTouched			; If not, branch

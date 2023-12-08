@@ -8,19 +8,19 @@ Level_LoadData:
 		; --- Initialize the start position and camera ---
 
 		lea	Level_SizeStartPos,a3		; Get size and start position data
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#4,d0				; ''
 		lea	(a3,d0.w),a3			; Get pointer to the correct pointers
 
-		clr.l	rDestMinCam.w		; Set target minimum camera values
-		clr.l	rMinCam.w			; Set minimum camera values
-		move.l	(a3),rDestMaxCam.w		; Set target maximum camera values
-		move.l	(a3)+,rMaxCam.w		; Set maximum camera values
+		clr.l	targetMinCamPos.w		; Set target minimum camera values
+		clr.l	minCamPos.w			; Set minimum camera values
+		move.l	(a3),targetMaxCamPos.w		; Set target maximum camera values
+		move.l	(a3)+,maxCamPos.w		; Set maximum camera values
 
-		move.w	#(224/2)-16,rCamYPosDist.w	; Set camera Y distance
+		move.w	#(224/2)-16,panCamYPos.w	; Set camera Y distance
 
-		movea.w	rPlayer1Addr.w,a0		; Player object
+		movea.w	playerPtrP1.w,a0		; Player object
 		move.w	(a3)+,d1			; Get starting X position
 		move.w	d1,oXPos(a0)			; Set the player's X position
 		move.w	(a3),d0				; Get starting Y position
@@ -35,7 +35,7 @@ Level_LoadData:
 		move.w	d0,oYPos(a0)			; ''
 
 .InitCam:
-		tst.b	rLastChkpoint.w		; Has a checkpoint been hit?
+		tst.b	chkIDLast.w		; Has a checkpoint been hit?
 		beq.s	.SetCam				; If not, branch
 		bsr.w	Level_LoadSavedInfo		; Load data
 		move.w	oXPos(a0),d1			; Get X position
@@ -47,41 +47,41 @@ Level_LoadData:
 		moveq	#0,d1				; Cap it
 
 .ChkMaxX:
-		move.w	rMaxCamX.w,d2		; Get max camera X position
+		move.w	maxCamXPos.w,d2		; Get max camera X position
 		cmp.w	d2,d1				; Have we gone beyond it?
 		bcs.s	.SetCamX			; If not, branch
 		move.w	d2,d1				; Cap it
 
 .SetCamX:	
-		move.w	d1,rCamXPos.w			; Set the camera's X position
+		move.w	d1,fgCamXPos.w			; Set the camera's X position
 
 		subi.w	#(224/2)-16,d0			; Get camera's Y position
 		bge.s	.ChkMaxY			; If it doesn't go beyond the upper boundary, branch
 		moveq	#0,d0				; Cap it
 
 .ChkMaxY:
-		move.w	rMaxCamY.w,d2		; Get max camera Y position
+		move.w	maxCamYPos.w,d2		; Get max camera Y position
 		cmp.w	d2,d0				; Have we gone beyond it?
 		blt.s	.SetCamY			; If not, branch
 		move.w	d2,d0				; Cap it
 
 .SetCamY:	
-		move.w	d0,rCamYPos.w			; Set the camera's Y position
+		move.w	d0,fgCamYPos.w			; Set the camera's Y position
 
 		; --- Load level data ---
 
 		lea	Level_DataPointers,a3		; Level data pointers
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#2,d0				; ''
 		lea	(a3,d0.w),a3			; Get pointer to the correct pointers
 
 		movea.l	(a3)+,a0			; Get chunk data pointer
-		lea	rChunks,a1			; Decompress into chunk table
+		lea	chunkData,a1			; Decompress into chunk table
 		jsr	KosDec.w			; ''
 
 		movea.l	(a3)+,a0			; Get block data pointer
-		lea	rBlocks.w,a1			; Decompress into block table
+		lea	blockData.w,a1			; Decompress into block table
 		jsr	KosDec.w			; ''
 
 		movea.l	(a3)+,a1			; Get tile data pointer
@@ -92,24 +92,24 @@ Level_LoadData:
 		move.w	(a0)+,d0			; Size of palette data
 		jsr	LoadTargetPal.w			; Load the palette
 
-		move.l	(a3)+,rLayoutFG.w		; Move layout addresses to variables
-		move.l	(a3)+,rLayoutBG.w
+		move.l	(a3)+,lvlLayoutFG.w		; Move layout addresses to variables
+		move.l	(a3)+,lvlLayoutBG.w
 
-		move.l	(a3)+,rObjPosAddr.w		; Set object position data pointer
-		move.l	(a3)+,rRingPosAddr.w		; Set ring position data pointer
+		move.l	(a3)+,objMgrLayout.w		; Set object position data pointer
+		move.l	(a3)+,ringMgrLayout.w		; Set ring position data pointer
 		movea.l	(a3)+,a3			; Get collision data pointers
 		move.l	(a3)+,d0			; Get collision data address
-		move.l	d0,rColAddr.w			; Set collision address to primary
-		move.l	d0,r1stCol.w			; Set primary collision data pointer
+		move.l	d0,currentColAddr.w			; Set collision address to primary
+		move.l	d0,primaryColPtr.w			; Set primary collision data pointer
 		addq.l	#1,d0				; Increment address for secondary collision
-		move.l	d0,r2ndCol.w			; Set secondary collision data pointer
-		lea	rAngleVals.w,a1		; Collision pointers
+		move.l	d0,secondaryColPtr.w			; Set secondary collision data pointer
+		lea	angleValPtr.w,a1		; Collision pointers
 		move.l	(a3)+,(a1)+			; Set angle value array pointer
 		move.l	(a3)+,(a1)+			; Set normal hiehgt map array pointer
 		move.l	(a3)+,(a1)			; Set rotated hiehgt map array pointer
 
 		lea	Level_PLCs,a3			; Get PLC list pointer
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#5,d0				; ''
 		movea.l	(a3,d0.w),a3			; Get pointer to the correct pointers
@@ -118,20 +118,20 @@ Level_LoadData:
 ; Update the water surface
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_UpdateWaterSurface:
-		tst.b	rWaterFlag.w			; Does the level have water?
+		tst.b	lvlHasWater.w			; Does the level have water?
 		beq.s	.End				; If not, branch
-		move.w	rCamXPos.w,d1			; Get camera X position
-		btst	#0,(rLvlFrames+1).w		; Are we on an odd frame?
+		move.w	fgCamXPos.w,d1			; Get camera X position
+		btst	#0,(lvlFrameCnt+1).w		; Are we on an odd frame?
 		beq.s	.SetXPos			; If not, branch
 		addi.w	#$20,d1				; Shift X position
 
 .SetXPos:
 		move.w	d1,d0				; Copy X postion
 		addi.w	#$60,d0				; Add surface #1's X position
-		movea.w	rWater1Addr.w,a0
+		movea.w	waterObjPtr1.w,a0
 		move.w	d0,oXPos(a0)			; Set it
 		addi.w	#$120,d1			; Add surface #2's X position
-		movea.w	rWater2Addr.w,a0
+		movea.w	waterObjPtr2.w,a0
 		move.w	d1,oXPos(a0)			; Set it
 
 .End:
@@ -140,30 +140,30 @@ Level_UpdateWaterSurface:
 ; Handle water height
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_WaterHeight:
-		tst.b	rWaterFlag.w			; Does the level have water?
+		tst.b	lvlHasWater.w			; Does the level have water?
 		beq.s	.End				; If not, branch
 		bsr.w	Level_MoveWater			; Move the water when appropriate
-		clr.b	rWaterFullscr.w		; Clear water fullscreen flag
+		clr.b	waterFullscr.w		; Clear water fullscreen flag
 
 		moveq	#1,d1				; Water movement speed
-		move.w	rDestWtrLvl.w,d0		; Get destination water level
-		sub.w	rWaterLvl.w,d0		; Is the current water level at that destination?
+		move.w	destWaterYPos.w,d0		; Get destination water level
+		sub.w	waterYPos.w,d0		; Is the current water level at that destination?
 		beq.s	.ChkOnScr			; If so, branch
 		bcc.s	.MoveDown			; If it needs to go down, branch
 		neg.w	d1				; Go up
 
 .MoveDown:
-		add.w	d1,rWaterLvl.w		; Move water
+		add.w	d1,waterYPos.w		; Move water
 
 .ChkOnScr:
-		move.w	rWaterLvl.w,d0		; Get water height
-		sub.w	rCamYPos.w,d0			; Get camera's Y position
+		move.w	waterYPos.w,d0		; Get water height
+		sub.w	fgCamYPos.w,d0			; Get camera's Y position
 		beq.s	.Fullscreen			; If they are the same, branch
 		bcc.s	.ChkBottom			; If the water height is below the top of the camera, branch
 		
 .Fullscreen:
-		st	rWaterFullscr.w		; Set water fullscreen flag
-		st	rHIntCnt.w			; Set H-INT counter to be offscreen
+		st	waterFullscr.w		; Set water fullscreen flag
+		st	hIntCntValue.w			; Set H-INT counter to be offscreen
 		rts
 
 .ChkBottom:
@@ -172,7 +172,7 @@ Level_WaterHeight:
 		moveq	#-1,d0				; Set H-INT counter to be offscreen
 
 .SetCounter:
-		move.b	d0,rHIntCnt.w			; Set H-INT counter
+		move.b	d0,hIntCntValue.w			; Set H-INT counter
 
 .End:
 		rts
@@ -184,7 +184,7 @@ Level_MoveWater:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_PalCycle:
 		lea	Level_PalCycRouts,a0		; Palette cycle routines
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#5,d0				; ''
 		movea.l	(a0,d0.w),a0			; Get correct routine pointer
@@ -194,7 +194,7 @@ Level_PalCycle:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_AnimateArt:
 		lea	Level_AniArtRouts,a0		; Animated art routines
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#5,d0				; ''
 		movea.l	(a0,d0.w),a0			; Get correct routine pointer
@@ -204,7 +204,7 @@ Level_AnimateArt:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_DynEvents:
 		lea	Level_DynEvenRouts,a0		; Dynamic events routines
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#5,d0				; ''
 		movea.l	(a0,d0.w),a0			; Get correct routine pointer
@@ -213,44 +213,44 @@ Level_DynEvents:
 ; Handle the camera
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_HandleCamera:
-		movea.w	rPlayer1Addr.w,a0		; Get player object
+		movea.w	playerPtrP1.w,a0		; Get player object
 		
-		tst.b	rCamLockX.w			; Is the camera locked horizontally?
+		tst.b	camLockX.w			; Is the camera locked horizontally?
 		bne.s	.ChkY				; If so, branch
-		lea	rCamXPos.w,a1			; Get foreground level variables
+		lea	fgCamXPos.w,a1			; Get foreground level variables
 		bsr.s	Level_MoveCameraX		; Move the camera horiozntally
 		
 .ChkY:
-		tst.b	rCamLockY.w			; Is the camera locked vertically?
+		tst.b	camLockY.w			; Is the camera locked vertically?
 		bne.s	.ChkMaxY			; If not, branch
-		lea	rCamYPos.w,a1			; Get foreground level variables
-		move.w	rCamYPosDist.w,d3		; Get camera Y distance
+		lea	fgCamYPos.w,a1			; Get foreground level variables
+		move.w	panCamYPos.w,d3		; Get camera Y distance
 		bsr.w	Level_MoveCameraY		; Move the camera vertically
 
 .ChkMaxY:
 		moveq	#2,d1				; Target camera scroll speed
-		move.w	rDestMaxY.w,d0		; Get distance between target and actual target max camera Y position
-		sub.w	rMaxCamY.w,d0		; ''
+		move.w	targetMaxCamY.w,d0		; Get distance between target and actual target max camera Y position
+		sub.w	maxCamYPos.w,d0		; ''
 		beq.s	.End				; If it's 0, branch
 		bcc.s	.MoveDown			; If it's positive, branch
-		move.w	rCamYPos.w,d0			; Get current camera Y position
-		cmp.w	rDestMaxY.w,d0		; Is it past the boundary?
+		move.w	fgCamYPos.w,d0			; Get current camera Y position
+		cmp.w	targetMaxCamY.w,d0		; Is it past the boundary?
 		bls.s	.ScrollUp			; If not, branch
-		move.w	d0,rMaxCamY.w		; Set max camera Y position
-		andi.w	#$FFFE,rMaxCamY.w		; Keep it a multiple of 2
+		move.w	d0,maxCamYPos.w		; Set max camera Y position
+		andi.w	#$FFFE,maxCamYPos.w		; Keep it a multiple of 2
 
 .ScrollUp:
-		sub.w	d1,rMaxCamY.w		; Scroll up
-		st	rCamMaxChg.w			; Indicate that the max Y boundary is changing
+		sub.w	d1,maxCamYPos.w		; Scroll up
+		st	chgCamMaxY.w			; Indicate that the max Y boundary is changing
 
 
 .End:
 		rts
 
 .MoveDown:
-		move.w	rCamYPos.w,d0			; Get current camera Y position
+		move.w	fgCamYPos.w,d0			; Get current camera Y position
 		addq.w	#8,d0				; ''
-		cmp.w	rMaxCamY.w,d0		; Is it past the boundary?
+		cmp.w	maxCamYPos.w,d0		; Is it past the boundary?
 		bcs.s	.ScrollDown			; If not, branch
 		btst	#1,oStatus(a0)		; Is the player in the air?
 		beq.s	.ScrollDown			; If not, branch
@@ -258,14 +258,14 @@ Level_HandleCamera:
 		add.w	d1,d1				; ''
 
 .ScrollDown:
-		add.w	d1,rMaxCamY.w		; Scroll down
-		st	rCamMaxChg.w			; Indicate that the max Y boundary is changing
+		add.w	d1,maxCamYPos.w		; Scroll down
+		st	chgCamMaxY.w			; Indicate that the max Y boundary is changing
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_MoveCameraX:
 		move.w	oXPos(a0),d0			; Get the player's X position
 		sub.w	(a1),d0				; Get distance from the camera's X position
-		sub.w	rCamXPosCenter.w,d0		; Subtract center
+		sub.w	panCamXPos.w,d0		; Subtract center
 		blt.s	.MoveLeft			; If we are going left, branch
 		bge.s	.MoveRight			; If we are going right, branch
 		rts
@@ -277,9 +277,9 @@ Level_MoveCameraX:
 
 .ChkLeftBound:
 		add.w	(a1),d0				; Add back the camera's X position
-		cmp.w	rMinCamX.w,d0		; Have we gone past the left boundary?
+		cmp.w	minCamXPos.w,d0		; Have we gone past the left boundary?
 		bgt.s	.SetCamX			; If not, branch
-		move.w	rMinCamX.w,d0		; Cap at the left boundary
+		move.w	minCamXPos.w,d0		; Cap at the left boundary
 		bra.s	.SetCamX			; Continue
 
 .MoveRight:
@@ -289,9 +289,9 @@ Level_MoveCameraX:
 
 .ChkRightBound:
 		add.w	(a1),d0				; Add back the camera's X position
-		cmp.w	rMaxCamX.w,d0		; Has the camera gone beyond the right boundary?
+		cmp.w	maxCamXPos.w,d0		; Has the camera gone beyond the right boundary?
 		blt.s	.SetCamX			; If not, branch
-		move.w	rMaxCamX.w,d0		; Cap at the right boundary
+		move.w	maxCamXPos.w,d0		; Cap at the right boundary
 
 .SetCamX:
 		move.w	d0,(a1)				; Set the new camera X position
@@ -317,14 +317,14 @@ Level_MoveCameraY:
 		subi.w	#$40,d0				; Subtract 64
 		bcc.s	.ScrollFast			; If the player is below the boundary, branch
 
-		tst.b	rCamMaxChg.w			; Is the max Y boundary changing?
+		tst.b	chgCamMaxY.w			; Is the max Y boundary changing?
 		bne.s	.ScrollMaxYChange		; If so, branch
 		bra.s	.NoScroll			; Continue
 
 .ChkBoundCross_Ground:
 		sub.w	d3,d0				; Subtract camera Y distance
 		bne.s	.DecideScrollType		; If the player moved, branch
-		tst.b	rCamMaxChg.w			; Is the max Y boundary changing?
+		tst.b	chgCamMaxY.w			; Is the max Y boundary changing?
 		bne.s	.ScrollMaxYChange		; If so, branch
 
 .NoScroll:
@@ -368,7 +368,7 @@ Level_MoveCameraY:
 
 .ScrollMaxYChange:
 		moveq	#0,d0				; Distance for the camera to move = 0
-		move.b	d0,rCamMaxChg.w		; Clear the max Y boundary changing flag
+		move.b	d0,chgCamMaxY.w		; Clear the max Y boundary changing flag
 		
 .ScrollUpOrDown:
 		moveq	#0,d1
@@ -386,9 +386,9 @@ Level_MoveCameraY:
 		swap	d1				; Get the actual Y position
 
 .ScrollUp:
-		cmp.w	rMinCamY.w,d1		; Has the camera gone beyond the upper boundary?
+		cmp.w	minCamYPos.w,d1		; Has the camera gone beyond the upper boundary?
 		bgt.s	.DoScroll			; If not, branch
-		move.w	rMinCamY.w,d1		; Cap at upper boundary
+		move.w	minCamYPos.w,d1		; Cap at upper boundary
 		bra.s	.DoScroll			; Continue
 
 .ScrollDownMax:
@@ -398,9 +398,9 @@ Level_MoveCameraY:
 		swap	d1				; Get the actual Y position
 
 .ScrollDown:
-		cmp.w	rMaxCamY.w,d1		; Has the camera gone beyond the lower boundary?
+		cmp.w	maxCamYPos.w,d1		; Has the camera gone beyond the lower boundary?
 		blt.s	.DoScroll			; If not, branch
-		move.w	rMaxCamY.w,d1		; Cap at lower boundary
+		move.w	maxCamYPos.w,d1		; Cap at lower boundary
 
 .DoScroll:
 		swap	d1				; Put Y coordinate in the higher word
@@ -411,7 +411,7 @@ Level_MoveCameraY:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_RingsManager:
 		moveq	#0,d0
-		move.b	rRingManRout.w,d0		; Get routine
+		move.b	ringMgrRoutine.w,d0		; Get routine
 		move.w	.Routines(pc,d0.w),d0		; Get offset
 		jmp	.Routines(pc,d0.w)		; Jump to the right routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -422,7 +422,7 @@ Level_RingsManager:
 ; Ring manager initialization
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_RingsManagerInit:
-		addq.b	#2,rRingManRout.w		; The next time the manager is run, only go to the main routine
+		addq.b	#2,ringMgrRoutine.w		; The next time the manager is run, only go to the main routine
 		
 		bsr.w	Level_RingsManagerSetup	; Prepare the tables and load the ring data
 
@@ -431,9 +431,9 @@ Level_RingsManagerInit:
 		; Start at the left side of the screen
 		; We get the location of the first ring that shows up at the left side of the screen in the data and store that
 
-		movea.l	rRingLoadL.w,a1		; Get current ring data address for the left side of the screen
-		lea	rRingStat.w,a2		; Ring status table
-		move.w	rCamXPos.w,d4			; Get camera's X position
+		movea.l	ringMgrLoadL.w,a1		; Get current ring data address for the left side of the screen
+		lea	ringStatus.w,a2		; Ring status table
+		move.w	fgCamXPos.w,d4			; Get camera's X position
 		subq.w	#8,d4				; Check 8 pixels to the left of it
 		bhi.s	.CheckLeftSide			; Branch if not beyond 0
 		moveq	#1,d4				; Cap left side to 1
@@ -446,8 +446,8 @@ Level_RingsManagerInit:
 .CheckLeftSide:
 		cmp.w	(a1),d4				; Is this ring located to the right of the left boundary?
 		bhi.s	.NextLeftRing			; If not, get the next ring
-		move.l	a1,rRingLoadL.w		; Store starting ring data address
-		move.w	a2,rRingStatPtr.w		; Store ring status address
+		move.l	a1,ringMgrLoadL.w		; Store starting ring data address
+		move.w	a2,ringMgrStatPtr.w		; Store ring status address
 
 		; Now the right side of the screen
 		; We get the location of the first ring that goes beyond the right side of the screen in the data and store that
@@ -461,7 +461,7 @@ Level_RingsManagerInit:
 .CheckRightSide:
 		cmp.w	(a1),d4				; Is this ring located to the right of the right boundary?
 		bhi.s	.NextRightRing			; If not, get the next ring
-		move.l	a1,rRingLoadR.w		; Store ending ring data address
+		move.l	a1,ringMgrLoadR.w		; Store ending ring data address
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Ring manager main routine
@@ -469,14 +469,14 @@ Level_RingsManagerInit:
 Level_RingsManagerMain:
 		bsr.w	Level_RingsManagerDoCollect	; Handle ring collection
 
-		movea.l	rRingLoadL.w,a1		; Get the current starting address for the ring data
-		movea.w	rRingStatPtr.w,a2		; Get the current starting address for the status table
+		movea.l	ringMgrLoadL.w,a1		; Get the current starting address for the ring data
+		movea.w	ringMgrStatPtr.w,a2		; Get the current starting address for the status table
 		
 		; Get the new starting addresses for ring data
 		; This is done by getting to a point from the current starting address where there's a ring onscreen
 		; and then going back to get the very first ring that's on screen
 
-		move.w	rCamXPos.w,d4			; Get camera's X position
+		move.w	fgCamXPos.w,d4			; Get camera's X position
 		subq.w	#8,d4				; Check 8 pixels to the left of it
 		bhi.s	.CheckNewLeftSide		; Branch if not beyond 0
 		moveq	#1,d4				; Cap left side to 1
@@ -498,14 +498,14 @@ Level_RingsManagerMain:
 .CheckNewLeftSide2:
 		cmp.w	-4(a1),d4			; Is this ring located to the left of the left boundary?
 		bls.s	.NextNewLeftRing2		; If not, get the next ring
-		move.l	a1,rRingLoadL.w		; Store starting ring data address
-		move.w	a2,rRingStatPtr.w		; Store ring status address
+		move.l	a1,ringMgrLoadL.w		; Store starting ring data address
+		move.w	a2,ringMgrStatPtr.w		; Store ring status address
 
 		; Now get the new ending addresses for ring data
 		; This is done by getting to a point from the current starting address where there's a ring at the right of the left boundary
 		; and then going back to get the very first ring that's on screen on the left side
 
-		movea.l	rRingLoadR.w,a1		; Get the current ending address for the ring data
+		movea.l	ringMgrLoadR.w,a1		; Get the current ending address for the ring data
 
 		addi.w	#320+16,d4			; Right boundary
 		bra.s	.CheckNewRightSide		; Start checking
@@ -524,15 +524,15 @@ Level_RingsManagerMain:
 .CheckNewRightSide2:
 		cmp.w	-4(a1),d4			; Is this ring located to the left of the right boundary?
 		bls.s	.NextNewRightRing2		; If not, get the next ring
-		move.l	a1,rRingLoadR.w		; Store ending ring data address
+		move.l	a1,ringMgrLoadR.w		; Store ending ring data address
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle ring collection
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_RingsManagerDoCollect:
-		lea	rRingCol.w,a2			; Ring collection table
+		lea	ringCollect.w,a2			; Ring collection table
 		move.w	(a2)+,d1			; Get consumed ring count
-		subq.w	#1,d1				; Sutbract 1
+		subq.w	#1,d1				; SutbactID 1
 		bcs.s	.End				; If there are no consumed rings to handle, branch
 
 .Loop:
@@ -548,7 +548,7 @@ Level_RingsManagerDoCollect:
 		bne.s	.Next				; If not, branch
 		move.w	#-1,(a1)			; Set timer and frame to -1
 		clr.w	-2(a2)				; Set address in collection table to 0
-		subq.w	#1,rRingColCnt.w		; Decrement collection table count
+		subq.w	#1,ringColCount.w		; Decrement collection table count
 
 .Next:
 		dbf	d1,.Loop			; Loop
@@ -560,11 +560,11 @@ Level_RingsManagerDoCollect:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_RingsManagerSetup:
 		; Clear tables
-		clrRAM	rRingStat
-		clrRAM	rRingCol
+		clrRAM	ringStatus
+		clrRAM	ringCollect
 
-		movea.l	rRingPosAddr.w,a1		; Get ring data pointer
-		move.l	a1,rRingLoadL.w		; Store address
+		movea.l	ringMgrLayout.w,a1		; Get ring data pointer
+		move.l	a1,ringMgrLoadL.w		; Store address
 		addq.w	#4,a1				; Increment address by 4
 		moveq	#0,d5				; Initialize the ring counter
 		move.w	#$1FE,d0			; Max number of ring
@@ -580,14 +580,14 @@ Level_RingsManagerSetup:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do ring collision for the player
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-PlayerRingCollision:
+PlayeringCollectlision:
 		cmpi.b	#105,oInvulTime(a0)		; Is the player able to collect rings while hurt?
 		bhs.w	.End				; If it hasn't been long enough, branch
-		movea.l	rRingLoadL.w,a1		; Get starting address of ring data
-		movea.l	rRingLoadR.w,a2		; Get starting address of status table
+		movea.l	ringMgrLoadL.w,a1		; Get starting address of ring data
+		movea.l	ringMgrLoadR.w,a2		; Get starting address of status table
 		cmpa.l	a1,a2				; Are there any rings to test collision with?
 		beq.w	.End				; If not, branch
-		movea.w	rRingStatPtr.w,a4
+		movea.w	ringMgrStatPtr.w,a4
 		move.w	oXPos(a0),d2			; Player's X position
 		move.w	oYPos(a0),d3			; Player's Y position
 		subq.w	#8,d2				; Subtract 8 from X
@@ -632,13 +632,13 @@ PlayerRingCollision:
 							; Consume the ring
 		move.w	#(6<<8)|((CMap_Ring_Sparkle-CMap_Ring)/8),(a4)
 		bsr.s	CollectRing			; Collect it
-		lea	rRingColList.w,a3		; Get collection list
+		lea	ringColList.w,a3		; Get collection list
 
 .Consume:
 		tst.w	(a3)+				; Has this slot been used up?
 		bne.s	.Consume			; If not, get the next one
 		move.w	a4,-(a3)			; Save the status table RAM address for the current ring
-		addq.w	#1,rRingColCnt.w		; Add to the number of rings consumed
+		addq.w	#1,ringColCount.w		; Add to the number of rings consumed
 
 .GetNext:
 		addq.w	#4,a1				; Next ring in ring data
@@ -652,8 +652,8 @@ PlayerRingCollision:
 ; Collect a ring
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 CollectRing:
-		addq.w	#1,rRings.w			; Incremment ring count
-		st	rUpdateRings.w			; Update ring counter in HUD
+		addq.w	#1,ringCount.w			; Incremment ring count
+		st	hudUpdateRings.w			; Update ring counter in HUD
 		playSnd	#sRing, 2			; Play ring sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -662,9 +662,9 @@ CollectRing:
 Level_RenderHUDAndRings:
 		moveq	#0,d6				; Clear render flags
 		moveq	#1*2,d4				; Standard frame
-		tst.w	rRings.w			; Do we have 0 rings?
+		tst.w	ringCount.w			; Do we have 0 rings?
 		bne.s	.Not0Rings			; If not, branch
-		btst	#3,(rLvlFrames+1).w		; Can the timer blink?
+		btst	#3,(lvlFrameCnt+1).w		; Can the timer blink?
 		bne.s	.Not0Rings			; If not, branch
 		moveq	#0*2,d4				; Set frame to blink the timer
 
@@ -679,12 +679,12 @@ Level_RenderHUDAndRings:
 		subq.w	#1,d4				; Subtract 1 from sprite count
 		jsr	DrawSprite.w			; Draw the HUD frame
 
-.RenderRings:
-		movea.l	rRingLoadL.w,a0			; Get starting address of ring data
-		move.l	rRingLoadR.w,d2			; Get ending address of ring data
+.RenderingCount:
+		movea.l	ringMgrLoadL.w,a0			; Get starting address of ring data
+		move.l	ringMgrLoadR.w,d2			; Get ending address of ring data
 		sub.l	a0,d2				; Get length of the data to read
 		beq.s	.End				; If zero length, branch
-		movea.w	rRingStatPtr.w,a4		; Get starting address of status table
+		movea.w	ringMgrStatPtr.w,a4		; Get starting address of status table
 		lea	CMap_Ring(pc),a1		; Get mappings pointer
 		move.w	#224+16,d5			; Get bottom screen boundary
 		
@@ -787,16 +787,16 @@ Map_HUD_18:	dc.b 0, 3
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_UpdateHUD:
-		tst.b	rUpdateRings.w		; Does the ring counter need to be updated?
+		tst.b	hudUpdateRings.w		; Does the ring counter need to be updated?
 		beq.s	.End				; If not, branch
 		bmi.s	.DontZero			; If the flag is negative, branch
 		bsr.w	Level_HUDResetRings		; Reset the ring counter
 
 .DontZero:
-		clr.b	rUpdateRings.w		; Clear update value
+		clr.b	hudUpdateRings.w		; Clear update value
 		vdpCmd	move.l,$D140,VRAM,WRITE,d0	; Set VDP command
 		moveq	#0,d1
-		move.w	rRings.w,d1			; Ring count
+		move.w	ringCount.w,d1			; Ring count
 		bra.s	.UpdateRings			; Update the rings counter
 
 .End
@@ -896,7 +896,7 @@ HUD_RingsBase:
 ;		$7F			Frame duration. Only here if global duration is -1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 AniArt_DoAnimate:
-		lea	rAnimCnts.w,a3		; Level art animation counters
+		lea	lvlAnimCntrs.w,a3		; Level art animation counters
 		move.w	(a2)+,d6			; Get number of scripts in list
 		bpl.s	.ListNotEmpty			; If there are any, continue
 		rts
@@ -975,7 +975,7 @@ AniArt_DoAnimate:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SolidObject:
 		moveq	#0,d6				; Clear collision flag register
-		movea.w	rPlayer1Addr.w,a1		; Set player object RAM
+		movea.w	playerPtrP1.w,a1		; Set player object RAM
 		btst	#cStandBit,oStatus(a0)		; Is the player standing on the current object?
 		beq.w	SolidObject_ChkColOnScr		; If not, branch
 		move.w	d1,d2				; Copy object width
@@ -1017,7 +1017,7 @@ SolidObject:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SolidObject_Always:
 		moveq	#0,d6				; Clear collision flag register
-		movea.w	rPlayer1Addr.w,a1		; Set player object RAM
+		movea.w	playerPtrP1.w,a1		; Set player object RAM
 		btst	#cStandBit,oStatus(a0)		; Is the player standing on the current object?
 		beq.w	SolidObject_ChkCollision	; If not, branch
 		move.w	d1,d2				; Copy object width
@@ -1060,7 +1060,7 @@ SolidObject_Always:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SlopedSolid:
 		moveq	#0,d6				; Clear collision flag register
-		movea.w	rPlayer1Addr.w,a1		; Set player object RAM
+		movea.w	playerPtrP1.w,a1		; Set player object RAM
 		btst	#cStandBit,oStatus(a0)		; Is the player standing on the current object?
 		beq.w	SlopedSolid_ChkCollision	; If not, branch
 		move.w	d1,d2				; Copy object width
@@ -1157,7 +1157,7 @@ SolidObject_ChkBounds:
 		bmi.w	SolidObject_TestClearPush	; If so, branch
 		cmpi.b	#$C,oRoutine(a1)			; Is the player dead?
 		bcc.w	SolidObject_End			; If so, branch
-		tst.b	rDebugMode.w			; Is debug mode active?
+		tst.b	debugMode.w			; Is debug mode active?
 		bne.w	SolidObject_End			; If so, branch
 
 		move.w	d0,d5				; Copy X offset
@@ -1318,7 +1318,7 @@ SolidObject_Above:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlatformObject:
 		moveq	#0,d6				; Clear collision flag register
-		movea.w	rPlayer1Addr.w,a1		; Get the player RAM
+		movea.w	playerPtrP1.w,a1		; Get the player RAM
 		btst	#cStandBit,oStatus(a0)		; Is the player standing on the object?
 		beq.w	Platform_ChkCollision		; If not, branch
 		move.w	d1,d2				; Copy the object's width
@@ -1378,11 +1378,11 @@ PlatformObject_ChkYRange:
 		ext.w	d1				; Sign extend it
 		add.w	d2,d1				; Add the Y position to the collision height
 		addq.w	#4,d1				; Add 4
-		sub.w	d1,d0				; Subract the result from the Y position
+		sub.w	d1,d0				; SubactID the result from the Y position
 		bhi.w	PlatformObject_End		; If it's greater than 0, branch
 		cmpi.w	#-$10,d0			; Is the result less than -16?
 		bcs.w	PlatformObject_End		; If so, branch
-		tst.b	rDebugMode.w			; Is debug mode active?
+		tst.b	debugMode.w			; Is debug mode active?
 		bne.w	PlatformObject_End		; If so, branch
 		tst.b	oFlags(a1)			; Is the player being carried by another object?
 		bmi.w	PlatformObject_End		; If so, branch
@@ -1439,7 +1439,7 @@ PlatformObject_End:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SlopedPlatform:
 		moveq	#0,d6				; Clear collision flag register
-		movea.w	rPlayer1Addr.w,a1		; Get the player RAM
+		movea.w	playerPtrP1.w,a1		; Get the player RAM
 		btst	#cStandBit,oStatus(a0)		; Is the player standing on the object?
 		beq.w	SlopedPlarform_ChkCol		; If not branch
 		move.w	d1,d2				; Copy the object's width
@@ -1506,7 +1506,7 @@ PlayerMoveOnPtfm:
 		bmi.s	.End				; If so, branch
 		cmpi.b	#$C,oRoutine(a1)			; Is the player dead?
 		bcc.s	.End				; If so, branch
-		tst.b	rDebugMode.w			; Is debug mode active?
+		tst.b	debugMode.w			; Is debug mode active?
 		bne.s	.End				; If so, branch
 		moveq	#0,d1
 		move.b	oColH(a1),d1			; Get the player's collision height
@@ -1562,7 +1562,7 @@ PlayerMoveOnSlope:
 ; Do object collision for the player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerDoObjCollision:
-		jsr	PlayerRingCollision		; Do ring collision
+		jsr	PlayeringCollectlision		; Do ring collision
 		
 		move.w	oXPos(a0),d2			; Get X position
 		move.w	oYPos(a0),d3			; Get Y position
@@ -1574,7 +1574,7 @@ PlayerDoObjCollision:
 		move.w	#$10,d4				; Get right sensor delta X
 		add.w	d5,d5				; Get right sensor delta Y
 
-		lea	rColList.w,a4			; Get collision response list
+		lea	collideList.w,a4			; Get collision response list
 		move.w	(a4)+,d6			; Get count
 		beq.s	.End				; If there are no objects to test, branch
 
@@ -1589,7 +1589,7 @@ PlayerDoObjCollision:
 		moveq	#0,d0				; Reset d0
 
 .End:
-		clr.w	rColList.w			; Clear the collision response list count
+		clr.w	collideList.w			; Clear the collision response list count
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkPosition:
@@ -1709,7 +1709,7 @@ PlayerDoObjCollision:
 ; Add a new entry to the collision response list
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 AddToColResponse:
-		lea	rColList.w,a1			; Get collision response list
+		lea	collideList.w,a1			; Get collision response list
 		cmpi.w	#$7E,(a1)			; Is it full?
 		bhs.s	.End				; If so, branch
 		addq.w	#2,(a1)				; Add a new entry
@@ -1728,8 +1728,8 @@ AddToColResponse:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_SaveInfo:
-		move.w	oXPos(a0),rSavedXPos.w		; Save X position
-		move.w	oYPos(a0),rSavedYPos.w		; Save Y position
+		move.w	oXPos(a0),chkSavedXPos.w		; Save X position
+		move.w	oYPos(a0),chkSavedYPos.w		; Save Y position
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load some info in a level (mainly for checkpoints)
@@ -1741,7 +1741,7 @@ Level_SaveInfo:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_LoadSavedInfo:
-		move.w	rSavedXPos.w,oXPos(a0)		; Load X position
-		move.w	rSavedYPos.w,oYPos(a0)		; Load Y position
+		move.w	chkSavedXPos.w,oXPos(a0)		; Load X position
+		move.w	chkSavedYPos.w,oYPos(a0)		; Load Y position
 		rts
 ; =========================================================================================================================================================

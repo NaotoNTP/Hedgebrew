@@ -73,18 +73,18 @@ ObjPlayer_Init:
 ; Main routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Main:
-		tst.b	rMoveCheat.w
+		tst.b	moveCheat.w
 		beq.s	.NoPlacementEnter
-		btst	#4,rP1Press.w			; Has the B button been pressed?
+		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.NoPlacementEnter		; If not, branch
-		move.b	#1,rDebugMode.w		; Enable debug placement mode
+		move.b	#1,debugMode.w		; Enable debug placement mode
 		move.l	#DebugPlacement,oAddr(a0)	; Set to debug placement mode
 		rts
 
 .NoPlacementEnter:
 		btst	#2,oFlags(a0)			; Are the controls locked?
 		bne.s	.Update				; If so, branch
-		move.w	rP1Data.w,rCtrl.w		; Set the player's control data
+		move.w	ctrlDataP1.w,plrCtrlData.w		; Set the player's control data
 
 .Update:
 	;	btst	#1,oStatus(a0)
@@ -104,7 +104,7 @@ ObjPlayer_Main:
 ; Handle the extended camera
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ExtendedCam:
-		move.w	rCamXPosCenter.w,d1		; Get camera X center
+		move.w	panCamXPos.w,d1		; Get camera X center
 		move.w	oGVel(a0),d0			; Get ground velocity
 		bpl.s	.PosGVel			; Get absolute value
 		neg.w	d0				; ''
@@ -138,7 +138,7 @@ ObjPlayer_ExtendedCam:
 		subq.w	#2,d1				; Move back left
 
 .SetShift:
-		move.w	d1,rCamXPosCenter.w		; Set camera X center
+		move.w	d1,panCamXPos.w		; Set camera X center
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Update Sonic's physics
@@ -167,14 +167,14 @@ ObjPlayer_Physics:
 ; Handle Sonic in the water
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Water:
-	tst.b	rWaterFlag.w			; Is there water in the level?
+	tst.b	lvlHasWater.w			; Is there water in the level?
 	bne.s	.HandleWater			; If so, branch
 
 .End:
 	rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .HandleWater:
-		move.w	rWaterLvl.w,d0		; Get water height
+		move.w	waterYPos.w,d0		; Get water height
 		cmp.w	oYPos(a0),d0			; Is Lover in the water?
 		bge.s	.NotInWater			; If not, branch
 
@@ -334,12 +334,12 @@ ObjPlayer_MoveGround:
 		tst.b	oMoveLock(a0)			; Is the move lock timer active?
 		bne.w	.ResetScr			; If so, branch
 
-		btst	#2,rCtrlHold.w		; Is left held?
+		btst	#2,plrCtrlHold.w		; Is left held?
 		beq.s	.NotLeft			; If so, branch
 		bsr.w	ObjPlayer_MoveLeft		; Move left
 
 .NotLeft:
-		btst	#3,rCtrlHold.w		; Is right held?
+		btst	#3,plrCtrlHold.w		; Is right held?
 		beq.s	.NotRight			; If so, branch
 		bsr.w	ObjPlayer_MoveRight		; Move right
 
@@ -395,7 +395,7 @@ ObjPlayer_MoveGround:
 		bra.s	.ResetScr			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkLookUp:
-		btst	#0,rCtrlHold.w		; Is the up button being held?
+		btst	#0,plrCtrlHold.w		; Is the up button being held?
 		beq.s	.ChkDown			; If not, branch
 		move.b	#7,oAni(a0)			; Set to looking up animation
 
@@ -403,13 +403,13 @@ ObjPlayer_MoveGround:
 		cmpi.b	#$78,oScrlDelay(a0)		; Has it reached $78?
 		blo.s	.ResetScrPart2			; If not, branch
 		move.b	#$78,oScrlDelay(a0)		; Cap at $78
-		cmpi.w	#200,rCamYPosDist.w		; Has the camera finished scrolling?
+		cmpi.w	#200,panCamYPos.w		; Has the camera finished scrolling?
 		beq.s	.UpdateSpdOnGround		; If so, branch
-		addq.w	#2,rCamYPosDist.w		; Scroll the camera
+		addq.w	#2,panCamYPos.w		; Scroll the camera
 		bra.s	.UpdateSpdOnGround		; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkDown:
-		btst	#1,rCtrlHold.w		; Is the down button being held?
+		btst	#1,plrCtrlHold.w		; Is the down button being held?
 		beq.s	.ResetScr			; If not, branch
 		move.b	#8,oAni(a0)			; Set to ducking animation
 
@@ -417,25 +417,25 @@ ObjPlayer_MoveGround:
 		cmpi.b	#$78,oScrlDelay(a0)		; Has it reached $78?
 		blo.s	.ResetScrPart2			; If not, branch
 		move.b	#$78,oScrlDelay(a0)		; Cap at $78
-		cmpi.w	#8,rCamYPosDist.w		; Has the camera finished scrolling?
+		cmpi.w	#8,panCamYPos.w		; Has the camera finished scrolling?
 		beq.s	.UpdateSpdOnGround		; If so, branch
-		subq.w	#2,rCamYPosDist.w		; Scroll the camera
+		subq.w	#2,panCamYPos.w		; Scroll the camera
 		bra.s	.UpdateSpdOnGround		; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ResetScr:
 		clr.b	oScrlDelay(a0)			; Reset scroll delay counter
 
 .ResetScrPart2:
-		cmpi.w	#(224/2)-16,rCamYPosDist.w	; Is the camera centered vertically?
+		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
 		beq.s	.UpdateSpdOnGround		; If so, branch
 		bhs.s	.ScrollUp			; If it's below the center, branch
-		addq.w	#4,rCamYPosDist.w		; Scroll the camera up
+		addq.w	#4,panCamYPos.w		; Scroll the camera up
 
 .ScrollUp:
-		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
+		subq.w	#2,panCamYPos.w		; Scroll the camera down
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .UpdateSpdOnGround:
-		move.b	rCtrlHold.w,d0		; Get held buttons
+		move.b	plrCtrlHold.w,d0		; Get held buttons
 		andi.b	#$C,d0				; Are left or right held?
 		bne.s	.ApplySpeed			; If so, branch
 
@@ -637,12 +637,12 @@ ObjPlayer_MoveRoll:
 		tst.b	oMoveLock(a0)			; Is the move lock timer active?
 		bne.w	.UpdateSpd			; If so, branch
 
-		btst	#2,rCtrlHold.w		; Is left being held?
+		btst	#2,plrCtrlHold.w		; Is left being held?
 		beq.s	.ChkRight			; If not, branch
 		bsr.w	ObjPlayer_RollLeft		; Handle left movement
 
 .ChkRight:
-		btst	#3,rCtrlHold.w		; Is right being held?
+		btst	#3,plrCtrlHold.w		; Is right being held?
 		beq.s	.Decelerate			; If not, branch
 		bsr.w	ObjPlayer_RollRight		; Handle right movement
 
@@ -755,7 +755,7 @@ ObjPlayer_MoveAir:
 		add.w	d5,d5				; Double it
 		move.w	oXVel(a0),d0			; Get X velocity
 
-		btst	#2,rCtrlHold.w		; Is left being held?
+		btst	#2,plrCtrlHold.w		; Is left being held?
 		beq.s	.NotLeft			; If not, branch
 		bset	#0,oStatus(a0)			; Face left
 		sub.w	d5,d0				; Subtract acceleration
@@ -769,7 +769,7 @@ ObjPlayer_MoveAir:
 		move.w	d1,d0				; Cap at top speed
 
 .NotLeft:
-		btst	#3,rCtrlHold.w		; Is right being held?
+		btst	#3,plrCtrlHold.w		; Is right being held?
 		beq.s	.NotRight			; If not, branch
 		bclr	#0,oStatus(a0)			; Face right
 		add.w	d5,d0				; Add acceleration
@@ -784,13 +784,13 @@ ObjPlayer_MoveAir:
 		move.w	d0,oXVel(a0)			; Set X velocity
 
 .ResetScr
-		cmpi.w	#(224/2)-16,rCamYPosDist.w	; Is the camera centered vertically?
+		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
 		beq.s	.DecelerateAtPeak		; If so, branch
 		bhs.s	.ScrollUp			; If it's below the center, branch
-		addq.w	#4,rCamYPosDist.w		; Scroll the camera up
+		addq.w	#4,panCamYPos.w		; Scroll the camera up
 
 .ScrollUp:
-		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
+		subq.w	#2,panCamYPos.w		; Scroll the camera down
 
 .DecelerateAtPeak:
 		cmpi.w	#-$400,oYVel(a0)		; Is Sonic at least going -4 pixels per frame up?
@@ -825,7 +825,7 @@ ObjPlayer_LvlBound:
 		bpl.s	.XBound
 		move.w	oYPos(a0),d1
 		addi.w	#$10,d1
-		move.w	rMinCamY.w,d0		; Get upper boundary position
+		move.w	minCamYPos.w,d0		; Get upper boundary position
 		cmp.w	d1,d0				; Has Sonic touched the upper boundary?
 		ble.s	.XBound				; If so, branch
 		move.w	d0,oYPos(a0)
@@ -839,25 +839,25 @@ ObjPlayer_LvlBound:
 		asl.l	#8,d0				; Shift it
 		add.l	d0,d1				; Add to X position
 		swap	d1				; Get actual X position
-		move.w	rMinCamX.w,d0		; Get left boundary position
+		move.w	minCamXPos.w,d0		; Get left boundary position
 		addi.w	#$10,d0				; ''
 		cmp.w	d1,d0				; Has Sonic touched the left boundary?
 		bgt.s	.TouchedSide			; If so, branch
-		move.w	rMaxCamX.w,d0		; Get max camera X position
+		move.w	maxCamXPos.w,d0		; Get max camera X position
 		addi.w	#320-24,d0			; Get right boundary position
 		cmp.w	d1,d0				; Has Sonic touched the right boundary?
 		ble.s	.TouchedSide			; If so, branch
 
 .ChkBottom:
-		move.w	rMaxCamY.w,d0		; Get max camera Y position
+		move.w	maxCamYPos.w,d0		; Get max camera Y position
 		addi.w	#224,d0				; Get bottom boundary position
 		cmp.w	oYPos(a0),d0			; Has Sonic touched the bottom boundary?
 		blt.s	.TouchedBottom			; If so, branch
 		rts
 
 .TouchedBottom:
-		move.w	rDestMaxY.w,d0		; Get target max camera Y position
-		move.w	rMaxCamY.w,d1		; Get current max camera Y position
+		move.w	targetMaxCamY.w,d0		; Get target max camera Y position
+		move.w	maxCamYPos.w,d1		; Get current max camera Y position
 		cmp.w	d0,d1				; Are they the same?
 		blt.s	.NoKill				; If not, branch
 		bra.w	ObjPlayer_GetKilled		; Get Sonic killed
@@ -883,7 +883,7 @@ ObjPlayer_Peelout:
 .ChkUp:
 		cmpi.b	#7,oAni(a0)			; Is Sonic looking up?
 		bne.w	.End				; If not, branch
-		move.b	rCtrlPress.w,d0		; Get controller bits
+		move.b	plrCtrlPress.w,d0		; Get controller bits
 		andi.b	#$70,d0				; Are A, B, or C pressed?
 		beq.w	.End				; If not, branch
 
@@ -902,7 +902,7 @@ ObjPlayer_Peelout:
 		jmp	PlayerAnglePos			; Update position and angle along the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkLaunch:
-		btst	#0,rCtrlHold.w		; Is up being held?
+		btst	#0,plrCtrlHold.w		; Is up being held?
 		bne.w	.Charge				; If so, branch
 		clr.b	oDashFlag(a0)			; Clear the dash flag
 
@@ -942,13 +942,13 @@ ObjPlayer_Peelout:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .DoUpdates:
 		addq.l	#4,sp				; Don't return to caller
-		cmpi.w	#(224/2)-16,rCamYPosDist.w	; Is the camera centered vertically?
+		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
 		beq.s	.FinishUpdates			; If so, branch
 		bhs.s	.ScrollUp			; If it's below the center, branch
-		addq.w	#4,rCamYPosDist.w		; Scroll the camera up
+		addq.w	#4,panCamYPos.w		; Scroll the camera up
 
 .ScrollUp:
-		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
+		subq.w	#2,panCamYPos.w		; Scroll the camera down
 
 .FinishUpdates:
 		jmp	PlayerAnglePos			; Update position and angle along the ground
@@ -967,7 +967,7 @@ ObjPlayer_Spindash:
 .ChkDown:
 		cmpi.b	#8,oAni(a0)			; Is Sonic ducking?
 		bne.w	.End				; If not, branch
-		move.b	rCtrlPress.w,d0		; Get controller bits
+		move.b	plrCtrlPress.w,d0		; Get controller bits
 		andi.b	#$70,d0				; Are A, B, or C pressed?
 		beq.w	.End				; If not, branch
 
@@ -990,7 +990,7 @@ ObjPlayer_Spindash:
 		jmp	PlayerAnglePos			; Update position and angle along the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkLaunch:
-		btst	#1,rCtrlHold.w		; Is down being held?
+		btst	#1,plrCtrlHold.w		; Is down being held?
 		bne.w	.Charge				; If so, branch
 		clr.b	oDashFlag(a0)			; Clear the dash flag
 
@@ -1033,13 +1033,13 @@ ObjPlayer_Spindash:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .DoUpdates:
 		addq.l	#4,sp				; Don't return to caller
-		cmpi.w	#(224/2)-16,rCamYPosDist.w	; Is the camera centered vertically?
+		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
 		beq.s	.FinishUpdates			; If so, branch
 		bhs.s	.ScrollUp			; If it's below the center, branch
-		addq.w	#4,rCamYPosDist.w		; Scroll the camera up
+		addq.w	#4,panCamYPos.w		; Scroll the camera up
 
 .ScrollUp:
-		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
+		subq.w	#2,panCamYPos.w		; Scroll the camera down
 
 .FinishUpdates:
 		jmp	PlayerAnglePos			; Update position and angle along the ground
@@ -1050,9 +1050,9 @@ ObjPlayer_Spindash:
 ; Check for jumping
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ChkJump:
-		move.b	rCtrlPress.w,d0		; Get pressed buttons
+		move.b	plrCtrlPress.w,d0		; Get pressed buttons
 		andi.b	#$70,d0				; Are A, B, or C pressed?
-		tst.b	rMoveCheat.w
+		tst.b	moveCheat.w
 		beq.s	.NoDebug
 		andi.b	#$60,d0				; Are A or C pressed?
 
@@ -1105,9 +1105,9 @@ ObjPlayer_JumpHeight:
 		move.w	#-MIN_JMP_HEIGHT,d1		; Standard minimum height
 		cmp.w	oYVel(a0),d1			; Is Sonic jumping at least hte minimum height?
 		ble.s	.End				; If not, branch
-		move.b	rCtrlHold.w,d0		; Get held buttons
+		move.b	plrCtrlHold.w,d0		; Get held buttons
 		andi.b	#$70,d0				; Are A, B, or C pressed?
-		tst.b	rMoveCheat.w
+		tst.b	moveCheat.w
 		beq.s	.NoDebug
 		andi.b	#$60,d0				; Are A or C pressed?
 
@@ -1193,10 +1193,10 @@ ObjPlayer_ChkRoll:
 .ChkSpd:
 		cmpi.w	#$80,d0				; Is Sonic going fast enough?
 		bcs.s	.NoRoll				; If not, branch
-		move.b	rCtrlHold.w,d0		; Get held buttons
+		move.b	plrCtrlHold.w,d0		; Get held buttons
 		andi.b	#$C,d0				; Are left or right held?
 		bne.s	.NoRoll				; If not, branch
-		btst	#1,rCtrlHold.w		; Is down being held?
+		btst	#1,plrCtrlHold.w		; Is down being held?
 		bne.s	ObjPlayer_DoRoll			; If so, branch
 
 .NoRoll:
@@ -1299,7 +1299,7 @@ ObjPlayer_RollSlopePush:
 ; Check for bouncy floor collision
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ChkBounce:
-		tst.b	rFloorActive.w		; Is the floor active?
+		tst.b	rFlooactIDive.w		; Is the floor active?
 		beq.w	.End				; If so, branch
 
 		btst	#1,oStatus(a0)			; Is Sonic in the air?
@@ -1456,7 +1456,7 @@ ObjPlayer_Hang:
 		andi.w	#$3FF,d0			; ''
 		cmpi.w	#$81,d0				; Is the block the bar?
 		bne.s	.FallOff			; If not, branch
-		move.b	rCtrlPress.w,d0		; Get control press bits
+		move.b	plrCtrlPress.w,d0		; Get control press bits
 		andi.b	#$70,d0				; Are we jumping off?
 		beq.s	.MoveX				; If not, branch
 
@@ -1469,7 +1469,7 @@ ObjPlayer_Hang:
 
 .MoveX:
 		moveq	#2,d0				; X speed
-		btst	#2,rCtrlHold.w		; Are we going left?
+		btst	#2,plrCtrlHold.w		; Are we going left?
 		beq.s	.ChkRight			; If not, branch
 		neg.w	d0				; Go the other way
 		bset	#0,oStatus(a0)			; Face to the left
@@ -1477,7 +1477,7 @@ ObjPlayer_Hang:
 		bra.s	.DoMove				; Continue
 
 .ChkRight:
-		btst	#3,rCtrlHold.w		; Are we going left?
+		btst	#3,plrCtrlHold.w		; Are we going left?
 		beq.s	.ResetScr			; If not, branch
 		bclr	#0,oStatus(a0)			; Face to the right
 		bclr	#0,oRender(a0)			; ''
@@ -1494,13 +1494,13 @@ ObjPlayer_Hang:
 
 .ResetScr:
 		clr.b	oScrlDelay(a0)			; Reset scroll delay counter
-		cmpi.w	#(224/2)-16,rCamYPosDist.w	; Is the camera centered vertically?
+		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
 		beq.s	.End				; If so, branch
 		bhs.s	.ScrollUp			; If it's below the center, branch
-		addq.w	#4,rCamYPosDist.w		; Scroll the camera up
+		addq.w	#4,panCamYPos.w		; Scroll the camera up
 
 .ScrollUp:
-		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
+		subq.w	#2,panCamYPos.w		; Scroll the camera down
 
 .End:
 		rts
@@ -1531,7 +1531,7 @@ ObjPlayer_GetHurt:
 		displaySprite	2,a0,a1,1		; Add sprite if not already being displayed
 		tst.b	oInvulTime(a0)			; Are we invulnerable?
 		bne.w	.End				; If so, branch
-		tst.w	rRings.w			; Does Sonic have any rings?
+		tst.w	ringCount.w			; Does Sonic have any rings?
 		beq.w	ObjPlayer_GetKilled		; If not, branch
 		jsr	FindFreeObj.w
 		beq.s	.Hurt
@@ -1576,11 +1576,11 @@ ObjPlayer_GetHurt:
 ; Hurt routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Hurt:
-		tst.b	rMoveCheat.w
+		tst.b	moveCheat.w
 		beq.s	.NoPlacementEnter
-		btst	#4,rP1Press.w			; Has the B button been pressed?
+		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.NoPlacementEnter		; If not, branch
-		move.b	#1,rDebugMode.w		; Enable debug placement mode
+		move.b	#1,debugMode.w		; Enable debug placement mode
 		move.l	#DebugPlacement,oAddr(a0)	; Set to debug placement mode
 		rts
 
@@ -1595,13 +1595,13 @@ ObjPlayer_Hurt:
 		move.b	#$1A,oAni(a0)			; Force the hurt animation
 		bsr.s	.ChkStop			; Check if Sonic has hit the ground or the bottom boundary
 
-		cmpi.w	#(224/2)-16,rCamYPosDist.w	; Is the camera centered vertically?
+		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
 		beq.s	.Cont				; If so, branch
 		bhs.s	.ScrollUp			; If it's below the center, branch
-		addq.w	#4,rCamYPosDist.w		; Scroll the camera up
+		addq.w	#4,panCamYPos.w		; Scroll the camera up
 
 .ScrollUp:
-		subq.w	#2,rCamYPosDist.w		; Scroll the camera down
+		subq.w	#2,panCamYPos.w		; Scroll the camera down
 
 .Cont:
 		bsr.w	ObjPlayer_LvlBound		; Handle level boundaries
@@ -1609,7 +1609,7 @@ ObjPlayer_Hurt:
 		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkStop:
-		move.w	rMaxCamY.w,d0		; Get bottom boundary
+		move.w	maxCamYPos.w,d0		; Get bottom boundary
 		addi.w	#224,d0				; ''
 		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
 		blt.s	ObjPlayer_GetKilled		; If so, branch
@@ -1642,7 +1642,7 @@ ObjPlayer_GetKilled:
 		move.w	#-$700,oYVel(a0)		; Make Sonic bounce up
 		clr.w	oXVel(a0)			; Lock Sonic horizontally
 		clr.w	oGVel(a0)			; ''
-		move.w	#$FFFF,rCamLocked.w		; Lock the camera
+		move.w	#$FFFF,camLocked.w		; Lock the camera
 
 	;	cmpi.l	#ObjSpike,oAddr(a2)		; Did Sonic hit a spike?
 	;	beq.s	.End				; If not, branch
@@ -1655,11 +1655,11 @@ ObjPlayer_GetKilled:
 ; Death routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Dead:
-		tst.b	rMoveCheat.w
+		tst.b	moveCheat.w
 		beq.s	.NoPlacementEnter
-		btst	#4,rP1Press.w			; Has the B button been pressed?
+		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.NoPlacementEnter		; If not, branch
-		move.b	#1,rDebugMode.w		; Enable debug placement mode
+		move.b	#1,debugMode.w		; Enable debug placement mode
 		move.l	#DebugPlacement,oAddr(a0)	; Set to debug placement mode
 		rts
 
@@ -1672,7 +1672,7 @@ ObjPlayer_Dead:
 		bra.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ChkBound:
-		move.w	rMaxCamY.w,d0		; Get bottom boundary
+		move.w	maxCamYPos.w,d0		; Get bottom boundary
 		addi.w	#$100,d0			; ''
 		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
 		bge.s	.End				; If not, branch
@@ -1690,7 +1690,7 @@ ObjPlayer_Gone:
 		beq.s	.End
 		subq.b	#1,oDeathTimer(a0)		; Decrement the death counter
 		bne.s	.End				; If it hasn't run out, branch
-		st	rLvlReload.w			; Reload the level
+		st	lvlReload.w			; Reload the level
 
 .End:
 		rts
@@ -1952,7 +1952,7 @@ ObjPlayer_Animate:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 DebugPlacement:
 		moveq	#0,d0
-		move.b	rDebugMode.w,d0		; Get debug placement mode routine
+		move.b	debugMode.w,d0		; Get debug placement mode routine
 		andi.w	#2,d0				; Only allow 0, 2, 4, and 6
 		add.w	d0,d0				; Double it
 		jsr	.Routines(pc,d0.w)		; Go to the correct routine
@@ -1963,11 +1963,11 @@ DebugPlacement:
 		bra.w	Debug_Main			; Main		(02*2)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Debug_Init:
-		addq.b	#2,rDebugMode.w		; Next routine
+		addq.b	#2,debugMode.w		; Next routine
 		clr.b	oFrame(a0)			; Reset mapping frame
 		clr.b	oAni(a0)			; Reset animation
 		clr.w	oGVel(a0)			; Reset ground velocity
-		clr.w	rCamLocked.w			; Unlock the camera
+		clr.w	camLocked.w			; Unlock the camera
 		clr.b	oBallMode(a0)			; Reset ball mode
 		clr.b	oAngle(a0)			; Reset angle
 		move.b	#4,oRoutine(a0)			; Set routine to main
@@ -1994,30 +1994,30 @@ Debug_Main:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Debug_Control:
 		moveq	#6,d0				; Speed
-		btst	#0,rP1Hold.w			; Is up being held?
+		btst	#0,ctrlHoldP1.w			; Is up being held?
 		beq.s	.NoUp				; If not, branch
 		sub.w	d0,oYPos(a0)			; Move up
 
 .NoUp:
-		btst	#1,rP1Hold.w			; Is down being held?
+		btst	#1,ctrlHoldP1.w			; Is down being held?
 		beq.s	.NoDown				; If not, branch
 		add.w	d0,oYPos(a0)			; Move down
 
 .NoDown:
-		btst	#2,rP1Hold.w			; Is left being held?
+		btst	#2,ctrlHoldP1.w			; Is left being held?
 		beq.s	.NoLeft				; If not, branch
 		sub.w	d0,oXPos(a0)			; Move left
 
 .NoLeft:
-		btst	#3,rP1Hold.w			; Is right being held?
+		btst	#3,ctrlHoldP1.w			; Is right being held?
 		beq.s	.NoRight			; If not, branch
 		add.w	d0,oXPos(a0)			; Move right
 
 .NoRight:
-		btst	#4,rP1Press.w			; Has the B button been pressed?
+		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.ChkWrap			; If not, branch
 		moveq	#0,d0
-		move.b	d0,rDebugMode.w		; Disable debug placement mode
+		move.b	d0,debugMode.w		; Disable debug placement mode
 		move.b	d0,oXPos+2(a0)			; Reset X subpixel
 		move.b	d0,oYPos+2(a0)			; Reset Y subpixel
 		move.w	d0,oXVel(a0)			; Reset X velocity

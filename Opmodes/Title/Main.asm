@@ -11,10 +11,10 @@ TitleScreen:
 ;		bsr.w	FadeToBlack			; Fade to black
 ;
 ;		intsOff					; Disable interrupts
-;		clrRAM	rKosPVars
-;		clrRAM	rChkpoint
-;		clrRAM	rGameVars
-;		clrRAM	rObjects
+;		clrRAM	kosVars
+;		clrRAM	checkpoint
+;		clrRAM	opmodeVars
+;		clrRAM	objMemory
 ;
 ;		lea	VDP_CTRL,a5
 ;		move.w	#$8004,(a5)			; $8004 - Disable H-INT, H/V Counter
@@ -25,12 +25,12 @@ TitleScreen:
 ;		move.w	#$9200,(a5)			; $9200 - Window V position at default
 ;		move.w	#$8B00,(a5)			; $8B03 - V-Scroll by screen, H-Scroll by screen
 ;		move.w	#$8700,(a5)			; $8700 - BG color pal 0 color 0
-;		clr.w	rDMAQueue.w			; Set stop token at the beginning of the DMA queue
-;		move.w	#rDMAQueue,rDMASlot.w	; Reset the DMA queue slot
+;		clr.w	dmaQueue.w			; Set stop token at the beginning of the DMA queue
+;		move.w	#dmaQueue,dmaSlot.w	; Reset the DMA queue slot
 ;
 ;		bsr.w	ClearScreen			; Clear screen
 ;
-;		lea	rDestPal.w,a0			; Fade target palette
+;		lea	palFadeBuff.w,a0			; Fade target palette
 ;		moveq	#$80>>2-1,d0			; Size
 ;
 ;.FillPal:
@@ -44,9 +44,9 @@ TitleScreen:
 ;TitleScreen2:
 ;		intsOff
 ;
-;		clr.b	rArtCheat.w
-;		clrRAM	rGameVars
-;		clrRAM	rObjects
+;		clr.b	artCheat.w
+;		clrRAM	opmodeVars
+;		clrRAM	objMemory
 ;
 ;		move.w	#$8200|($C000/$400),VDP_CTRL	; Reset plane A address
 ;		bsr.w	FadeToWhite			; Fade to white
@@ -55,11 +55,11 @@ TitleScreen:
 ;		bsr.w	ClearScreen			; Clear screen
 ;
 ;		lea	MapEni_TitleBG,a0		; Decompress background mappings
-;		lea	rBuffer,a1			; Decompress into RAM
+;		lea	miscBuff,a1			; Decompress into RAM
 ;		moveq	#1,d0				; Base tile properties: Tile ID 1, no flags
 ;		bsr.w	EniDec				; Decompress!
 ;
-;		lea	rBuffer,a1			; Load mappings
+;		lea	miscBuff,a1			; Load mappings
 ;		move.l	#$60000003,d0			; At (0, 0) on plane A
 ;		moveq	#$27,d1				; $28x$1C tiles
 ;		moveq	#$1B,d2				; ''
@@ -67,11 +67,11 @@ TitleScreen:
 ;		bsr.w	LoadPlaneMap			; Load the map
 ;
 ;		lea	MapEni_TitleLogo,a0		; Decompress logo mappings
-;		lea	rBuffer,a1			; Decompress into RAM
+;		lea	miscBuff,a1			; Decompress into RAM
 ;		move.w	#$8370,d0			; Base tile properties: Tile ID 1, no flags
 ;		bsr.w	EniDec				; Decompress!
 ;
-;		lea	rBuffer,a1			; Load mappings
+;		lea	miscBuff,a1			; Load mappings
 ;		move.l	#$41040003,d0			; At (0, 0) on plane A
 ;		moveq	#$E,d1				; $28x$1C tiles
 ;		moveq	#$C,d2				; ''
@@ -103,13 +103,13 @@ TitleScreen:
 ;		bsr.w	QueueKosMData			; ''
 ;
 ;.WaitPLCs:
-;		move.b	#vGeneral,rVINTRout.w		; Level load V-INT routine
+;		move.b	#vGeneral,vIntRoutine.w		; Level load V-INT routine
 ;		jsr	ProcessKos.w			; Process Kosinski queue
 ;		jsr	VSync_Routine.w			; V-SYNC
 ;		jsr	ProcessKosM.w			; Process Kosinski Moduled queue
-;		tst.b	rKosPMMods.w			; Are there still modules left?
+;		tst.b	kosMModules.w			; Are there still modules left?
 ;		bne.s	.WaitPLCs			; If so, branch
-;		move.b	#vGeneral,rVINTRout.w		; Level load V-INT routine
+;		move.b	#vGeneral,vIntRoutine.w		; Level load V-INT routine
 ;		jsr	VSync_Routine.w			; V-SYNC
 ;		
 ;		move.l	#ObjTtlSonic,rObj_0.w		; Load the Sonic object
@@ -125,9 +125,9 @@ TitleScreen:
 ;		move.w	#320,(rObj_2+oY).w		; Set Y
 ;
 ;		jsr	RunObjects.w			; Run objects
-;		jsr	RenderObjects.w			; Render objects
+;		jsr	RendeobjMemory.w			; Render objects
 ;
-;		clr.w	rPalCycTimer.w		; Reset palette cycle
+;		clr.w	palCycTimer.w		; Reset palette cycle
 ;
 ;		bsr.w	FadeFromWhite			; Fade from white
 ;
@@ -135,27 +135,27 @@ TitleScreen:
 ;		jsr	PlayDAC1			; ''
 ;
 ;.Loop:
-;		move.b	#vTitle,rVINTRout.w		; V-SYNC
+;		move.b	#vTitle,vIntRoutine.w		; V-SYNC
 ;		bsr.w	VSync_Routine			; ''
 ;
 ;		bsr.s	Title_Updates			; Do updates
 ;		
 ;		jsr	RunObjects.w			; Run objects
-;		jsr	RenderObjects.w			; Render objects
+;		jsr	RendeobjMemory.w			; Render objects
 ;
 ;		lea	FreeMove_Cheat(pc),a0
-;		lea	rMoveCheat.w,a1
+;		lea	moveCheat.w,a1
 ;		lea	rCheatEntry.w,a2
 ;		bsr.w	Title_ChkCheats
 ;		lea	Art_Cheat(pc),a0
-;		lea	rArtCheat.w,a1
+;		lea	artCheat.w,a1
 ;		lea	rCheatEntry2.w,a2
 ;		bsr.w	Title_ChkCheats
 ;
-;		tst.b	rArtCheat.w
+;		tst.b	artCheat.w
 ;		bne.w	BinbowieArt
 ;
-;		tst.b	rP1Press.w			; Has start been pressed
+;		tst.b	ctrlPressP1.w			; Has start been pressed
 ;		bpl.s	.Loop				; If so, branch
 ;
 ;		st	(rObj_2+oGloveFlag).w		; Set the punch flag
@@ -164,20 +164,20 @@ TitleScreen:
 ;		jsr	PlayDAC1			; ''
 ;
 ;.PunchLoop:
-;		move.b	#vTitle,rVINTRout.w		; V-SYNC
+;		move.b	#vTitle,vIntRoutine.w		; V-SYNC
 ;		bsr.w	VSync_Routine			; ''
 ;
 ;		bsr.s	Title_Updates			; Do updates
 ;
 ;		jsr	RunObjects.w			; Run objects
-;		jsr	RenderObjects.w			; Render objects
+;		jsr	RendeobjMemory.w			; Render objects
 ;		
 ;		tst.b	(rObj_2+oGloveTime).w		; Has the timer run out?
 ;		bpl.s	.PunchLoop			; If not, loop
 ;		
 ;		st	rStartFall.w			; Set flag to start the level by falling
 ;
-;		move.b	#gLevel,rGameMode.w		; Set game mode to "level"
+;		move.b	#gLevel,opmode.w		; Set game mode to "level"
 ;		jmp	Level				; Go to level
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Palette cycle
@@ -187,17 +187,17 @@ TitleScreen:
 ;		addq.b	#4,rLogoAngle.w		; Increment angle
 ;		jsr	CalcSine.w			; Get sine
 ;		asr.w	#5,d0				; ''
-;		move.w	d0,rVScrollFG.w		; Set logo's Y position
+;		move.w	d0,vScrollBuffFG.w		; Set logo's Y position
 ;
-;		subq.b	#1,rPalCycTimer.w		; Decrement timer
+;		subq.b	#1,palCycTimer.w		; Decrement timer
 ;		bpl.s	.End				; If it hasn't run out, branch
-;		move.b	#6,rPalCycTimer.w		; Reset timer
+;		move.b	#6,palCycTimer.w		; Reset timer
 ;		
 ;		moveq	#0,d0
-;		move.b	rPalCycIndex.w,d0		; Get index
+;		move.b	palCycIndex.w,d0		; Get index
 ;		mulu.w	#$C,d0				; Turn into offset
 ;		lea	PalCyc_Title(pc,d0.w),a0	; Get pointer to palette data
-;		lea	(rPalette+$14).w,a1		; Palette
+;		lea	(paletteBuff+$14).w,a1		; Palette
 ;		move.w	(a0)+,(a1)+			; Load palette
 ;		move.w	(a0)+,(a1)+			; ''
 ;		move.w	(a0)+,(a1)+			; ''
@@ -205,10 +205,10 @@ TitleScreen:
 ;		move.w	(a0)+,(a1)+			; ''
 ;		move.w	(a0)+,(a1)+			; ''
 ;		
-;		addq.b	#1,rPalCycIndex.w		; Increment index
-;		cmpi.b	#6,rPalCycIndex.w		; Has it reached the end?
+;		addq.b	#1,palCycIndex.w		; Increment index
+;		cmpi.b	#6,palCycIndex.w		; Has it reached the end?
 ;		bcs.s	.End				; If not, branch
-;		clr.b	rPalCycIndex.w		; Reset index
+;		clr.b	palCycIndex.w		; Reset index
 
 ;.End:
 ;		rts
@@ -228,7 +228,7 @@ TitleScreen:
 ;		bne.s	.End
 ;		move.w	(a2),d0
 ;		adda.w	d0,a0
-;		move.b	rP1Press.w,d0
+;		move.b	ctrlPressP1.w,d0
 ;		cmp.b	(a0),d0
 ;		bne.s	.ResetCheat
 ;		addq.w	#1,(a2)
@@ -266,11 +266,11 @@ TitleScreen:
 ;		jsr	ClearScreen.w
 ;
 ;		lea	MapEni_BinBowieArt(pc),a0	; Decompress mappings
-;		lea	rBuffer,a1			; Decompress into RAM
+;		lea	miscBuff,a1			; Decompress into RAM
 ;		moveq	#1,d0				; Base tile properties: Tile ID 1, no flags
 ;		bsr.w	EniDec				; Decompress!
 ;
-;		lea	rBuffer,a1			; Load mappings
+;		lea	miscBuff,a1			; Load mappings
 ;		move.l	#$40000003,d0			; At (0, 0) on plane A
 ;		moveq	#$27,d1				; $28x$1C tiles
 ;		moveq	#$1B,d2				; ''
@@ -286,13 +286,13 @@ TitleScreen:
 ;		bsr.w	QueueKosMData			; ''
 ;
 ;.WaitPLCs:
-;		move.b	#vGeneral,rVINTRout.w		; Level load V-INT routine
+;		move.b	#vGeneral,vIntRoutine.w		; Level load V-INT routine
 ;		jsr	ProcessKos.w			; Process Kosinski queue
 ;		jsr	VSync_Routine.w			; V-SYNC
 ;		jsr	ProcessKosM.w			; Process Kosinski Moduled queue
-;		tst.b	rKosPMMods.w			; Are there still modules left?
+;		tst.b	kosMModules.w			; Are there still modules left?
 ;		bne.s	.WaitPLCs			; If so, branch
-;		move.b	#vGeneral,rVINTRout.w		; Level load V-INT routine
+;		move.b	#vGeneral,vIntRoutine.w		; Level load V-INT routine
 ;		jsr	VSync_Routine.w			; V-SYNC
 ;
 ;		jsr	FadeFromWhite.w
@@ -301,9 +301,9 @@ TitleScreen:
 ;		jsr	PlayDAC1
 ;
 ;.Loop:
-;		move.b	#vTitle,rVINTRout.w		; Level load V-INT routine
+;		move.b	#vTitle,vIntRoutine.w		; Level load V-INT routine
 ;		jsr	ProcessKos.w			; Process Kosinski queue
-;		move.b	rP1Press.w,d0
+;		move.b	ctrlPressP1.w,d0
 ;		andi.b	#%10010000,d0
 ;		beq.s	.Loop
 ;

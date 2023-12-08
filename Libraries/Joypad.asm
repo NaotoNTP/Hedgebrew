@@ -11,7 +11,7 @@
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ReadJoypads:
-	lea	rP1Data.w,a0			; 8	; load RAM space for joypad data
+	lea	ctrlDataP1.w,a0			; 8	; load RAM space for joypad data
 	lea	PORT_A_DATA-1,a1		; 12	; load I/O data port A
 	moveq	#%00000000,d0			; 4	; prepare TH = 0 request value
 	moveq	#%01000000,d1			; 4	; prepare TH = 1 request value

@@ -56,7 +56,7 @@ ObjDrownCnt_Anim:
 		jsr	AnimateObject.w			; ''
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjDrownCnt_ChkWater:
-		move.w	rWaterLvl.w,d0		; Get water level
+		move.w	waterYPos.w,d0		; Get water level
 		cmp.w	oYPos(a0),d0			; Have we gone beyond it?
 		bcs.s	.Wobble				; If not, branch
 
@@ -184,7 +184,7 @@ ObjDrownCnt_Count:
 		bcc.w	.MakeBubble			; If Sonic still has air left, branch
 
 		bsr.w	ObjDrown_ResetDrown		; Reset drowning stuff
-		move.w	#$FFFF,rCamLocked.w		; Lock the camera
+		move.w	#$FFFF,camLocked.w		; Lock the camera
 		playSnd	#sDrown, 2			; Play drowning sound
 		move.b	#$A,oAirUnk34(a0)
 		move.w	#1,oAirUnk36(a0)
@@ -243,7 +243,7 @@ ObjDrownCnt_Count:
 		move.w	d0,oYPos(a1)
 		jsr	RandomNumber.w
 		move.b	d0,oBubAngle(a1)
-		move.w	rLvlFrames.w,d0
+		move.w	lvlFrameCnt.w,d0
 		andi.b	#3,d0
 		bne.s	.loc_14082
 		move.b	#$E,oSubtype(a1)

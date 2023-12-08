@@ -33,7 +33,7 @@ LoadDualPCM:
 	endr
 
 		moveq	#2,d0			; set flush timer for 60hz systems
-		btst	#6,rHWVersion.w	; is this a PAL Mega Drive?
+		btst	#6,hwVersion.w	; is this a PAL Mega Drive?
 		beq.s	.ntsc			; if not, branch
 		moveq	#3,d0			; set flush timer for 50hz systems
 .ntsc
@@ -197,7 +197,7 @@ dUpdateAllAMPS:
 ; play at the exact right speed, instead of slightly too slow.
 ; ---------------------------------------------------------------------------
 
-.chkregion	btst	#6,rHWVersion.w	; is this PAL system?
+.chkregion	btst	#6,hwVersion.w	; is this PAL system?
 		beq.s	.driver			; if not, branch
 		subq.b	#1,mCtrPal.w		; decrease PAL frame counter
 		bgt.s	.driver			; if hasn't become 0 (or lower!), branch
@@ -2973,7 +2973,7 @@ dcsComm:
 ; ---------------------------------------------------------------------------
 
 dcCondRegTable:
-	dc.w rHWVersion, mFlags	; 0
+	dc.w hwVersion, mFlags	; 0
 	dc.w mTempoMain, mTempoSpeed	; 2
 	dc.w 0, 0			; 4
 	dc.w 0, 0			; 6

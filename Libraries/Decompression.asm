@@ -475,7 +475,7 @@ LoadKosMQueue:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 QueueKosMData:
-		lea	rKosPMList.w,a2
+		lea	kosMList.w,a2
 		tst.l	(a2)				; Is the first slot free?
 		beq.s	ProcessKosM_Init		; If it is, branch
 		
@@ -506,17 +506,17 @@ ProcessKosM_Init:
 		move.w	d3,d0
 		rol.w	#5,d0
 		andi.w	#$1F,d0				; Get number of complete modules
-		move.b	d0,rKosPMMods.w
+		move.b	d0,kosMModules.w
 		andi.l	#$7FF,d3			; Get size of last module in words
 		bne.s	.GotLeftover			; Branch if it's non-zero
-		subq.b	#1,rKosPMMods.w		; Otherwise decrement the number of modules
+		subq.b	#1,kosMModules.w		; Otherwise decrement the number of modules
 		move.l	#$800,d3			; And take the size of the last module to be $800 words
 
 .GotLeftover:
-		move.w	d3,rKosPMLastSz.w
-		move.w	d2,rKosPMDest.w
-		move.l	a1,rKosPMSrc.w
-		addq.b	#1,rKosPMMods.w		; Store total number of modules
+		move.w	d3,kosMLastSize.w
+		move.w	d2,kosMDestination.w
+		move.l	a1,kosMSource.w
+		addq.b	#1,kosMModules.w		; Store total number of modules
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Processes the first module on the queue
@@ -528,7 +528,7 @@ ProcessKosM_Init:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ProcessKosM:
-		tst.b	rKosPMMods.w
+		tst.b	kosMModules.w
 		bne.s	.ModulesLeft
 
 .Done:
@@ -536,53 +536,53 @@ ProcessKosM:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ModulesLeft:
 		bmi.s	.DecompressionStarted
-		cmpi.w	#(rKosPList_End-rKosPList)/8,rKosPCnt.w
+		cmpi.w	#(kosList_End-kosList)/8,kosCount.w
 		bhs.s	.Done				; Branch if the Kosinski decompression queue is full
-		movea.l	rKosPMList.w,a1
-		lea	rKosPBuf.w,a2
+		movea.l	kosMList.w,a1
+		lea	kosMBuff.w,a2
 		bsr.w	QueueKosData			; Add current module to decompression queue
-		ori.b	#$80,rKosPMMods.w		; And set bit to signify decompression in progress
+		ori.b	#$80,kosMModules.w		; And set bit to signify decompression in progress
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .DecompressionStarted:
-		tst.w	rKosPCnt.w
+		tst.w	kosCount.w
 		bne.s	.Done				; Branch if the decompression isn't complete
 
 		; Otherwise, DMA the decompressed data to VRAM
-		andi.b	#$7F,rKosPMMods.w
+		andi.b	#$7F,kosMModules.w
 		move.l	#$1000/2,d3
-		subq.b	#1,rKosPMMods.w
+		subq.b	#1,kosMModules.w
 		bne.s	.Skip				; Branch if it isn't the last module
-		move.w	rKosPMLastSz.w,d3
+		move.w	kosMLastSize.w,d3
 
 .Skip:
-		move.w	rKosPMDest.w,d2
+		move.w	kosMDestination.w,d2
 		move.w	d2,d0
 		add.w	d3,d0
 		add.w	d3,d0
-		move.w	d0,rKosPMDest.w		; Set new destination
-		move.l	rKosPMList.w,d0
-		move.l	rKosPList.w,d1
+		move.w	d0,kosMDestination.w		; Set new destination
+		move.l	kosMList.w,d0
+		move.l	kosList.w,d1
 		sub.l	d1,d0
 		andi.l	#$F,d0
 		add.l	d0,d1				; Round to the nearest $10 boundary
-		move.l	d1,rKosPMList.w		; And set new source
-		move.l	#rKosPBuf,d1
+		move.l	d1,kosMList.w		; And set new source
+		move.l	#kosMBuff,d1
 		bsr.w	QueueDMATransfer
-		tst.b	rKosPMMods.w
+		tst.b	kosMModules.w
 		bne.w	.Exit				; Return if this wasn't the last module
-		lea	rKosPMList.w,a0
-		lea	(rKosPMList+6).w,a1
-	rept (rKosPMList_End-rKosPMList)/6-1
+		lea	kosMList.w,a0
+		lea	(kosMList+6).w,a1
+	rept (kosMList_End-kosMList)/6-1
 		move.l	(a1)+,(a0)+			; Otherwise, shift all entries up
 		move.w	(a1)+,(a0)+
 	endr
 		clr.l	(a0)+				; And mark the last slot as free
 		clr.w	(a0)+
-		move.l	rKosPMList.w,d0
+		move.l	kosMList.w,d0
 		beq.s	.Exit				; Return if the queue is now empty
 		movea.l	d0,a1
-		move.w	rKosPMDest.w,d2
+		move.w	kosMDestination.w,d2
 		bra.w	ProcessKosM_Init
 
 .Exit:
@@ -598,12 +598,12 @@ ProcessKosM:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 QueueKosData:
-		move.w	rKosPCnt.w,d0
+		move.w	kosCount.w,d0
 		lsl.w	#3,d0
-		lea	rKosPList.w,a3
+		lea	kosList.w,a3
 		move.l	a1,(a3,d0.w)			; Store source
 		move.l	a2,4(a3,d0.w)			; Store destination
-		addq.w	#1,rKosPCnt.w
+		addq.w	#1,kosCount.w
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Checks if V-INT occured in the middle of Kosinski queue processing and stores the location from which processing is to resume if it did
@@ -615,14 +615,14 @@ QueueKosData:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SetKosBookmark:
-		tst.w	rKosPCnt.w
+		tst.w	kosCount.w
 		bpl.s	.Done				; Branch if a decompression wasn't in progress
 		move.l	$42(sp),d0			; Check address V-INT is supposed to rte to
 		cmpi.l	#ProcessKos_Main,d0
 		bcs.s	.Done
 		cmpi.l	#ProcessKos_Done,d0
 		bcc.s	.Done
-		move.l	$42(sp),rKosPBookmark.w
+		move.l	$42(sp),kosBookmark.w
 		move.l	#BackupKosRegs,$42(sp)		; Force V-INT to rte here instead if needed
 
 .Done:
@@ -637,14 +637,14 @@ SetKosBookmark:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ProcessKos:
-		tst.w	rKosPCnt.w
+		tst.w	kosCount.w
 		beq.w	ProcessKos_Done
 		bmi.w	RestoreKosBookmark		; Branch if a decompression was interrupted by V-int
 
 ProcessKos_Main:
-		ori.w	#$8000,rKosPCnt.w	; Set sign bit to signify decompression in progress
-		movea.l	rKosPList.w,a0
-		movea.l	rKosPDest.w,a1
+		ori.w	#$8000,kosCount.w	; Set sign bit to signify decompression in progress
+		movea.l	kosList.w,a0
+		movea.l	kosDestination.w,a1
 		
 		; What follows is identical to the normal Kosinski decompressor
 		moveq	#(1<<_Kos_LoopUnroll)-1,d7
@@ -810,14 +810,14 @@ ProcessKos_Main:
 	endif
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Quit:	
-		move.l	a0,rKosPList.w
-		move.l	a1,rKosPDest.w
-		andi.w	#$7FFF,rKosPCnt.w		; Clear decompression in progress bit
-		subq.w	#1,rKosPCnt.w
+		move.l	a0,kosList.w
+		move.l	a1,kosDestination.w
+		andi.w	#$7FFF,kosCount.w		; Clear decompression in progress bit
+		subq.w	#1,kosCount.w
 		beq.s	ProcessKos_Done			; Branch if there aren't any entries remaining in the queue
-		lea	rKosPList.w,a0
-		lea	(rKosPList+8).w,a1		; Otherwise, shift all entries up
-	rept (rKosPList_End-rKosPList)/8-1
+		lea	kosList.w,a0
+		lea	(kosList+8).w,a1		; Otherwise, shift all entries up
+	rept (kosList_End-kosList)/8-1
 		move.l	(a1)+,(a0)+
 		move.l	(a1)+,(a0)+
 	endr
@@ -826,18 +826,18 @@ ProcessKos_Done:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 RestoreKosBookmark:
-		movem.w	rKosPRegs.w,d0-d6
-		movem.l	(rKosPRegs+2*7).w,a0-a1/a5
-		move.l	rKosPBookmark.w,-(sp)
-		move.w	rKosPSR.w,-(sp)
+		movem.w	kosRegisters.w,d0-d6
+		movem.l	(kosRegisters+2*7).w,a0-a1/a5
+		move.l	kosBookmark.w,-(sp)
+		move.w	kosStatusReg.w,-(sp)
 		moveq	#(1<<_Kos_LoopUnroll)-1,d7
 		lea	KosDec_ByteMap(pc),a4		; Load LUT poiner
 		rte
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 BackupKosRegs:
-		move	sr,rKosPSR.w
-		movem.w	d0-d6,rKosPRegs.w
-		movem.l	a0-a1/a5,(rKosPRegs+2*7).w
+		move	sr,kosStatusReg.w
+		movem.w	d0-d6,kosRegisters.w
+		movem.l	a0-a1/a5,(kosRegisters+2*7).w
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load Kosinski compressed art into VRAM

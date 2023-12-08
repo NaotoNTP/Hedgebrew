@@ -17,11 +17,11 @@ ObjBumper:
 		move.b	d1,oColH(a0)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBumperMain:
-		tst.b	rDebugMode.w
+		tst.b	debugMode.w
 		bne.w	.Display
 
 		lea	.RangeData(pc),a1		; Range data
-		movea.w	rPlayer1Addr.w,a2		; Player object
+		movea.w	playerPtrP1.w,a2		; Player object
 		cmpi.b	#$C,oRoutine(a2)
 		bcc.w	.Display
 		jsr	CheckObjInRange.w		; Is the player in range?
@@ -33,7 +33,7 @@ ObjBumperMain:
 		sub.w	oXPos(a2),d1
 		sub.w	oYPos(a2),d2
 		jsr	CalcArcTan.w
-		move.b	(rFrameCnt+3).w,d1
+		move.b	(frameCounter+3).w,d1
 		andi.w	#3,d1
 		add.w	d1,d0
 		jsr	CalcSine.w

@@ -12,7 +12,7 @@
 ;	d1.l	- New seed
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 RandomNumber:
-		move.l	rRNGSeed.w,d1			; Get seed
+		move.l	randomSeed.w,d1			; Get seed
 		bne.s	.Generate			; If it's already initialized, branch
 		move.l	#$2A6D365B,d1			; Initialize the seed
 
@@ -27,7 +27,7 @@ RandomNumber:
 		add.w	d1,d0				; ''
 		move.w	d0,d1				; ''
 		swap	d1				; ''
-		move.l	d1,rRNGSeed.w			; Set new seed
+		move.l	d1,randomSeed.w			; Set new seed
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Calculate the sine and cosine of an angle
@@ -193,7 +193,7 @@ ArcTanTable:
 ; Initialize oscillation
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 InitOscillation:
-		lea	rOscNums.w,a1
+		lea	oscillators.w,a1
 		lea	OscInitData(pc),a2
 		moveq	#(OscInitData_End-OscInitData)>>1-1,d1
 
@@ -225,7 +225,7 @@ OscInitData_End:
 ; Update oscillation
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 UpdateOscillation:
-		lea	rOscNums.w,a1
+		lea	oscillators.w,a1
 		lea	OscUpdateData(pc),a2
 		move.w	(a1)+,d3
 		moveq	#(OscUpdateData_End-OscUpdateData)>>2-1,d1
@@ -257,7 +257,7 @@ UpdateOscillation:
 		addq.w	#4,a1
 		dbf	d1,.OscLoop
 
-		move.w	d3,rOscCtrl.w
+		move.w	d3,oscControl.w
 
 .End:
 		rts

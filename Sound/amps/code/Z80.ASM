@@ -1532,14 +1532,14 @@ SwitchVolume:
 ;		zneg					; 08	; convert volume to 00 - 80 (mute - loud)
 ;		zadd	a,080h				; 07	; ''
 ;		zadd	a,a				; 04	; shift MSB into carry
-;		ld	(SV_Fraction+001h),a		; 13	; store fraction
+;		ld	(SV_fraction+001h),a		; 13	; store fraction
 ;		sbc	a,a				; 04	; get only the carry (for quotient)
 ;		zneg					; 08	; ''
 ;		ld	c,a				; 04	; store quotient in c
 ;		ld	hl,00000h			; 10	; reset current fraction/dividend
 ;		ld	a,b				; 04	; reload volume
 ;		zadd	a,080h				; 07	; rotate starting volume
-;SV_Fraction:	ld	b,000h				; 07	; set fraction/dividend
+;SV_fraction:	ld	b,000h				; 07	; set fraction/dividend
 ;
 ;SV_SetNormal:
 ;		ld	(de),a				; 07	; save to table

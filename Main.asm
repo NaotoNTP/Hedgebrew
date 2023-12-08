@@ -36,18 +36,18 @@ GameInit:
 		
 		move.b	HW_VERSION,d0				; Get hardware version
 		andi.b	#$C0,d0					; Just get region bits
-		move.b	d0,rHWVersion.w				; Store in RAM
+		move.b	d0,hwVersion.w				; Store in RAM
 
 		move.w	#$4EF9,d0				; JMP opcode
-		move.w	d0,rVIntJmp.w				; Set the "JMP" command for V-INT
-		move.w	d0,rHIntJmp.w				; Set the "JMP" command for H-INT
-		move.l	#VInt_Standard,rVIntAddr.w		; Set the V-INT pointer to the standard V-INT routine
-		move.l	#HInt_Water,rHIntAddr.w			; Set the H-INT pointer to the standard V-INT routine
+		move.w	d0,vIntJump.w				; Set the "JMP" command for V-INT
+		move.w	d0,hIntJump.w				; Set the "JMP" command for H-INT
+		move.l	#VInt_Standard,vIntAddress.w		; Set the V-INT pointer to the standard V-INT routine
+		move.l	#HInt_Water,hIntAddress.w			; Set the H-INT pointer to the standard V-INT routine
 
-		clr.w	rDMAQueue.w				; Set stop token at the beginning of the DMA queue
-		move.w	#rDMAQueue,rDMASlot.w			; Reset the DMA queue slot
+		clr.w	dmaQueue.w				; Set stop token at the beginning of the DMA queue
+		move.w	#dmaQueue,dmaSlot.w			; Reset the DMA queue slot
 
-		move.b	#gLevel,rGameMode.w			; Set game mode to "title"
+		move.b	#gLevel,opmode.w			; Set game mode to "title"
 		jmp	Level					; Go to the title screen
 
 ; =========================================================================================================================================================
@@ -56,7 +56,7 @@ GameInit:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 GotoGameMode:
 		moveq	#0,d0
-		move.b	rGameMode.w,d0				; Get game mode ID
+		move.b	opmode.w,d0				; Get game mode ID
 		movea.l	.GameModes(pc,d0.w),a0			; Get pointer
 		jmp	(a0)					; Jump to it
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

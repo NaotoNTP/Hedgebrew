@@ -11,14 +11,14 @@
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_InitPlanes:
-		lea	rFGCam.w,a1			; Get foreground level drawing RAM
-		lea	rFGColBuf.w,a3			; Get foreground column plane buffer
-		lea	rFGRowBuf.w,a4			; Get foreground row plane buffer
+		lea	fgCamVars.w,a1			; Get foreground level drawing RAM
+		lea	fgColBuff.w,a3			; Get foreground column plane buffer
+		lea	fgRowBuff.w,a4			; Get foreground row plane buffer
 
 		move.l	#$40000003,cVDP(a1)		; Set the base VDP command for drawing tiles
 		clr.w	cLayout(a1)			; Set the offset for the level layout (foreground)
 		
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#3,d0				; ''
 		lea	Level_RenderRouts,a0		; Get initialization routine list
@@ -26,16 +26,16 @@ Level_InitPlanes:
 		movea.l	(a0,d0.w),a0			; Get initialization pointer
 		jsr	(a0)				; Jump to it
 
-		move.w	cYPos(a1),rVScrollFG.w		; Set the V-Scroll value for the foreground
+		move.w	cYPos(a1),vScrollBuffFG.w		; Set the V-Scroll value for the foreground
 
-		lea	rBGCam.w,a1			; Get background level drawing RAM
-		lea	rBGColBuf.w,a3			; Get background column plane buffer
-		lea	rBGRowBuf.w,a4			; Get background row plane buffer
+		lea	bgCamVars.w,a1			; Get background level drawing RAM
+		lea	bgColBuff.w,a3			; Get background column plane buffer
+		lea	bgRowBuff.w,a4			; Get background row plane buffer
 		
 		move.l	#$60000003,cVDP(a1)		; Set the base VDP command for drawing tils
 		move.w	#4,cLayout(a1)			; Set the offset for the level layout (background)
 		
-		move.w	rLevel.w,d0			; Get level ID
+		move.w	levelID.w,d0			; Get level ID
 		ror.b	#1,d0				; Turn into offset
 		lsr.w	#3,d0				; ''
 		lea	Level_RenderRouts+4,a0		; Get initialization routine list
@@ -43,33 +43,33 @@ Level_InitPlanes:
 		movea.l	(a0,d0.w),a0			; Get initialization pointer
 		jsr	(a0)				; Jump to it
 
-		move.w	cYPos(a1),rVScrollBG.w		; Set the V-Scroll value for the background
+		move.w	cYPos(a1),vScrollBuffBG.w		; Set the V-Scroll value for the background
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Update the planes
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_UpdatePlanes:
-		lea	rFGCam.w,a1			; Get foreground level drawing RAM
-		lea	rFGColBuf.w,a3		; Get foreground column plane buffer
-		lea	rFGRowBuf.w,a4		; Get foreground row plane buffer
+		lea	fgCamVars.w,a1			; Get foreground level drawing RAM
+		lea	fgColBuff.w,a3		; Get foreground column plane buffer
+		lea	fgRowBuff.w,a4		; Get foreground row plane buffer
 		
 		movea.l	cUpdate(a1),a0			; Get the update routine pointer
 		jsr	(a0)				; Jump to it
 		
-		lea	rBGCam.w,a1			; Get background level drawing RAM
-		lea	rBGColBuf.w,a3		; Get background column plane buffer
-		lea	rBGRowBuf.w,a4		; Get background row plane buffer
+		lea	bgCamVars.w,a1			; Get background level drawing RAM
+		lea	bgColBuff.w,a3		; Get background column plane buffer
+		lea	bgRowBuff.w,a4		; Get background row plane buffer
 
 		movea.l	cUpdate(a1),a0			; Get the update routine pointer
 		jsr	(a0)				; Jump to it
 
-		lea	rFGCam.w,a2			; Get foreground level drawing RAM
+		lea	fgCamVars.w,a2			; Get foreground level drawing RAM
 		move.w	cXPos(a2),cXPrev(a2)		; Update the previous X position for the foreground
 		move.w	cYPos(a2),cYPrev(a2)		; Update the previous Y position for the foreground
-		move.w	cYPos(a2),rVScrollFG.w		; Set the V-Scroll value for the foreground
+		move.w	cYPos(a2),vScrollBuffFG.w		; Set the V-Scroll value for the foreground
 		move.w	cXPos(a1),cXPrev(a1)		; Update the previous X position for the background
 		move.w	cYPos(a1),cYPrev(a1)		; Update the previous Y position for the background
-		move.w	cYPos(a1),rVScrollBG.w		; Set the V-Scroll value for the background
+		move.w	cYPos(a1),vScrollBuffBG.w		; Set the V-Scroll value for the background
 
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ General_InitFG:
 ; General background initialization
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 General_InitBG:
-		lea	rFGCam.w,a2			; Get foreground level drawing RAM
+		lea	fgCamVars.w,a2			; Get foreground level drawing RAM
 		move.w	cXPos(a2),d0			; Get foreground X position
 		asr.w	#1,d0				; Divide by 2
 		move.w	d0,cXPos(a1)			; Set as background X position
@@ -105,7 +105,7 @@ General_UpdateFG:
 ; General background update
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 General_UpdateBG:
-		lea	rFGCam.w,a2			; Get foreground level drawing RAM
+		lea	fgCamVars.w,a2			; Get foreground level drawing RAM
 		move.w	cXPos(a2),d0			; Get foreground X position
 		asr.w	#1,d0				; Divide by 2
 		move.w	d0,cXPos(a1)			; Set as background X position
@@ -407,11 +407,11 @@ getChunk	macro
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_GetRow:
-		lea	rLayout.w,a2			; Get level layout pointer address
+		lea	lvlLayout.w,a2			; Get level layout pointer address
 		adda.w	cLayout(a1),a2			; Add camera offset value
 		movea.l	(a2),a2				; Load address stored within the pointer
 
-		lea	rBlocks.w,a3			; Get block table address
+		lea	blockData.w,a3			; Get block table address
 		lea	$82(a4),a5			; Store plane buffer address for the bottom tiles in the row
 
 		calcHiVDP				; Get high VDP command word
@@ -494,11 +494,11 @@ Level_GetRow:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_GetCol:
-		lea	rLayout.w,a2			; Get level layout pointer address
+		lea	lvlLayout.w,a2			; Get level layout pointer address
 		adda.w	cLayout(a1),a2			; Add camera offset value
 		movea.l	(a2),a2				; Load address stored within the pointer
 		
-		lea	rBlocks.w,a4			; Get block table address
+		lea	blockData.w,a4			; Get block table address
 		lea	$42(a3),a5			; Store plane buffer address for the right tiles in the column
 		
 		calcHiVDP				; Get high VDP command word
@@ -669,9 +669,9 @@ scrollSection	macro
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ScrollSections:
-		lea	rFGCam.w,a2			; Get foreground level drawing variables
-		lea	rScrlSecs.w,a4		; Deformation offset buffer
-		lea	rHScroll.w,a5			; Horizontal scroll buffer
+		lea	fgCamVars.w,a2			; Get foreground level drawing variables
+		lea	scrollSects.w,a4		; Deformation offset buffer
+		lea	hScrollBuff.w,a5			; Horizontal scroll buffer
 
 		move.w	(a3)+,d0			; Get the total number of scroll sections
 
@@ -767,8 +767,8 @@ ScrollSections:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ScrollStaticBG:
-		lea	rFGCam.w,a2		; Get foreground level drawing variables
-		lea	rHScroll.w,a5		; Horizontal scroll buffer
+		lea	fgCamVars.w,a2		; Get foreground level drawing variables
+		lea	hScrollBuff.w,a5		; Horizontal scroll buffer
 		
 		move.l	cXPos(a2),d1			; Get foreground X position
 		neg.l	d1				; Negate it so it scrolls properly

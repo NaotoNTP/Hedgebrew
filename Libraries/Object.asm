@@ -11,16 +11,16 @@
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 InitObjectList:
-		clrRAM	rRespawns,rObjects_End		; Clear respawn table and object memory
+		clrRAM	objRespawn,objMemory_End		; Clear respawn table and object memory
 
 	; setup tail object
-		move.w	#rTailAddr,rTailNext.w		; set the first object as the tail object
-		move.w	#rTailAddr,rTailPrev.w		; set the last object as the tail object
-		move.l	#.rts,rTailAddr.w		; set the next rts as the tail object pointer
+		move.w	#objExecExit,objExecFirst.w		; set the first object as the tail object
+		move.w	#objExecExit,objExecLast.w		; set the last object as the tail object
+		move.l	#.rts,objExecExit.w		; set the next rts as the tail object pointer
 
 	; setup free object list
-		lea	rObjects.w,a0			; load the objects list into a0
-		move.w	a0,rFreeHead.w			; set the first object as the first free object
+		lea	objMemory.w,a0			; load the objects list into a0
+		move.w	a0,objExecFree.w			; set the first object as the first free object
 		moveq	#OBJECT_COUNT-2,d0		; load object count to d0
 		moveq	#oSize,d1			; load object size to d1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ InitObjectList:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	; reset display table
-		lea	rDispInput-dNext.w,a1		; get display table address to a1
+		lea	objDisplay-dNext.w,a1		; get display table address to a1
 		moveq	#8-1,d1				; loop for all the layers
 
 .dsp
@@ -60,13 +60,13 @@ InitObjectList:
 ;	a2.l	- Trashed
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 FindFreeObj:
-		move.w	rFreeHead.w,d0			; get pointer to the next free object
+		move.w	objExecFree.w,d0			; get pointer to the next free object
 		beq.s	.rts				; if it's a null pointer (z=1), return
 		movea.w	d0,a1				; load to a1
-		move.w	oPrev(a1),rFreeHead.w		; copy the next free object pointer to list start
+		move.w	oPrev(a1),objExecFree.w		; copy the next free object pointer to list start
 
-		move.w	rTailPrev.w,a2			; load last object to a2
-		move.w	a1,rTailPrev.w			; save as the new last object
+		move.w	objExecLast.w,a2			; load last object to a2
+		move.w	a1,objExecLast.w			; save as the new last object
 		move.w	oNext(a2),oNext(a1)		; copy the next pointer from old tail to new object
 		move.w	a1,oNext(a2)			; save new object as next pointer for old tail
 		move.w	a2,oPrev(a1)			; save old tail as prev pointer for new object
@@ -105,8 +105,8 @@ DeleteObject:
 		move.w	oNext(a0),a1			; get next object to a1
 		move.w	oPrev(a0),oPrev(a1)		; copy previous pointer
 
-		move.w	rFreeHead.w,oPrev(a0)		; get the head of the free list to previous pointer of this object
-		move.w	a0,rFreeHead.w			; save as the new head of free list
+		move.w	objExecFree.w,oPrev(a0)		; get the head of the free list to previous pointer of this object
+		move.w	a0,objExecFree.w			; save as the new head of free list
 
 ; clear object memory
 		moveq	#0,d0				; clear d0
@@ -134,15 +134,15 @@ DeleteObject:
 ; RETURNS:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-RenderObjects:
+RendeobjMemory:
 		moveq	#($280/8)-1,d7			; Max sprite count
 		moveq	#0,d6				; Render flags
 
-		lea	rFGCam.w,a3			; Foreground camera variables
-		lea	rDispInput+dNext.w,a5	; Sprite input table
-		lea	rSprites.w,a6			; Sprite table buffer
+		lea	fgCamVars.w,a3			; Foreground camera variables
+		lea	objDisplay+dNext.w,a5	; Sprite input table
+		lea	spriteBuff.w,a6			; Sprite table buffer
 
-		cmpi.b	#gLevel,rGameMode.w		; Are we in level mode?
+		cmpi.b	#gLevel,opmode.w		; Are we in level mode?
 		bne.s	.PrioLvlLoop			; If not, branch
 		jsr	Level_RenderHUDAndRings		; Render the HUD & Rings (in that order)
 
@@ -220,7 +220,7 @@ RenderObjects:
 		bne.w	.ObjectLoop			; If there are still some sprites to draw in this priority level, branch
 
 .NextPrioLvl:
-		cmpa.w	#rDispInput_End,a5		; Are we at the end of the input table?
+		cmpa.w	#objDisplay_End,a5		; Are we at the end of the input table?
 		blo.w	.PrioLvlLoop			; If not, branch
 
 		move.w	d7,d6				; Get remaining sprite count
@@ -235,7 +235,7 @@ RenderObjects:
 .SetDrawnSprites:
 		subi.w	#($280/8)-1,d6			; Get number of sprites drawn
 		neg.w	d6				; ''
-		move.b	d6,rSprCount.w		; Store it
+		move.b	d6,spriteCount.w		; Store it
 
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -532,19 +532,19 @@ CheckObjInRange:
 ; Object manager
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjectManager:
-		tst.b	rObjManInit.w
+		tst.b	objMgrInit.w
 		bne.s	ObjectManagerMain
 
 ObjectManagerInit:
-		st	rObjManInit.w			; Set the init flag
+		st	objMgrInit.w			; Set the init flag
 
-		movea.l	rObjPosAddr.w,a0		; Get object data pointer
-		move.l	a0,rObjLoadR.w
-		move.l	a0,rObjLoadL.w			; Store address of object layout
+		movea.l	objMgrLayout.w,a0		; Get object data pointer
+		move.l	a0,objMgrLoadR.w
+		move.l	a0,objMgrLoadL.w			; Store address of object layout
 
-		lea	rRespawns.w,a3			; Object respawn table
+		lea	objRespawn.w,a3			; Object respawn table
 
-		move.w	rCamXPos.w,d6			; Camera's X position
+		move.w	fgCamXPos.w,d6			; Camera's X position
 		subi.w	#$80,d6				; Subtract 128
 		bhs.s	.NoReset			; Branch if it doesn't go past the left boundary
 		moveq	#0,d6				; Cap at left boundary
@@ -552,7 +552,7 @@ ObjectManagerInit:
 .NoReset:
 		andi.w	#$FF80,d6			; Keep in chunks of 128 pixels
 
-		movea.l	rObjLoadR.w,a0			; Get address of the object loader for the right side of the screen
+		movea.l	objMgrLoadR.w,a0			; Get address of the object loader for the right side of the screen
 
 .ChkObjsLeft:
 		cmp.w	(a0),d6				; Compare object position
@@ -562,12 +562,12 @@ ObjectManagerInit:
 		bra.s	.ChkObjsLeft			; Loop
 
 .ChkDone:
-		move.l	a0,rObjLoadR.w			; Store new addresses
-		move.w	a3,rObjRespR.w			; ''
+		move.l	a0,objMgrLoadR.w			; Store new addresses
+		move.w	a3,objMgrRespL.w			; ''
 
-		lea	rRespawns.w,a3			; Object respawn table
+		lea	objRespawn.w,a3			; Object respawn table
 
-		movea.l	rObjLoadL.w,a0
+		movea.l	objMgrLoadL.w,a0
 		subi.w	#$80,d6				; Subtract from camera's X position again
 		bcs.s	.ChkDone2			; But is done to account for the object loader later on
 
@@ -579,28 +579,28 @@ ObjectManagerInit:
 		bra.s	.ChkObjsRight			; Loop
 
 .ChkDone2:
-		move.l	a0,rObjLoadL.w			; Store new addresses
-		move.w	a3,rObjRespL.w			; ''
+		move.l	a0,objMgrLoadL.w			; Store new addresses
+		move.w	a3,objMgrRespR.w			; ''
 
-		move.w	#-1,rObjManX.w			; Reset manager's camera X position
-		move.w	rCamYPos.w,d0			; Get camera's Y position
+		move.w	#-1,objMgrCameraX.w			; Reset manager's camera X position
+		move.w	fgCamYPos.w,d0			; Get camera's Y position
 		andi.w	#$FF80,d0			; Keep in range
-		move.w	d0,rObjManY.w			; Store it so unnecessary Y checks shouldn't be done
+		move.w	d0,objMgrCameraY.w			; Store it so unnecessary Y checks shouldn't be done
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjectManagerMain:
-		move.w	rCamYPos.w,d1			; Get camera's Y position
+		move.w	fgCamYPos.w,d1			; Get camera's Y position
 		subi.w	#$80,d1				; Subtract 128 pixels
 		andi.w	#$FF80,d1			; Keep in range
-		move.w	d1,rObjYCoarse.w		; Store this
+		move.w	d1,objMgrCoarseY.w		; Store this
 
-		move.w	rCamXPos.w,d1			; Get camera's X position
+		move.w	fgCamXPos.w,d1			; Get camera's X position
 		subi.w	#$80,d1				; Subtract 128 pixels
 		andi.w	#$FF80,d1			; Keep in range
-		move.w	d1,rObjXCoarse.w		; Store this
+		move.w	d1,objMgrCoarseX.w		; Store this
 		
 		lea	Level_ObjIndex,a4		; Level object index
 
-		move.w	rCamYPos.w,d3			; Get camera's Y position
+		move.w	fgCamYPos.w,d3			; Get camera's Y position
 		andi.w	#$FF80,d3			; Keep in range
 		move.w	d3,d4				; Copy
 		addi.w	#$200,d4			; Lower Y boundary
@@ -610,16 +610,16 @@ ObjectManagerMain:
 
 .SetNoWrap:
 		move.w	#$FFF,d5
-		move.w	rCamXPos.w,d6			; Get camera's X position
+		move.w	fgCamXPos.w,d6			; Get camera's X position
 		andi.w	#$FF80,d6			; Keep in range
-		cmp.w	rObjManX.w,d6			; Check against last range
+		cmp.w	objMgrCameraX.w,d6			; Check against last range
 		beq.w	Level_LoadObjs_SameXRange	; Branch if they are the same
 		bge.s	Level_LoadObjs_Forward		; If new range is greater than the last, branch
 
-		move.w	d6,rObjManX.w			; Set new range
+		move.w	d6,objMgrCameraX.w			; Set new range
 
-		movea.l	rObjLoadL.w,a0			; Get current objects on the left side of the screen
-		movea.w	rObjRespL.w,a3			; And the appropriate respawn list
+		movea.l	objMgrLoadL.w,a0			; Get current objects on the left side of the screen
+		movea.w	objMgrRespR.w,a3			; And the appropriate respawn list
 
 		subi.w	#$80,d6				; Subtract 128 from the X position
 		blo.s	.EndLoad			; If outside of the level boundary, branch
@@ -646,11 +646,11 @@ ObjectManagerMain:
 		jsr	DeleteOtherObj.w
 
 .EndLoad:
-		move.l	a0,rObjLoadL.w			; Store new addresses
-		move.w	a3,rObjRespL.w
+		move.l	a0,objMgrLoadL.w			; Store new addresses
+		move.w	a3,objMgrRespR.w
 
-		movea.l	rObjLoadR.w,a0			; Get current objects on the right side of the screen
-		movea.w	rObjRespR.w,a3			; And the appropriate respawn list
+		movea.l	objMgrLoadR.w,a0			; Get current objects on the right side of the screen
+		movea.w	objMgrRespL.w,a3			; And the appropriate respawn list
 
 		addi.w	#$300,d6			; Load 2 chunks forward
 
@@ -662,15 +662,15 @@ ObjectManagerMain:
 		bra.s	.ChkLoop			; Check next object
 
 .ChkDone:
-		move.l	a0,rObjLoadR.w			; Store new addresses
-		move.w	a3,rObjRespR.w
+		move.l	a0,objMgrLoadR.w			; Store new addresses
+		move.w	a3,objMgrRespL.w
 		bra.s	Level_LoadObjs_SameXRange	; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_LoadObjs_Forward:
-		move.w	d6,rObjManX.w			; Set new range
+		move.w	d6,objMgrCameraX.w			; Set new range
 
-		movea.l	rObjLoadR.w,a0			; Get current objects on the right side of the screen
-		movea.w	rObjRespR.w,a3			; And the appropriate respawn list
+		movea.l	objMgrLoadR.w,a0			; Get current objects on the right side of the screen
+		movea.w	objMgrRespL.w,a3			; And the appropriate respawn list
 
 		addi.w	#$280,d6			; Load 2 chunks forward
 
@@ -689,11 +689,11 @@ Level_LoadObjs_Forward:
 		jsr	DeleteOtherObj.w
 
 .EndLoad:
-		move.l	a0,rObjLoadR.w			; Store new addresses
-		move.w	a3,rObjRespR.w
+		move.l	a0,objMgrLoadR.w			; Store new addresses
+		move.w	a3,objMgrRespL.w
 
-		movea.l	rObjLoadL.w,a0			; Get current objects on the left side of the screen
-		movea.w	rObjRespL.w,a3			; And the appropriate respawn list
+		movea.l	objMgrLoadL.w,a0			; Get current objects on the left side of the screen
+		movea.w	objMgrRespR.w,a3			; And the appropriate respawn list
 
 		subi.w	#$300,d6			; Check 1 chunk backwards
 		blo.s	.ChkDone			; If outside of level, branch
@@ -706,14 +706,14 @@ Level_LoadObjs_Forward:
 		bra.s	.ChkLoop			; Check next object
 
 .ChkDone:
-		move.l	a0,rObjLoadL.w			; Store new addresses
-		move.w	a3,rObjRespL.w
+		move.l	a0,objMgrLoadL.w			; Store new addresses
+		move.w	a3,objMgrRespR.w
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_LoadObjs_SameXRange:
-		move.w	rCamYPos.w,d6			; Get camera's X position
+		move.w	fgCamYPos.w,d6			; Get camera's X position
 		andi.w	#$FF80,d6			; Keep in range
 		move.w	d6,d3				; Copy
-		cmp.w	rObjManY.w,d6			; Check against last range
+		cmp.w	objMgrCameraY.w,d6			; Check against last range
 		beq.w	.LoadEnd			; Branch if they are the same
 		bge.s	.MovingDown			; If the new raqnge is greater than the last, branch
 
@@ -732,9 +732,9 @@ Level_LoadObjs_SameXRange:
 		addi.w	#$80,d4				; Look one chunk down
 		move.w	#$FFF,d5
 
-		movea.l	rObjLoadL.w,a0			; Get current objects on the left side of the screen
-		movea.w	rObjRespL.w,a3			; And the appropriate respawn list
-		move.l	rObjLoadR.w,d7			; Get current objects on the right side of the screen
+		movea.l	objMgrLoadL.w,a0			; Get current objects on the left side of the screen
+		movea.w	objMgrRespR.w,a3			; And the appropriate respawn list
+		move.l	objMgrLoadR.w,d7			; Get current objects on the right side of the screen
 		sub.l	a0,d7				; Subtract the left position from the right
 		beq.s	.LoadEndRst			; Branch if no objects
 		addq.l	#2,a0				; Align to object's Y position
@@ -783,7 +783,7 @@ Level_LoadObjs_SameXRange:
 		jsr	DeleteOtherObj.w
 
 .LoadEnd:
-		move.w	d6,rObjManY.w		; Store manager's camera Y position
+		move.w	d6,objMgrCameraY.w		; Store manager's camera Y position
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load an object from the object layout
@@ -856,7 +856,7 @@ CheckObjActive:
 
 CheckObjActive2:
 		andi.w	#$FF80,d0			; Only allow multiples of $80
-		sub.w	rObjXCoarse.w,d0		; Subtract the camera's coarse X position
+		sub.w	objMgrCoarseX.w,d0		; Subtract the camera's coarse X position
 		cmpi.w	#$280,d0			; Has it gone offscreen?
 		bhi.s	.Delete				; If so, branch
 		rts
@@ -886,7 +886,7 @@ GetOrientToPlayer:
 		moveq	#0,d0
 		moveq	#0,d1
 
-		movea.w	rPlayer1Addr.w,a1		; Get player object
+		movea.w	playerPtrP1.w,a1		; Get player object
 
 		move.w	oXPos(a0),d2			; Get horizonal distance
 		sub.w	oXPos(a1),d2			; ''
