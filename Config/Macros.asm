@@ -574,7 +574,7 @@ strpos			= strpos+1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 runObjects		macro
 		movea.w	objExecFirst.w,a0				; load first object slot into a0
-		move.l	oAddr(a0),a1				; load its pointer to a1
+		move.l	_objAddress(a0),a1				; load its pointer to a1
 		jsr	(a1)					; jump to its code
 	endm
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -587,8 +587,8 @@ runObjects		macro
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 nextObject		macro
-		movea.w	oNext(a0),a0				; load the next object address to a0
-		move.l	oAddr(a0),a1				; load its pointer to a1
+		movea.w	_objNext(a0),a0				; load the next object address to a0
+		move.l	_objAddress(a0),a1				; load its pointer to a1
 		jmp	(a1)					; jump to its code
 	endm
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -606,14 +606,14 @@ displaySprite		macro	layer, obj, fre, chk
 ;	endif
 
 	if \chk
-		tst.w	oDrawNext(\obj)					; check if displayed already
+		tst.w	_objDrawNext(\obj)					; check if displayed already
 		bne.s	.no\@						; if yes, skip
 	endif
 
-		move.w	#objDisplay+(\layer*dSize),oDrawNext(\obj)	; put end marker as the next pointer
+		move.w	#objDisplay+(\layer*dSize),_objDrawNext(\obj)	; put end marker as the next pointer
 		move.w	objDisplay+dPrev+(\layer*dSize).w,\fre		; copy the pointer from the end marker to dst register
-		move.w	\fre,oDrawPrev(\obj)				; copy that to prev pointer
-		move.w	\obj,oDrawNext(\fre)				;
+		move.w	\fre,_objDrawPrev(\obj)				; copy that to prev pointer
+		move.w	\obj,_objDrawNext(\fre)				;
 		move.w	\obj,objDisplay+dPrev+(\layer*dSize).w		; copy the pointer from the end marker to dst register
 
 ;		cmp.w	#objDisplay+(\layer*dSize),objDisplay+dPrev+(\layer*dSize).w	; special case: points to itself
@@ -636,19 +636,19 @@ displaySpriteReg		macro	reg, obj, fre, chk
 layer EQUR	\reg							; convert register
 
 	if \chk
-		tst.w	oDrawNext(\reg)					; check if displayed already
+		tst.w	_objDrawNext(\reg)					; check if displayed already
 		bne.s	.no\@						; if yes, skip
 	endif
 
-		move.w	layer,oDrawNext(\obj)				; put end marker as the next pointer
-		move.w	oDrawPrev(layer),\fre				; copy the pointer from the end marker to dst register
-		move.w	\fre,oDrawPrev(\obj)				; copy that to prev pointer
-		move.w	\obj,oDrawNext(\fre)				;
-		move.w	\obj,oDrawPrev(layer)				; copy the pointer from the end marker to dst register
+		move.w	layer,_objDrawNext(\obj)				; put end marker as the next pointer
+		move.w	_objDrawPrev(layer),\fre				; copy the pointer from the end marker to dst register
+		move.w	\fre,_objDrawPrev(\obj)				; copy that to prev pointer
+		move.w	\obj,_objDrawNext(\fre)				;
+		move.w	\obj,_objDrawPrev(layer)				; copy the pointer from the end marker to dst register
 
-;		cmp.w	oDrawPrev(layer),layer				; special case: points to itself
+;		cmp.w	_objDrawPrev(layer),layer				; special case: points to itself
 ;		bne.s	.no\@						; if no, skip
-;		move.w	\obj,oDrawPrev(layer)				; else, copy over
+;		move.w	\obj,_objDrawPrev(layer)				; else, copy over
 .no\@
 	endm
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -661,21 +661,21 @@ layer EQUR	\reg							; convert register
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 removeSprite		macro	obj, fre, chk
 	if \chk
-		tst.w	oDrawNext(\obj)					; check if displayed already
+		tst.w	_objDrawNext(\obj)					; check if displayed already
 		beq.s	.yes\@						; if not, skip
 	endif
 
-		move.w	oDrawPrev(\obj),\fre				; load the prev pointer to dst
-		move.w	oDrawNext(\obj),oDrawNext(\fre)			; copy the next object pointer from src to dst
-		move.w	oDrawNext(\obj),\fre				; load the next pointer to dst
-		move.w	oDrawPrev(\obj),oDrawPrev(\fre)			; copy the prev object pointer from src to dst
+		move.w	_objDrawPrev(\obj),\fre				; load the prev pointer to dst
+		move.w	_objDrawNext(\obj),_objDrawNext(\fre)			; copy the next object pointer from src to dst
+		move.w	_objDrawNext(\obj),\fre				; load the next pointer to dst
+		move.w	_objDrawPrev(\obj),_objDrawPrev(\fre)			; copy the prev object pointer from src to dst
 
-;		cmp.w	oDrawPrev(\obj),\fre				; special case: last object
+;		cmp.w	_objDrawPrev(\obj),\fre				; special case: last object
 ;		bne.s	.no\@						; if no, skip
-;		move.w	\fre,oDrawNext(\fre)				; else, change to point to same address
+;		move.w	\fre,_objDrawNext(\fre)				; else, change to point to same address
 
 .no\@
-		clr.l	oDrawNext(\obj)
+		clr.l	_objDrawNext(\obj)
 .yes\@
 	endm
 ; =========================================================================================================================================================

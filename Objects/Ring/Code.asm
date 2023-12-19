@@ -1,7 +1,7 @@
 ; =========================================================================================================================================================
 ; Water surface object
 ; =========================================================================================================================================================
-		rsset	oLvlSSTs
+		rsset	_objLvlSSTs
 
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjRingLoss:
@@ -23,19 +23,19 @@ ObjRingLoss:
 		beq.s	.ResetCounter
 
 .MakeRings:
-		move.l	#ObjLostRing,oAddr(a1)
-		move.w	oXPos(a0),oXPos(a1)
-		move.w	oYPos(a0),oYPos(a1)
-		move.l	#Map_ObjLostRing,oMap(a1)	; Mappings
-		move.w	#$26B4,oVRAM(a1)		; Tile properties
-		move.b	#4,oRender(a1)			; Render flags
+		move.l	#ObjLostRing,_objAddress(a1)
+		move.w	_objXPos(a0),_objXPos(a1)
+		move.w	_objYPos(a0),_objYPos(a1)
+		move.l	#Map_ObjLostRing,_objMapping(a1)	; Mappings
+		move.w	#$26B4,_objVRAM(a1)		; Tile properties
+		move.b	#4,_objRender(a1)			; Render flags
 	displaySprite	3,a1,a2,0			; Priority
-		move.b	#8,oDrawW(a1)			; Sprite width
-		move.b	#8,oDrawH(a1)			; Sprite height
-		move.b	#8,oColW(a1)			; Collision width
-		move.b	#8,oColH(a1)			; Collision height
-		move.w	(a3)+,oXVel(a1)
-		move.w	(a3)+,oYVel(a1)
+		move.b	#8,_objDrawW(a1)			; Sprite width
+		move.b	#8,_objDrawH(a1)			; Sprite height
+		move.b	#8,_objColW(a1)			; Collision width
+		move.b	#8,_objColH(a1)			; Collision height
+		move.w	(a3)+,_objXVel(a1)
+		move.w	(a3)+,_objYVel(a1)
 		dbf	d5,.Loop
 		move.b	#-1,ringLossAnimT.w
 
@@ -46,7 +46,7 @@ ObjRingLoss:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjLostRing:
 		jsr	ObjectMove.w
-		addi.w	#$18,oYVel(a0)
+		addi.w	#$18,_objYVel(a0)
 		bmi.s	.ChkCol
 		move.b	(frameCounter+3).w,d0
 		add.w	a0,d0
@@ -55,11 +55,11 @@ ObjLostRing:
 		jsr	ObjCheckFloorDist
 		tst.w	d1
 		bpl.s	.ChkCol
-		add.w	d1,oYPos(a0)
-		move.w	oYVel(a0),d0
+		add.w	d1,_objYPos(a0)
+		move.w	_objYVel(a0),d0
 		asr.w	#2,d0
-		sub.w	d0,oYVel(a0)
-		neg.w	oYVel(a0)
+		sub.w	d0,_objYVel(a0)
+		neg.w	_objYVel(a0)
 
 .ChkCol:
 		lea	.RangeData(pc),a1		; Range data
@@ -67,7 +67,7 @@ ObjLostRing:
 		jsr	CheckObjInRange.w		; Is the player in range?
 		tst.w	d0				; ''
 		beq.s	.ChkDel				; If not, branch
-		cmpi.b	#105,oInvulTime(a2)
+		cmpi.b	#105,_objInvulTime(a2)
 		bhs.s	.ChkDel
 		bra.s	ObjLostRing_Collect
 
@@ -76,7 +76,7 @@ ObjLostRing:
 		beq.w	ObjLostRing_Delete
 		move.w	maxCamYPos.w,d0		; Get max camera Y position
 		addi.w	#224,d0				; Get bottom boundary position
-		cmp.w	oYPos(a0),d0			; Have we touched the bottom boundary?
+		cmp.w	_objYPos(a0),d0			; Have we touched the bottom boundary?
 		blt.s	ObjLostRing_Delete		; If so, branch
 	nextObject
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ ObjLostRing_Collect:
 ObjLostRing_Sparkle:
 		lea	Ani_ObjRing,a1
 		jsr	AnimateObject.w
-		tst.b	oRoutine(a0)
+		tst.b	_objRoutine(a0)
 		bne.s	ObjLostRing_Delete
 	nextObject
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

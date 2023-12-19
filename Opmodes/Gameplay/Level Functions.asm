@@ -22,24 +22,24 @@ Level_LoadData:
 
 		movea.w	playerPtrP1.w,a0		; Player object
 		move.w	(a3)+,d1			; Get starting X position
-		move.w	d1,oXPos(a0)			; Set the player's X position
+		move.w	d1,_objXPos(a0)			; Set the player's X position
 		move.w	(a3),d0				; Get starting Y position
-		move.w	d0,oYPos(a0)			; Set the player's Y position
+		move.w	d0,_objYPos(a0)			; Set the player's Y position
 
 		tst.b	rStartFall.w			; Should we start the level by falling?
 		beq.s	.InitCam			; If not, branch
-		bset	#2,oFlags(a0)
+		bset	#2,_objFlags(a0)
 		moveq	#$72,d1				; Reset Sonic's X position
-		move.w	d1,oXPos(a0)			; ''
+		move.w	d1,_objXPos(a0)			; ''
 		moveq	#-32,d0				; Reset Sonic's Y position
-		move.w	d0,oYPos(a0)			; ''
+		move.w	d0,_objYPos(a0)			; ''
 
 .InitCam:
 		tst.b	chkIDLast.w		; Has a checkpoint been hit?
 		beq.s	.SetCam				; If not, branch
 		bsr.w	Level_LoadSavedInfo		; Load data
-		move.w	oXPos(a0),d1			; Get X position
-		move.w	oYPos(a0),d0			; Get Y position
+		move.w	_objXPos(a0),d1			; Get X position
+		move.w	_objYPos(a0),d0			; Get Y position
 
 .SetCam:
 		subi.w	#320/2,d1			; Get camera's X position
@@ -129,10 +129,10 @@ Level_UpdateWaterSurface:
 		move.w	d1,d0				; Copy X postion
 		addi.w	#$60,d0				; Add surface #1's X position
 		movea.w	waterObjPtr1.w,a0
-		move.w	d0,oXPos(a0)			; Set it
+		move.w	d0,_objXPos(a0)			; Set it
 		addi.w	#$120,d1			; Add surface #2's X position
 		movea.w	waterObjPtr2.w,a0
-		move.w	d1,oXPos(a0)			; Set it
+		move.w	d1,_objXPos(a0)			; Set it
 
 .End:
 		rts
@@ -252,7 +252,7 @@ Level_HandleCamera:
 		addq.w	#8,d0				; ''
 		cmp.w	maxCamYPos.w,d0		; Is it past the boundary?
 		bcs.s	.ScrollDown			; If not, branch
-		btst	#1,oStatus(a0)		; Is the player in the air?
+		btst	#1,_objStatus(a0)		; Is the player in the air?
 		beq.s	.ScrollDown			; If not, branch
 		add.w	d1,d1				; Scroll down faster
 		add.w	d1,d1				; ''
@@ -263,7 +263,7 @@ Level_HandleCamera:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_MoveCameraX:
-		move.w	oXPos(a0),d0			; Get the player's X position
+		move.w	_objXPos(a0),d0			; Get the player's X position
 		sub.w	(a1),d0				; Get distance from the camera's X position
 		sub.w	panCamXPos.w,d0		; Subtract center
 		blt.s	.MoveLeft			; If we are going left, branch
@@ -299,15 +299,15 @@ Level_MoveCameraX:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_MoveCameraY:
 		moveq	#0,d1
-		move.w	oYPos(a0),d0			; Get the player's Y position
+		move.w	_objYPos(a0),d0			; Get the player's Y position
 		sub.w	(a1),d0				; Get distance from the camera's Y position
 
-		btst	#2,oStatus(a0)			; Is the player rolling?
+		btst	#2,_objStatus(a0)			; Is the player rolling?
 		beq.s	.NoRoll				; If not, branch
 		subq.w	#5,d0				; Move up some
 
 .NoRoll:
-		btst	#1,oStatus(a0)			; Is the player in the air?
+		btst	#1,_objStatus(a0)			; Is the player in the air?
 		beq.s	.ChkBoundCross_Ground		; If not, branch
 
 .ChkBoundCross_Air:
@@ -334,7 +334,7 @@ Level_MoveCameraY:
 		cmpi.w	#(224/2)-16,d3			; Is the camera Y distance normal?
 		bne.s	.ScrollSlow			; If not, branch
 
-		move.w	oGVel(a0),d1			; Get the players' ground velocity
+		move.w	_objGVel(a0),d1			; Get the players' ground velocity
 		bpl.s	.Positive			; If it's positive, branch
 		neg.w	d1				; Force it to be positive
 
@@ -581,18 +581,18 @@ Level_RingsManagerSetup:
 ; Do ring collision for the player
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayeringCollectlision:
-		cmpi.b	#105,oInvulTime(a0)		; Is the player able to collect rings while hurt?
+		cmpi.b	#105,_objInvulTime(a0)		; Is the player able to collect rings while hurt?
 		bhs.w	.End				; If it hasn't been long enough, branch
 		movea.l	ringMgrLoadL.w,a1		; Get starting address of ring data
 		movea.l	ringMgrLoadR.w,a2		; Get starting address of status table
 		cmpa.l	a1,a2				; Are there any rings to test collision with?
 		beq.w	.End				; If not, branch
 		movea.w	ringMgrStatPtr.w,a4
-		move.w	oXPos(a0),d2			; Player's X position
-		move.w	oYPos(a0),d3			; Player's Y position
+		move.w	_objXPos(a0),d2			; Player's X position
+		move.w	_objYPos(a0),d3			; Player's Y position
 		subq.w	#8,d2				; Subtract 8 from X
 		moveq	#0,d5
-		move.b	oColH(a0),d5			; Player's collision height
+		move.b	_objColH(a0),d5			; Player's collision height
 		subq.b	#3,d5				; Subtract 3 from collision height
 		sub.w	d5,d3				; Subtract from Y
 		move.w	#6,d1
@@ -879,7 +879,7 @@ HUD_RingsBase:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; LEVEL ANIMATION SCRIPTS
 ;
-; The AniArt_DoAnimate subroutine uses these scripts to reload certain tiles,
+; The AniArt_D_objAnimmate subroutine uses these scripts to reload certain tiles,
 ; thus animating them. All the relevant art must be uncompressed, because
 ; otherwise the subroutine would spend so much time waiting for the art to be
 ; decompressed that the VBLANK window would close before all the animating was done.
@@ -895,7 +895,7 @@ HUD_RingsBase:
 ;		0			Tile ID of first tile in ArtUnc_Flowers1 to transfer
 ;		$7F			Frame duration. Only here if global duration is -1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-AniArt_DoAnimate:
+AniArt_D_objAnimmate:
 		lea	lvlAnimCntrs.w,a3		; Level art animation counters
 		move.w	(a2)+,d6			; Get number of scripts in list
 		bpl.s	.ListNotEmpty			; If there are any, continue
@@ -949,7 +949,7 @@ AniArt_DoAnimate:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Set an object as solid and check for collision
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; RETURNING SOLID OBJECT COLLISION BIT FORMAT (For oStatus):
+; RETURNING SOLID OBJECT COLLISION BIT FORMAT (For _objStatus):
 ;	XXPXSXAX
 ;	X	- Unused
 ;	P	- Pushing flag
@@ -976,24 +976,24 @@ AniArt_DoAnimate:
 SolidObject:
 		moveq	#0,d6				; Clear collision flag register
 		movea.w	playerPtrP1.w,a1		; Set player object RAM
-		btst	#cStandBit,oStatus(a0)		; Is the player standing on the current object?
+		btst	#cStandBit,_objStatus(a0)		; Is the player standing on the current object?
 		beq.w	SolidObject_ChkColOnScr		; If not, branch
 		move.w	d1,d2				; Copy object width
 		add.w	d2,d2				; Double it
-		btst	#1,oStatus(a1)			; Is the player in midair?
+		btst	#1,_objStatus(a1)			; Is the player in midair?
 		bne.s	.NotOnTop			; If so, branch
-		move.w	oXPos(a1),d0			; Get player's X position
-		sub.w	oXPos(a0),d0			; Subtract the current object's X position
+		move.w	_objXPos(a1),d0			; Get player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the current object's X position
 		add.w	d1,d0				; Add width
 		bmi.s	.NotOnTop			; If not colliding, branch
 		cmp.w	d2,d0				; Compare with the width
 		bcs.s	.IsOnTop			; If not colliding, branch
 
 .NotOnTop:
-		bclr	#cStandBit,oStatus(a1)		; Clear the standing on object bit for the player
-		bset	#1,oStatus(a1)			; Make the player be in midair
-		bclr	#cStandBit,oStatus(a0)		; Clear the player standing on this object bit
-		clr.w	oInteract(a1)			; Clear the player's interact object pointer
+		bclr	#cStandBit,_objStatus(a1)		; Clear the standing on object bit for the player
+		bset	#1,_objStatus(a1)			; Make the player be in midair
+		bclr	#cStandBit,_objStatus(a0)		; Clear the player standing on this object bit
+		clr.w	_objInteract(a1)			; Clear the player's interact object pointer
 		moveq	#0,d4				; Set collision status to 0
 		rts
 
@@ -1018,24 +1018,24 @@ SolidObject:
 SolidObject_Always:
 		moveq	#0,d6				; Clear collision flag register
 		movea.w	playerPtrP1.w,a1		; Set player object RAM
-		btst	#cStandBit,oStatus(a0)		; Is the player standing on the current object?
+		btst	#cStandBit,_objStatus(a0)		; Is the player standing on the current object?
 		beq.w	SolidObject_ChkCollision	; If not, branch
 		move.w	d1,d2				; Copy object width
 		add.w	d2,d2				; Double it
-		btst	#1,oStatus(a1)			; Is the player in midair?
+		btst	#1,_objStatus(a1)			; Is the player in midair?
 		bne.s	.NotOnTop			; If so, branch
-		move.w	oXPos(a1),d0			; Get player's X position
-		sub.w	oXPos(a0),d0			; Subtract the current object's X position
+		move.w	_objXPos(a1),d0			; Get player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the current object's X position
 		add.w	d1,d0				; Add width
 		bmi.s	.NotOnTop			; If not colliding, branch
 		cmp.w	d2,d0				; Compare with the width
 		bcs.s	.IsOnTop			; If not colliding, branch
 
 .NotOnTop:
-		bclr	#cStandBit,oStatus(a1)		; Clear the standing on object bit for the player
-		bset	#1,oStatus(a1)			; Make the player be in midair
-		bclr	#cStandBit,oStatus(a0)		; Clear the player standing on this object bit
-		clr.w	oInteract(a1)			; Clear the player's interact object pointer
+		bclr	#cStandBit,_objStatus(a1)		; Clear the standing on object bit for the player
+		bset	#1,_objStatus(a1)			; Make the player be in midair
+		bclr	#cStandBit,_objStatus(a0)		; Clear the player standing on this object bit
+		clr.w	_objInteract(a1)			; Clear the player's interact object pointer
 		moveq	#0,d4				; Set collision status to 0
 		rts
 
@@ -1061,24 +1061,24 @@ SolidObject_Always:
 SlopedSolid:
 		moveq	#0,d6				; Clear collision flag register
 		movea.w	playerPtrP1.w,a1		; Set player object RAM
-		btst	#cStandBit,oStatus(a0)		; Is the player standing on the current object?
+		btst	#cStandBit,_objStatus(a0)		; Is the player standing on the current object?
 		beq.w	SlopedSolid_ChkCollision	; If not, branch
 		move.w	d1,d2				; Copy object width
 		add.w	d2,d2				; Double it
-		btst	#1,oStatus(a1)			; Is the player in midair?
+		btst	#1,_objStatus(a1)			; Is the player in midair?
 		bne.s	.NotOnTop			; If so, branch
-		move.w	oXPos(a1),d0			; Get player's X position
-		sub.w	oXPos(a0),d0			; Subtract the current object's X position
+		move.w	_objXPos(a1),d0			; Get player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the current object's X position
 		add.w	d1,d0				; Add width
 		bmi.s	.NotOnTop			; If not colliding, branch
 		cmp.w	d2,d0				; Compare with the width
 		bcs.s	.IsOnTop			; If not colliding, branch
 
 .NotOnTop:
-		bclr	#cStandBit,oStatus(a1)		; Clear the standing on object bit for the player
-		bset	#1,oStatus(a1)			; Make the player be in midair
-		bclr	#cStandBit,oStatus(a0)		; Clear the player standing on this object bit
-		clr.w	oInteract(a1)			; Clear the player's interact object pointer
+		bclr	#cStandBit,_objStatus(a1)		; Clear the standing on object bit for the player
+		bset	#1,_objStatus(a1)			; Make the player be in midair
+		bclr	#cStandBit,_objStatus(a0)		; Clear the player standing on this object bit
+		clr.w	_objInteract(a1)			; Clear the player's interact object pointer
 		moveq	#0,d4				; Set collision status to 0
 		rts
 
@@ -1089,8 +1089,8 @@ SlopedSolid:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SlopedSolid_ChkCollision:
-		move.w	oXPos(a1),d0			; Get player's X position
-		sub.w	oXPos(a0),d0			; Subtract current object's X position
+		move.w	_objXPos(a1),d0			; Get player's X position
+		sub.w	_objXPos(a0),d0			; Subtract current object's X position
 		add.w	d1,d0				; Add width to it
 		bmi.w	SolidObject_TestClearPush	; If not colliding, branch
 		move.w	d1,d3				; Copy width to d3
@@ -1098,7 +1098,7 @@ SlopedSolid_ChkCollision:
 		cmp.w	d3,d0				; Compare to the X position
 		bhi.w	SolidObject_TestClearPush	; If not colliding, branch
 		move.w	d0,d5				; Copy the X position to d5
-		btst	#0,oRender(a0)			; Is the object X-flipped?
+		btst	#0,_objRender(a0)			; Is the object X-flipped?
 		beq.s	.NoFlip				; If not, branch
 		not.w	d5				; Logical notation on d5
 		add.w	d3,d5				; Add width
@@ -1108,12 +1108,12 @@ SlopedSolid_ChkCollision:
 		move.b	(a2,d5.w),d3			; Get height of this segment
 		sub.b	(a2),d3				; Subtract first bytes from the value
 		ext.w	d3				; Sign extend to word
-		move.w	oYPos(a0),d5			; Get the current object's Y position
+		move.w	_objYPos(a0),d5			; Get the current object's Y position
 		sub.w	d3,d5				; Subtract the height from the Y position
-		move.b	oColH(a1),d3			; Get the player's collision height
+		move.b	_objColH(a1),d3			; Get the player's collision height
 		ext.w	d3				; Sign extend to word
 		add.w	d3,d2				; Add collision height to the object height
-		move.w	oYPos(a1),d3			; Get the player's Y position
+		move.w	_objYPos(a1),d3			; Get the player's Y position
 		sub.w	d5,d3				; Subtract d5
 		addq.w	#4,d3				; Add 4
 		add.w	d2,d3				; Add height and collision height
@@ -1125,26 +1125,26 @@ SlopedSolid_ChkCollision:
 		bra.w	SolidObject_ChkBounds		; If anything else, we are colliding
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SolidObject_ChkColOnScr:
-		tst.b	oRender(a0)			; Is the object on screen?
+		tst.b	_objRender(a0)			; Is the object on screen?
 		bpl.w	SolidObject_TestClearPush	; If not, branch
 
 SolidObject_ChkCollision:
-		move.w	oXPos(a1),d0			; Get player's X position
-		sub.w	oXPos(a0),d0			; Subtract the current object's X position
+		move.w	_objXPos(a1),d0			; Get player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the current object's X position
 		add.w	d1,d0				; Add width
 		move.w	d1,d3				; Copy width
 		add.w	d3,d3				; Double it
 		cmp.w	d3,d0				; Compare with the X position
 		bhi.w	SolidObject_TestClearPush	; If not colliding, branch
 		
-		move.b	oInitColH(a1),d4		; Get the player's default collision height
+		move.b	_objInitColH(a1),d4		; Get the player's default collision height
 		ext.w	d4				; Sign extend to word
 		add.w	d2,d4				; Add height
-		move.b	oColH(a1),d3			; Get the player's collision height
+		move.b	_objColH(a1),d3			; Get the player's collision height
 		ext.w	d3				; Sign extend to word
 		add.w	d3,d2				; Add to height
-		move.w	oYPos(a1),d3			; Get player's Y position
-		sub.w	oYPos(a0),d3			; Subtract the current object's Y position
+		move.w	_objYPos(a1),d3			; Get player's Y position
+		sub.w	_objYPos(a0),d3			; Subtract the current object's Y position
 		addq.w	#4,d3				; Add 4
 		add.w	d2,d3				; Add height
 		andi.w	#$FFF,d3			; Keep in range
@@ -1153,9 +1153,9 @@ SolidObject_ChkCollision:
 		bcc.w	SolidObject_TestClearPush	; If not colliding, branch
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SolidObject_ChkBounds:
-		tst.b	oFlags(a1)			; Is the player being carried by another object?
+		tst.b	_objFlags(a1)			; Is the player being carried by another object?
 		bmi.w	SolidObject_TestClearPush	; If so, branch
-		cmpi.b	#$C,oRoutine(a1)			; Is the player dead?
+		cmpi.b	#$C,_objRoutine(a1)			; Is the player dead?
 		bcc.w	SolidObject_End			; If so, branch
 		tst.b	debugMode.w			; Is debug mode active?
 		bne.w	SolidObject_End			; If so, branch
@@ -1187,24 +1187,24 @@ SolidObject_Sides:
 		tst.w	d0
 		beq.s	.AlignPlayer			; Branch if we are in the middle of the object?
 		bmi.s	.ChkRight			; Branch if we are right of the object
-		tst.w	oXVel(a1)			; Is the player moving left?
+		tst.w	_objXVel(a1)			; Is the player moving left?
 		bmi.s	.AlignPlayer			; If so, branch
 		bra.s	.ClearGroundVel			; If else player is moving right, branch
 
 .ChkRight:
-		tst.w	oXVel(a1)
+		tst.w	_objXVel(a1)
 		bpl.s	.AlignPlayer			; Branch if player is moving right
 
 .ClearGroundVel:
-		clr.w	oGVel(a1)			; Stop the player from moving
-		clr.w	oXVel(a1)			; Clear the player's X velocity
+		clr.w	_objGVel(a1)			; Stop the player from moving
+		clr.w	_objXVel(a1)			; Clear the player's X velocity
 
 .AlignPlayer:
-		sub.w	d0,oXPos(a1)			; Align player to the side of the object
-		btst	#1,oStatus(a1)			; Is the player in midair?
+		sub.w	d0,_objXPos(a1)			; Align player to the side of the object
+		btst	#1,_objStatus(a1)			; Is the player in midair?
 		bne.s	.InAir				; If so, branch
-		bset	#cPushBit,oStatus(a0)		; Set the pushing bit
-		bset	#cPushBit,oStatus(a1)		; Set the player's pushing bit
+		bset	#cPushBit,_objStatus(a0)		; Set the pushing bit
+		bset	#cPushBit,_objStatus(a1)		; Set the player's pushing bit
 		bset	#cTouchSideBit,d6		; Set "touch side" flag
 		moveq	#1,d4				; Set collision status to 1
 		rts
@@ -1216,19 +1216,19 @@ SolidObject_Sides:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SolidObject_TestClearPush:
-		btst	#cPushBit,oStatus(a0)		; Is the player pushing this object?
+		btst	#cPushBit,_objStatus(a0)		; Is the player pushing this object?
 		beq.s	SolidObject_End			; If not, branch
-		cmpi.b	#2,oAni(a1)			; Is the player jumping/rolling?
+		cmpi.b	#2,_objAnim(a1)			; Is the player jumping/rolling?
 		beq.s	SolidObject_ClearPush		; If so, branch
-		cmpi.b	#$17,oAni(a1)			; Is the player in using the drowning animation
+		cmpi.b	#$17,_objAnim(a1)			; Is the player in using the drowning animation
 		beq.s	SolidObject_ClearPush		; If so, branch
-		cmpi.b	#$1A,oAni(a1)			; Is the player in using the hurt animation
+		cmpi.b	#$1A,_objAnim(a1)			; Is the player in using the hurt animation
 		beq.s	SolidObject_ClearPush		; If so, branch
-		move.w	#1,oAni(a1)			; Make the player use the walking animation
+		move.w	#1,_objAnim(a1)			; Make the player use the walking animation
 
 SolidObject_ClearPush:
-		bclr	#cPushBit,oStatus(a0)		; Clear the pushing bit
-		bclr	#cPushBit,oStatus(a1)		; Clear the player's pushing bit
+		bclr	#cPushBit,_objStatus(a0)		; Clear the pushing bit
+		bclr	#cPushBit,_objStatus(a1)		; Clear the player's pushing bit
 
 SolidObject_End:
 		moveq	#0,d4				; Set collision status to 0
@@ -1242,21 +1242,21 @@ SolidObject_UpDown:
 		bra.s	SolidObject_TestClearPush	; If not, the player is not colliding
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SolidObject_Below:
-		tst.w	oYVel(a1)			; Is the player moving vertically?
+		tst.w	_objYVel(a1)			; Is the player moving vertically?
 		beq.s	.CheckCrush			; If so, branch
 		bpl.s	.SetY				; If the player's moving down, branch
 		tst.w	d3				; Is the player above the middle of the object?
 		bpl.s	.SetY				; If so, branch
-		clr.w	oYVel(a1)			; Clear the player's Y velocity
+		clr.w	_objYVel(a1)			; Clear the player's Y velocity
 
 .SetY:
-		sub.w	d3,oYPos(a1)			; Push the player below the object
+		sub.w	d3,_objYPos(a1)			; Push the player below the object
 		bset	#cTouchBtmBit,d6		; Set "touch bottom" flag
 		moveq	#-2,d4				; Set the collision status to -2
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .CheckCrush:
-		btst	#1,oStatus(a1)			; Is the player in midair?
+		btst	#1,_objStatus(a1)			; Is the player in midair?
 		bne.s	.SetY				; If so, branch
 		move.w	d0,d4				; Get x offset
 		bpl.s	.NoNeg				; If it's positive branch
@@ -1281,20 +1281,20 @@ SolidObject_Above:
 		; recalculates object width.
 
 		moveq	#0,d1
-		move.b	oColW(a0),d1			; Get the current object's width
+		move.b	_objColW(a0),d1			; Get the current object's width
 		move.w	d1,d2				; Copy it
 		add.w	d2,d2				; Double it
 		
-		add.w	oXPos(a1),d1			; Add the player's X position
-		sub.w	oXPos(a0),d1			; Subtract the current object's X position
+		add.w	_objXPos(a1),d1			; Add the player's X position
+		sub.w	_objXPos(a0),d1			; Subtract the current object's X position
 		bmi.s	.NoCollision			; If the player is not colliding, branch
 		
 		cmp.w	d2,d1				; Is the plauer colliding from the right?
 		bcc.s	.NoCollision			; If the player is not colliding, branch
 		
-		subq.w	#1,oYPos(a1)			; Subtract 1 from the player's Y position
-		sub.w	d3,oYPos(a1)			; Move the player above the object
-		tst.w	oYVel(a1)			; Is the player moving up?
+		subq.w	#1,_objYPos(a1)			; Subtract 1 from the player's Y position
+		sub.w	d3,_objYPos(a1)			; Move the player above the object
+		tst.w	_objYVel(a1)			; Is the player moving up?
 		bmi.s	.NoCollision			; If so, branch
 		bsr.w	RideObject_SetRide		; Allow the player to stand on top (and set the "ride" bit)
 		bset	#cTouchTopBit,d6		; Set "touch top" flag
@@ -1319,24 +1319,24 @@ SolidObject_Above:
 PlatformObject:
 		moveq	#0,d6				; Clear collision flag register
 		movea.w	playerPtrP1.w,a1		; Get the player RAM
-		btst	#cStandBit,oStatus(a0)		; Is the player standing on the object?
+		btst	#cStandBit,_objStatus(a0)		; Is the player standing on the object?
 		beq.w	Platform_ChkCollision		; If not, branch
 		move.w	d1,d2				; Copy the object's width
 		add.w	d2,d2				; Double it
-		btst	#1,oStatus(a1)			; Is the player in midair?
+		btst	#1,_objStatus(a1)			; Is the player in midair?
 		bne.s	.NotOnTop			; If so, branch
-		move.w	oXPos(a1),d0			; Get the player's X position
-		sub.w	oXPos(a0),d0			; Subtract the object's X position
+		move.w	_objXPos(a1),d0			; Get the player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the object's X position
 		add.w	d1,d0				; Add width
 		bmi.s	.NotOnTop			; If the player is not colliding, branch
 		cmp.w	d2,d0				; Compare with the width
 		blo.s	.OnTop				; If the player is not colliding, branch
 
 .NotOnTop:
-		bclr	#cStandBit,oStatus(a1)		; Clear the player's standing on object bit
-		bset	#1,oStatus(a1)			; Make the player be in midair
-		bclr	#cStandBit,oStatus(a0)		; Clear the player standing on this object bit
-		clr.w	oInteract(a1)			; Clear the player's interact object pointer
+		bclr	#cStandBit,_objStatus(a1)		; Clear the player's standing on object bit
+		bset	#1,_objStatus(a1)			; Make the player be in midair
+		bclr	#cStandBit,_objStatus(a0)		; Clear the player standing on this object bit
+		clr.w	_objInteract(a1)			; Clear the player's interact object pointer
 		moveq	#0,d4				; Set the collision status to 0
 		rts
 
@@ -1347,10 +1347,10 @@ PlatformObject:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Platform_ChkBridgeCol:
-		tst.w	oYVel(a1)			; Is the player moving up?
+		tst.w	_objYVel(a1)			; Is the player moving up?
 		bmi.w	PlatformObject_End		; If so, branch
-		move.w	oXPos(a1),d0			; Get the player's X position
-		sub.w	oXPos(a0),d0			; Subtract the object's X position
+		move.w	_objXPos(a1),d0			; Get the player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the object's X position
 		add.w	d1,d0				; Add width
 		bmi.w	PlatformObject_End		; If the player is not colliding, branch
 		cmp.w	d2,d0				; Compare with width
@@ -1358,10 +1358,10 @@ Platform_ChkBridgeCol:
 		bra.s	Platform_ChkCol_Cont		; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Platform_ChkCollision:
-		tst.w	oYVel(a1)			; Is the player moving up?
+		tst.w	_objYVel(a1)			; Is the player moving up?
 		bmi.w	PlatformObject_End		; If so, branch
-		move.w	oXPos(a1),d0			; Get the player's X position
-		sub.w	oXPos(a0),d0			; Subtract the object's X position
+		move.w	_objXPos(a1),d0			; Get the player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the object's X position
 		add.w	d1,d0				; Add width
 		bmi.w	PlatformObject_End		; If the player is not colliding, branch
 		add.w	d1,d1				; Double width
@@ -1369,12 +1369,12 @@ Platform_ChkCollision:
 		bcc.w	PlatformObject_End		; If the player is not colliding, branch
 
 Platform_ChkCol_Cont:
-		move.w	oYPos(a0),d0			; Get the object's Y position
+		move.w	_objYPos(a0),d0			; Get the object's Y position
 		sub.w	d3,d0				; Subtract the height from it
 
 PlatformObject_ChkYRange:
-		move.w	oYPos(a1),d2			; Get the player's Y position
-		move.b	oColH(a1),d1			; Get the player's collision height
+		move.w	_objYPos(a1),d2			; Get the player's Y position
+		move.b	_objColH(a1),d1			; Get the player's collision height
 		ext.w	d1				; Sign extend it
 		add.w	d2,d1				; Add the Y position to the collision height
 		addq.w	#4,d1				; Add 4
@@ -1384,13 +1384,13 @@ PlatformObject_ChkYRange:
 		bcs.w	PlatformObject_End		; If so, branch
 		tst.b	debugMode.w			; Is debug mode active?
 		bne.w	PlatformObject_End		; If so, branch
-		tst.b	oFlags(a1)			; Is the player being carried by another object?
+		tst.b	_objFlags(a1)			; Is the player being carried by another object?
 		bmi.w	PlatformObject_End		; If so, branch
-		cmpi.b	#$C,oRoutine(a1)		; Is the player dead?
+		cmpi.b	#$C,_objRoutine(a1)		; Is the player dead?
 		bcc.w	PlatformObject_End		; If so, branch
 		add.w	d0,d2				; Add the previous result to the Y position
 		addq.w	#3,d2				; Add 3
-		move.w	d2,oYPos(a1)			; Add to the player's Y position
+		move.w	d2,_objYPos(a1)			; Add to the player's Y position
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Set the player on top of the object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1402,20 +1402,20 @@ PlatformObject_ChkYRange:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 RideObject_SetRide:
-		btst	#cStandBit,oStatus(a1)		; Is the player standing on the object?
+		btst	#cStandBit,_objStatus(a1)		; Is the player standing on the object?
 		beq.s	.IsStanding			; If not, branch
-		movea.w	oInteract(a1),a3		; Get the object the player is standing on
-		bclr	#cStandBit,oStatus(a3)		; Clear its standing on object bit
-		clr.w	oInteract(a1)			; Clear the player's interact object pointer
+		movea.w	_objInteract(a1),a3		; Get the object the player is standing on
+		bclr	#cStandBit,_objStatus(a3)		; Clear its standing on object bit
+		clr.w	_objInteract(a1)			; Clear the player's interact object pointer
 
 .IsStanding:
-		move.w	a0,oInteract(a1)		; Set it as the object the player is standing on
-		clr.b	oAngle(a1)			; Clear the player's angle
-		clr.w	oYVel(a1)			; Clear the player's Y velocity
-		move.w	oXVel(a1),oGVel(a1)		; Set the player's X velocity as its ground velocity
-		bset	#cStandBit,oStatus(a1)		; Set the player's standing on object bit
-		bset	#cStandBit,oStatus(a0)		; Set the player standing on this object bir
-		bclr	#1,oStatus(a1)			; Clear the player's in midair bit
+		move.w	a0,_objInteract(a1)		; Set it as the object the player is standing on
+		clr.b	_objAngle(a1)			; Clear the player's angle
+		clr.w	_objYVel(a1)			; Clear the player's Y velocity
+		move.w	_objXVel(a1),_objGVel(a1)		; Set the player's X velocity as its ground velocity
+		bset	#cStandBit,_objStatus(a1)		; Set the player's standing on object bit
+		bset	#cStandBit,_objStatus(a0)		; Set the player standing on this object bir
+		bclr	#1,_objStatus(a1)			; Clear the player's in midair bit
 		beq.s	PlatformObject_End		; If it was already clear, branch
 		move.l	a0,-(sp)			; Store the current object's address
 		movea.l	a1,a0				; Replace it with the player's address
@@ -1440,24 +1440,24 @@ PlatformObject_End:
 SlopedPlatform:
 		moveq	#0,d6				; Clear collision flag register
 		movea.w	playerPtrP1.w,a1		; Get the player RAM
-		btst	#cStandBit,oStatus(a0)		; Is the player standing on the object?
+		btst	#cStandBit,_objStatus(a0)		; Is the player standing on the object?
 		beq.w	SlopedPlarform_ChkCol		; If not branch
 		move.w	d1,d2				; Copy the object's width
 		add.w	d2,d2				; Double it
-		btst	#1,oStatus(a1)			; Is the player in midair?
+		btst	#1,_objStatus(a1)			; Is the player in midair?
 		bne.s	.NotOnTop			; If so, branch
-		move.w	oXPos(a1),d0			; Get the player's X position
-		sub.w	oXPos(a0),d0			; Subtract the object's X position
+		move.w	_objXPos(a1),d0			; Get the player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the object's X position
 		add.w	d1,d0				; Add width
 		bmi.s	.NotOnTop			; If the player is not colliding, branch
 		cmp.w	d2,d0				; Compare with the width
 		blo.s	.OnTop				; If the player is not colliding, branch
 
 .NotOnTop:
-		bclr	#cStandBit,oStatus(a1)		; Clear the player's standing on object bit
-		bset	#1,oStatus(a1)			; Make the player be in midair
-		bclr	#cStandBit,oStatus(a0)		; Clear the player standing on this object bit
-		clr.w	oInteract(a1)			; Clear the player's interact object pointer
+		bclr	#cStandBit,_objStatus(a1)		; Clear the player's standing on object bit
+		bset	#1,_objStatus(a1)			; Make the player be in midair
+		bclr	#cStandBit,_objStatus(a0)		; Clear the player standing on this object bit
+		clr.w	_objInteract(a1)			; Clear the player's interact object pointer
 		moveq	#0,d4				; Set the collision status to 0
 		rts
 
@@ -1468,16 +1468,16 @@ SlopedPlatform:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 SlopedPlarform_ChkCol:
-		tst.w	oYVel(a1)			; Is the player moving up?
+		tst.w	_objYVel(a1)			; Is the player moving up?
 		bmi.w	PlatformObject_End		; If so, branch
-		move.w	oXPos(a1),d0			; Get the player's X position
-		sub.w	oXPos(a0),d0			; Subtract the object's X position
+		move.w	_objXPos(a1),d0			; Get the player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the object's X position
 		add.w	d1,d0				; Add width
 		bmi.w	PlatformObject_End		; If the player is not colliding, branch
 		add.w	d1,d1				; Double width
 		cmp.w	d1,d0				; Compare with width
 		bcc.w	PlatformObject_End		; If the player is not colliding, branch
-		btst	#0,oRender(a0)			; Is the object X flipped?
+		btst	#0,_objRender(a0)			; Is the object X flipped?
 		beq.s	.NoXFlip			; If not, skip
 		not.w	d0				; Logical notation
 		add.w	d1,d0				; Add width
@@ -1486,7 +1486,7 @@ SlopedPlarform_ChkCol:
 		lsr.w	#1,d0				; Divide by 2 (by shifting right once)
 		move.b	(a2,d0.w),d3			; Get height of the next segment
 		ext.w	d3				; Sign extend to word
-		move.w	oYPos(a0),d0			; Get the current object's Y position
+		move.w	_objYPos(a0),d0			; Get the current object's Y position
 		sub.w	d3,d0				; Subtract the height from the Y position
 		bra.w	PlatformObject_ChkYRange	; Check the Y range
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1500,20 +1500,20 @@ SlopedPlarform_ChkCol:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerMoveOnPtfm:
-		move.w	oYPos(a0),d0			; Get the current object's Y position
+		move.w	_objYPos(a0),d0			; Get the current object's Y position
 		sub.w	d3,d0				; Subtract height
-		tst.b	oFlags(a1)			; Is the player being carried by another object?
+		tst.b	_objFlags(a1)			; Is the player being carried by another object?
 		bmi.s	.End				; If so, branch
-		cmpi.b	#$C,oRoutine(a1)			; Is the player dead?
+		cmpi.b	#$C,_objRoutine(a1)			; Is the player dead?
 		bcc.s	.End				; If so, branch
 		tst.b	debugMode.w			; Is debug mode active?
 		bne.s	.End				; If so, branch
 		moveq	#0,d1
-		move.b	oColH(a1),d1			; Get the player's collision height
+		move.b	_objColH(a1),d1			; Get the player's collision height
 		sub.w	d1,d0				; Subtract from the Y position
-		move.w	d0,oYPos(a1)			; Set as the player's Y position
-		sub.w	oXPos(a0),d2			; Subtract the current object's X position from the suggest X position
-		sub.w	d2,oXPos(a1)			; Subtract the difference from the X position of the player
+		move.w	d0,_objYPos(a1)			; Set as the player's Y position
+		sub.w	_objXPos(a0),d2			; Subtract the current object's X position from the suggest X position
+		sub.w	d2,_objXPos(a1)			; Subtract the difference from the X position of the player
 		;tst.b	(Shield_Flag).w			; Does the player have a shield?
 		;beq.s	.End				; If not branch
 		;move.w	d0,(Object_Space_7+oY).w	; Apply to the shield's Y position
@@ -1533,13 +1533,13 @@ PlayerMoveOnPtfm:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerMoveOnSlope:
-		btst	#cStandBit,oStatus(a1)		; Is the player standing on the object?
+		btst	#cStandBit,_objStatus(a1)		; Is the player standing on the object?
 		beq.s	.End				; If not, branch
-		move.w	oXPos(a1),d0			; Get the player's X position
-		sub.w	oXPos(a0),d0			; Subtract the current object's X position
+		move.w	_objXPos(a1),d0			; Get the player's X position
+		sub.w	_objXPos(a0),d0			; Subtract the current object's X position
 		add.w	d1,d0				; Add width
 		lsr.w	#1,d0				; Divide by 2 (by shifting right once)
-		btst	#0,oRender(a0)			; Is the object X flipped?
+		btst	#0,_objRender(a0)			; Is the object X flipped?
 		beq.s	.NoXFlip			; If not, branch
 		not.w	d0				; Logical notation on d0
 		add.w	d1,d0				; Add width
@@ -1547,14 +1547,14 @@ PlayerMoveOnSlope:
 .NoXFlip:
 		move.b	(a2,d0.w),d1			; Get Y offset
 		ext.w	d1				; Sign extend to word
-		move.w	oYPos(a0),d0			; Get current object's Y position
+		move.w	_objYPos(a0),d0			; Get current object's Y position
 		sub.w	d1,d0				; Subtract the Y offset
 		moveq	#0,d1
-		move.b	oColH(a1),d1			; Get the player's collision height
+		move.b	_objColH(a1),d1			; Get the player's collision height
 		sub.w	d1,d0				; Subtract from the Y position
-		move.w	d0,oYPos(a1)			; Set as the player's Y position
-		sub.w	oXPos(a0),d2			; Subtract the current object's X position from the suggest X position
-		sub.w	d2,oXPos(a1)			; Subtract the difference from the X position of the player
+		move.w	d0,_objYPos(a1)			; Set as the player's Y position
+		sub.w	_objXPos(a0),d2			; Subtract the current object's X position from the suggest X position
+		sub.w	d2,_objXPos(a1)			; Subtract the difference from the X position of the player
 
 .End:
 		rts
@@ -1564,11 +1564,11 @@ PlayerMoveOnSlope:
 PlayerDoObjCollision:
 		jsr	PlayeringCollectlision		; Do ring collision
 		
-		move.w	oXPos(a0),d2			; Get X position
-		move.w	oYPos(a0),d3			; Get Y position
+		move.w	_objXPos(a0),d2			; Get X position
+		move.w	_objYPos(a0),d3			; Get Y position
 		subq.w	#8,d2				; Get left sensor X
 		moveq	#0,d5
-		move.b	oColH(a0),d5			; Get collision height
+		move.b	_objColH(a0),d5			; Get collision height
 		subq.b	#3,d5				; Subtract 3
 		sub.w	d5,d3				; Get left sensor Y
 		move.w	#$10,d4				; Get right sensor delta X
@@ -1580,7 +1580,7 @@ PlayerDoObjCollision:
 
 .ObjLoop:
 		movea.w	(a4)+,a1			; Get object
-		move.b	oColType(a1),d0			; Does touching it do anything?
+		move.b	_objColType(a1),d0			; Does touching it do anything?
 		bne.s	.ChkPosition			; If so, branch
 
 .NextObj:
@@ -1594,8 +1594,8 @@ PlayerDoObjCollision:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkPosition:
 		moveq	#0,d1
-		move.b	oColW(a1),d1			; Get object width
-		move.w	oXPos(a1),d0			; Get object X position
+		move.b	_objColW(a1),d1			; Get object width
+		move.w	_objXPos(a1),d0			; Get object X position
 		sub.w	d1,d0				; Get left side of object
 		sub.w	d2,d0				; Is the player right of the left side of the object?
 		bcc.s	.ChkRightSide			; If so, branch
@@ -1610,8 +1610,8 @@ PlayerDoObjCollision:
 
 .ChkHeight:
 		moveq	#0,d1
-		move.b	oColH(a1),d1			; Get object height
-		move.w	oYPos(a1),d0			; Get object Y position
+		move.b	_objColH(a1),d1			; Get object height
+		move.w	_objYPos(a1),d0			; Get object Y position
 		sub.w	d1,d0				; Get top of object
 		sub.w	d3,d0				; Is the player below the top of the object?
 		bcc.s	.ChkBottom			; If so, branch
@@ -1626,7 +1626,7 @@ PlayerDoObjCollision:
 
 .ChkType:
 		moveq	#0,d0
-		move.b	oColType(a1),d0			; Get collision type
+		move.b	_objColType(a1),d0			; Get collision type
 		jmp	.CollisionTypes-2(pc,d0.w)	; Go to the appropriate routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .CollisionTypes:
@@ -1635,70 +1635,70 @@ PlayerDoObjCollision:
 		bra.s	.Monitor			; Monitor
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Enemy:
-		cmpi.b	#2,oAni(a0)			; Are we rolling?
+		cmpi.b	#2,_objAnim(a0)			; Are we rolling?
 		bne.w	.ChkHurt			; If not, branch
 
 .ChkBoss:
-		tst.b	oHitCnt(a1)			; Do we have a hit count?
+		tst.b	_objHitCnt(a1)			; Do we have a hit count?
 		beq.s	.Kill				; If not, branch
-		neg.w	oXVel(a0)			; Bounce backwards
-		neg.w	oYVel(a0)			; ''
-		clr.b	oColType(a1)			; Indicate that we have hit the boss
-		subq.b	#1,oHitCnt(a1)			; Decrement hit count
+		neg.w	_objXVel(a0)			; Bounce backwards
+		neg.w	_objYVel(a0)			; ''
+		clr.b	_objColType(a1)			; Indicate that we have hit the boss
+		subq.b	#1,_objHitCnt(a1)			; Decrement hit count
 		bne.s	.BossEnd			; If it hasn't reached 0, branch
-		bset	#7,oStatus(a1)			; Set the "killed" flag
+		bset	#7,_objStatus(a1)			; Set the "killed" flag
 
 .BossEnd:
 		rts
 
 .Kill:
-		bset	#7,oStatus(a1)			; Set the "killed" flag
-		move.l	#ObjExplosion,oAddr(a1)		; Change into an explosion
-		clr.b	oColType(a1)			; Indicate that we have hit the boss
-		clr.b	oRoutine(a1)			; Reset the routine ID
-		tst.w	oYVel(a0)			; Are we going up?
+		bset	#7,_objStatus(a1)			; Set the "killed" flag
+		move.l	#ObjExplosion,_objAddress(a1)		; Change into an explosion
+		clr.b	_objColType(a1)			; Indicate that we have hit the boss
+		clr.b	_objRoutine(a1)			; Reset the routine ID
+		tst.w	_objYVel(a0)			; Are we going up?
 		bmi.s	.MoveDown			; If so, branch
-		move.w	oYPos(a0),d0			; Are we below the object?
-		cmp.w	oYPos(a1),d0			; ''
+		move.w	_objYPos(a0),d0			; Are we below the object?
+		cmp.w	_objYPos(a1),d0			; ''
 		bhs.s	.MoveUp				; If so, branch
-		neg.w	oYVel(a0)			; Bounce up
+		neg.w	_objYVel(a0)			; Bounce up
 		rts
 
 .MoveDown:
-		addi.w	#$100,oYVel(a0)			; Move down
+		addi.w	#$100,_objYVel(a0)			; Move down
 		rts
 
 .MoveUp:
-		subi.w	#$100,oYVel(a0)			; Move up
+		subi.w	#$100,_objYVel(a0)			; Move up
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Indestructable:
 		bra.s	.ChkHurt			; Get hurt
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Monitor:
-		move.w	oYVel(a0),d0			; Get Y velocity
+		move.w	_objYVel(a0),d0			; Get Y velocity
 		bpl.s	.ChkDestroy			; If it's falling or staying still, branch
-		move.w	oYPos(a0),d0			; Get player's Y position
+		move.w	_objYPos(a0),d0			; Get player's Y position
 		subi.w	#$10,d0				; Subtract 16
-		cmp.w	oYPos(a1),d0			; Is the plyaer hitting the bottom of the object?
+		cmp.w	_objYPos(a1),d0			; Is the plyaer hitting the bottom of the object?
 		blo.s	.MonitorEnd			; If not, branch
-		move.w	#-$180,oYVel(a1)		; Bounce the monitor up
-		tst.b	oMonFall(a1)			; Is it already falling?
+		move.w	#-$180,_objYVel(a1)		; Bounce the monitor up
+		tst.b	_objMonFall(a1)			; Is it already falling?
 		bne.s	.MonitorEnd			; If so, branch
-		st	oMonFall(a1)			; Set the fall flag
+		st	_objMonFall(a1)			; Set the fall flag
 		rts
 
 .ChkDestroy:
-		cmpi.b	#2,oAni(a0)			; Are we rolling?
+		cmpi.b	#2,_objAnim(a0)			; Are we rolling?
 		bne.s	.MonitorEnd			; If not, branch
-		neg.w	oYVel(a0)			; Bounce up
-		move.l	#ObjMonitorBreakOpen,oAddr(a1)	; Set to destroyed routine
+		neg.w	_objYVel(a0)			; Bounce up
+		move.l	#ObjMonitorBreakOpen,_objAddress(a1)	; Set to destroyed routine
 		
 .MonitorEnd:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkHurt:
-		tst.w	oInvulTime(a0)			; Are we invulnerable?
+		tst.w	_objInvulTime(a0)			; Are we invulnerable?
 		bne.s	.NoHurt				; If so, branch
 		movea.l	a1,a2				; Copy harmful object's pointer
 		jmp	ObjPlayer_GetHurt		; Get hurts
@@ -1728,8 +1728,8 @@ AddToColResponse:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_SaveInfo:
-		move.w	oXPos(a0),chkSavedXPos.w		; Save X position
-		move.w	oYPos(a0),chkSavedYPos.w		; Save Y position
+		move.w	_objXPos(a0),chkSavedXPos.w		; Save X position
+		move.w	_objYPos(a0),chkSavedYPos.w		; Save Y position
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load some info in a level (mainly for checkpoints)
@@ -1741,7 +1741,7 @@ Level_SaveInfo:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_LoadSavedInfo:
-		move.w	chkSavedXPos.w,oXPos(a0)		; Load X position
-		move.w	chkSavedYPos.w,oYPos(a0)		; Load Y position
+		move.w	chkSavedXPos.w,_objXPos(a0)		; Load X position
+		move.w	chkSavedYPos.w,_objYPos(a0)		; Load Y position
 		rts
 ; =========================================================================================================================================================

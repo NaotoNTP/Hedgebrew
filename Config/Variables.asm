@@ -63,7 +63,7 @@ objMemory	rs.b	0				; Object SSTs
 		maxObjRAM $2400				; ''
 objMemory_End	rs.b	0
 
-OBJECT_COUNT	equ	(objMemory_End-objMemory)/oSize
+OBJECT_COUNT	equ	(objMemory_End-objMemory)/_objSize
 
 objExecute	rs.b	0				; Object execution list variables (DO NOT REARRANGE THE ORDER OF THESE!)
 objExecExit	rs.l	1				; Pointer to a return intstruction that will exit object execution
@@ -290,7 +290,7 @@ angleValPtr	rs.l	1				; Angle value array pointer
 normColArrayPtr	rs.l	1				; Normal height map array pointer
 rotColArrayPtr	rs.l	1				; Rotated height map array pointer
 
-gotoNextLvl	rs.b	1				; Flag to go to the next level
+got_objNextLvl	rs.b	1				; Flag to go to the next level
 bossDefeated	rs.b	1
 
 lvlHasWater	rs.b	1				; Water in level flag

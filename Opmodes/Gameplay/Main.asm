@@ -57,7 +57,7 @@ Level_NoFade:
 		jsr	InitObjectList.w
 
 		jsr	FindFreeObj.w
-		move.l	#ObjPlayer,oAddr(a1)		; Load Player object
+		move.l	#ObjPlayer,_objAddress(a1)		; Load Player object
 		move.w	a1,playerPtrP1.w		; Store the address
 
 		tst.b	lvlHasWater.w			; Does the level have water?
@@ -65,13 +65,13 @@ Level_NoFade:
 
 							; Load water surfaces
 		jsr	FindFreeObj.w
-		move.l	#ObjWaterSurface,oAddr(a1)
-		move.w	#$60,oXPos(a1)
+		move.l	#ObjWaterSurface,_objAddress(a1)
+		move.w	#$60,_objXPos(a1)
 		move.w	a1,waterObjPtr1.w		; Store the address
 
 		jsr	FindFreeObj.w
-		move.l	#ObjWaterSurface,oAddr(a1)
-		move.w	#$120,oXPos(a1)
+		move.l	#ObjWaterSurface,_objAddress(a1)
+		move.w	#$120,_objXPos(a1)
 		move.w	a1,waterObjPtr2.w		; Store the address
 
 .NoSurface:
@@ -372,7 +372,7 @@ Level_AniArtRouts:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 AniArt_WWZ:
 		lea	.AniData(pc),a2			; Tutorial animated art data
-		bra.w	AniArt_DoAnimate		; Handle animations
+		bra.w	AniArt_D_objAnimmate		; Handle animations
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .AniData:
 		dc.w	2

@@ -7,36 +7,36 @@ DEC_SPD		EQU	$80				; Deceleration
 JUMP_HEIGHT	EQU	$680				; Jump height
 MIN_JMP_HEIGHT	EQU	$400				; Minimum jump height
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-		rsset	oLvlSSTs
-oInitColH	rs.b	1				; Initial collision height
-oInitColW	rs.b	1				; Initial collision width
-oTopSolid	rs.b	1				; Top solid bit
-oLRBSolid	rs.b	1				; LRB solid bit
-oTopSpd		rs.w	1				; Top speed
-oAcc		rs.w	1				; Acceleration
-oDec		rs.w	1				; Deceleration
-oFlipDir	rs.w	0				; Flip direction
-oGVel		rs.w	1				; Ground velocity
-oInteract	rs.w	1				; Interacted object space pointer
-oAirTimer	rs.b	1				; Air timer
-oMoveLock	rs.b	1				; Move lock timer
-oJumping	rs.b	1				; Jumping flag
-oAngle		rs.b	1				; Angle
-oInvulTime	rs.b	1				; Invulnerability timer
-oDeathTimer	rs.b	1				; Death timer
-oScrlDelay	rs.b	1				; Look up and down scroll delay counter
-oDashFlag	rs.b	1				; Dash flags
-oDashTimer	rs.b	1				; Dash timer
-oFlipAngle	rs.b	1				; Flip angle about the X axis
-oFlipTurned	rs.b	1				; Inverted flip flag
-oFlipRemain	rs.b	1				; Remaining flips to do
-oFlipSpeed	rs.b	1				; Flip speed
-oBallMode	rs.b	1				; Ball mode flag
-oHangAniTime	rs.b	1				; Hang animation timer
+		rsset	_objLvlSSTs
+_objInitColH	rs.b	1				; Initial collision height
+_objInitColW	rs.b	1				; Initial collision width
+_objTopSolid	rs.b	1				; Top solid bit
+_objLRBSolid	rs.b	1				; LRB solid bit
+_objTopSpd	rs.w	1				; Top speed
+_objAccel	rs.w	1				; Acceleration
+_objDecel	rs.w	1				; Deceleration
+_objFlipDir	rs.w	0				; Flip direction
+_objGVel	rs.w	1				; Ground velocity
+_objInteract	rs.w	1				; Interacted object space pointer
+_objAirTimer	rs.b	1				; Air timer
+_objMoveLock	rs.b	1				; Move lock timer
+_objJumping	rs.b	1				; Jumping flag
+_objAngle	rs.b	1				; Angle
+_objInvulTime	rs.b	1				; Invulnerability timer
+_objDeathTimer	rs.b	1				; Death timer
+_objScrlDelay	rs.b	1				; Look up and down scroll delay counter
+_objDashFlag	rs.b	1				; Dash flags
+_objDashTimer	rs.b	1				; Dash timer
+_objFlipAngle	rs.b	1				; Flip angle about the X axis
+_objFlipTurned	rs.b	1				; Inverted flip flag
+_objFlipRemain	rs.b	1				; Remaining flips to do
+_objFlipSpeed	rs.b	1				; Flip speed
+_objBallMode	rs.b	1				; Ball mode flag
+_objHangAniTime	rs.b	1				; Hang animation timer
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer:
 		moveq	#0,d0
-		move.b	oRoutine(a0),d0			; Get routine ID
+		move.b	_objRoutine(a0),d0			; Get routine ID
 		jsr	.Index(pc,d0.w)			; Jump to it
 	nextObject
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,25 +50,25 @@ ObjPlayer:
 ; Initialization routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Init:
-		addq.b	#4,oRoutine(a0)			; Next routine
+		addq.b	#4,_objRoutine(a0)			; Next routine
 
-		move.b	#9,oColW(a0)			; Collision width
-		move.b	#$13,oColH(a0)			; Collision height
-		move.b	oColW(a0),oInitColW(a0)		; Set initial collision width
-		move.b	oColH(a0),oInitColH(a0)		; Set initial collision height
-		move.l	#Map_ObjPlayer,oMap(a0)		; Mappings
-		move.w	#$780,oVRAM(a0)			; Sprite tile properties
+		move.b	#9,_objColW(a0)			; Collision width
+		move.b	#$13,_objColH(a0)			; Collision height
+		move.b	_objColW(a0),_objInitColW(a0)		; Set initial collision width
+		move.b	_objColH(a0),_objInitColH(a0)		; Set initial collision height
+		move.l	#Map_ObjPlayer,_objMapping(a0)		; Mappings
+		move.w	#$780,_objVRAM(a0)			; Sprite tile properties
 	displaySprite	2,a0,a1,0			; Priority
-		move.b	#$18,oDrawW(a0)			; Sprite width
-		move.b	#$18,oDrawH(a0)			; Sprite height
-		move.b	#4,oRender(a0)			; Render flags
+		move.b	#$18,_objDrawW(a0)			; Sprite width
+		move.b	#$18,_objDrawH(a0)			; Sprite height
+		move.b	#4,_objRender(a0)			; Render flags
 
-		move.b	#$C,oTopSolid(a0)		; Top solid bit
-		move.b	#$D,oLRBSolid(a0)		; LRB solid bit
-		move.b	#$1E,oAirTimer(a0)		; Set air timer
-		st	oPrevDPLC(a0)			; Reset saved DPLC frame
-		clr.b	oFlipRemain(a0)			; No flips remaining
-		move.b	#4,oFlipSpeed(a0)		; Flip speed
+		move.b	#$C,_objTopSolid(a0)		; Top solid bit
+		move.b	#$D,_objLRBSolid(a0)		; LRB solid bit
+		move.b	#$1E,_objAirTimer(a0)		; Set air timer
+		st	_objPrevDPLC(a0)			; Reset saved DPLC frame
+		clr.b	_objFlipRemain(a0)			; No flips remaining
+		move.b	#4,_objFlipSpeed(a0)		; Flip speed
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Main routine
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,16 +78,16 @@ ObjPlayer_Main:
 		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.NoPlacementEnter		; If not, branch
 		move.b	#1,debugMode.w		; Enable debug placement mode
-		move.l	#DebugPlacement,oAddr(a0)	; Set to debug placement mode
+		move.l	#DebugPlacement,_objAddress(a0)	; Set to debug placement mode
 		rts
 
 .NoPlacementEnter:
-		btst	#2,oFlags(a0)			; Are the controls locked?
+		btst	#2,_objFlags(a0)			; Are the controls locked?
 		bne.s	.Update				; If so, branch
 		move.w	ctrlDataP1.w,plrCtrlData.w		; Set the player's control data
 
 .Update:
-	;	btst	#1,oStatus(a0)
+	;	btst	#1,_objStatus(a0)
 	;	bne.s	.NotOnGround
 
 ;.NotOnGround:
@@ -105,14 +105,14 @@ ObjPlayer_Main:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ExtendedCam:
 		move.w	panCamXPos.w,d1		; Get camera X center
-		move.w	oGVel(a0),d0			; Get ground velocity
+		move.w	_objGVel(a0),d0			; Get ground velocity
 		bpl.s	.PosGVel			; Get absolute value
 		neg.w	d0				; ''
 
 .PosGVel:
 		cmpi.w	#$600,d0			; Is Sonic going at 6 pixels/frame?
 		bcs.s	.ResetXShift			; If not, branch
-		tst.w	oGVel(a0)			; Is Sonic moving right?
+		tst.w	_objGVel(a0)			; Is Sonic moving right?
 		bpl.s	.MoveRight			; If so, branch
 		addq.w	#2,d1				; Move right
 		cmpi.w	#$E0,d1				; Cap it
@@ -145,14 +145,14 @@ ObjPlayer_ExtendedCam:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_GetPhysics:
 		moveq	#0,d0
-		btst	#6,oStatus(a0)			; Is Sonic underwater?
+		btst	#6,_objStatus(a0)			; Is Sonic underwater?
 		beq.s	.GetOffset			; If not, branch
 		moveq	#8,d0				; Set the underwater bit
 
 .GetOffset:
 		lea	ObjPlayer_Physics(pc,d0.w),a1	; Get pointer to correct physics values
-		move.l	(a1)+,oTopSpd(a0)		; Set top speed and acceleration
-		move.w	(a1),oDec(a0)			; Set deceleration
+		move.l	(a1)+,_objTopSpd(a0)		; Set top speed and acceleration
+		move.w	(a1),_objDecel(a0)			; Set deceleration
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Physics values
@@ -175,35 +175,35 @@ ObjPlayer_Water:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .HandleWater:
 		move.w	waterYPos.w,d0		; Get water height
-		cmp.w	oYPos(a0),d0			; Is Lover in the water?
+		cmp.w	_objYPos(a0),d0			; Is Lover in the water?
 		bge.s	.NotInWater			; If not, branch
 
-		bset	#6,oStatus(a0)			; Set the "in water" flag
+		bset	#6,_objStatus(a0)			; Set the "in water" flag
 		bne.s	.End				; If Lover is already in the water, branch
 
-		asr.w	oXVel(a0)			; Make Lover move slower
-		asr.w	oYVel(a0)
-		asr.w	oYVel(a0)
+		asr.w	_objXVel(a0)			; Make Lover move slower
+		asr.w	_objYVel(a0)
+		asr.w	_objYVel(a0)
 		beq.s	.End				; If a splash doesn't need to be created, branch
 
 		playSnd	#sSplash, 2			; Play splash sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .NotInWater:
-		bclr	#6,oStatus(a0)			; Clear "in water" flag
+		bclr	#6,_objStatus(a0)			; Clear "in water" flag
 		beq.s	.End				; If Lover was already out of the water, branch
 
-		cmpi.b	#$10,oRoutine(a0)			; Is Lover falling back from getting hurt?
+		cmpi.b	#$10,_objRoutine(a0)			; Is Lover falling back from getting hurt?
 		beq.s	.ChkSplash			; If so, branch
-		asl	oYVel(a0)			; Make Lover move faster vertically
+		asl	_objYVel(a0)			; Make Lover move faster vertically
 
 .ChkSplash:
-		tst.w	oYVel(a0)			; Does a splash need to be created?
+		tst.w	_objYVel(a0)			; Does a splash need to be created?
 		beq.s	.End				; If not, branch
 
-		cmpi.w	#-$1000,oYVel(a0)		; Is Lover moving more than -$10 pixels per frame?
+		cmpi.w	#-$1000,_objYVel(a0)		; Is Lover moving more than -$10 pixels per frame?
 		bgt.s	.PlaySplashSnd			; If not, branch
-		move.w	#-$1000,oYVel(a0)		; Cap the speed
+		move.w	#-$1000,_objYVel(a0)		; Cap the speed
 
 .PlaySplashSnd:
 		playSnd	#sSplash, 2			; Play splash sound
@@ -212,11 +212,11 @@ ObjPlayer_Water:
 ; Do Sonic's modes
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_DoModes:
-		btst	#0,oFlags(a0)			; Is running Sonic's mode disabled?
+		btst	#0,_objFlags(a0)			; Is running Sonic's mode disabled?
 		bne.s	.NoMode				; If so, branch
 
 		moveq	#0,d0
-		move.b	oStatus(a0),d0			; Get status
+		move.b	_objStatus(a0),d0			; Get status
 		andi.w	#6,d0				; Only get mode bits
 		add.w	d0,d0
 		jsr	ObjPlayer_Modes(pc,d0.w)	; Jump to the right routine
@@ -254,9 +254,9 @@ ObjPlayer_MdGround:
 ; Misc. updates
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MiscUpdates:
-		tst.b	oMoveLock(a0)			; Is the move lock timer finished?
+		tst.b	_objMoveLock(a0)			; Is the move lock timer finished?
 		beq.s	.NoMoveLock			; If so, branch
-		subq.b	#1,oMoveLock(a0)		; Decrement the timer
+		subq.b	#1,_objMoveLock(a0)		; Decrement the timer
 
 .NoMoveLock:
 		jsr	sub_F846
@@ -265,13 +265,13 @@ ObjPlayer_MiscUpdates:
 		jsr	PlayerChkLeftWallDist		; Check for left wall collision
 		tst.w	d1				; Has Sonic entered the wall?
 		bpl.s	.ChkRight			; If not, branch
-		sub.w	d1,oXPos(a0)			; Fix Sonic's X position
+		sub.w	d1,_objXPos(a0)			; Fix Sonic's X position
 
 .ChkRight:
 		jsr	PlayerChkRightWallDist		; Check for right wall collision
 		tst.w	d1				; Has Sonic entered the wall?
 		bpl.s	.End				; If not, branch
-		add.w	d1,oXPos(a0)			; Fix Sonic's X position
+		add.w	d1,_objXPos(a0)			; Fix Sonic's X position
 
 .End:
 		rts
@@ -280,10 +280,10 @@ ObjPlayer_MiscUpdates:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MdJump:
 ObjPlayer_MdAir:
-		clr.w	oInteract(a0)			; Sonic cannot be interacting with objects while in midair
-		bclr	#cStandBit,oStatus(a0)		; ''
+		clr.w	_objInteract(a0)			; Sonic cannot be interacting with objects while in midair
+		bclr	#cStandBit,_objStatus(a0)		; ''
 
-		btst	#3,oFlags(a0)			; Is Sonic hanging?
+		btst	#3,_objFlags(a0)			; Is Sonic hanging?
 		beq.s	.DoModes			; If not, branch
 		bsr.w	ObjPlayer_Hang			; Hang
 		bra.s	.DoCol				; Continue
@@ -292,17 +292,17 @@ ObjPlayer_MdAir:
 		bsr.w	ObjPlayer_JumpHeight		; Handle jump height
 		bsr.w	ObjPlayer_MoveAir		; Do movement
 		jsr	ObjectMoveAndFall.w		; Allow movement
-		cmpi.w	#$1000,oYVel(a0)		; Is Sonic moving down too fasr?
+		cmpi.w	#$1000,_objYVel(a0)		; Is Sonic moving down too fasr?
 		ble.s	.NoCap				; If not, branch
-		move.w	#$1000,oYVel(a0)		; Cap the downward speed
+		move.w	#$1000,_objYVel(a0)		; Cap the downward speed
 
 .NoCap:
 		bsr.w	ObjPlayer_JumpAngle		; Reset Sonic's angle in mid air
 
 .DoCol:
-		btst	#6,oStatus(a0)
+		btst	#6,_objStatus(a0)
 		beq.s	.NoWater
-		subi.w	#$28,oYVel(a0)
+		subi.w	#$28,_objYVel(a0)
 
 .NoWater:
 		jsr	PlayerChkCollision		; Check for level collision
@@ -311,7 +311,7 @@ ObjPlayer_MdAir:
 ; Roll mode
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MdRoll:
-		tst.b	oBallMode(a0)			; Are we in ball mode?
+		tst.b	_objBallMode(a0)			; Are we in ball mode?
 		bne.s	.NoJump				; If so, branch
 		bsr.w	ObjPlayer_ChkJump		; Check for jumping
 
@@ -327,11 +327,11 @@ ObjPlayer_MdRoll:
 ; Do movement on the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MoveGround:
-		move.w	oTopSpd(a0),d6			; Get top speed
-		move.w	oAcc(a0),d5			; Get acceleration
-		move.w	oDec(a0),d4			; Get deceleration
+		move.w	_objTopSpd(a0),d6			; Get top speed
+		move.w	_objAccel(a0),d5			; Get acceleration
+		move.w	_objDecel(a0),d4			; Get deceleration
 
-		tst.b	oMoveLock(a0)			; Is the move lock timer active?
+		tst.b	_objMoveLock(a0)			; Is the move lock timer active?
 		bne.w	.ResetScr			; If so, branch
 
 		btst	#2,plrCtrlHold.w		; Is left held?
@@ -344,28 +344,28 @@ ObjPlayer_MoveGround:
 		bsr.w	ObjPlayer_MoveRight		; Move right
 
 .NotRight:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$20,d0				; Shift it
 		andi.b	#$C0,d0				; Get quadrant
 		bne.w	.ResetScr			; If Sonic is not on the floor, branch
-		tst.w	oGVel(a0)			; Has Sonic already been halted?
+		tst.w	_objGVel(a0)			; Has Sonic already been halted?
 		bne.w	.ResetScr			; If not, branch
 
-		bclr	#5,oStatus(a0)			; Stop pushing
-		move.b	#5,oAni(a0)			; Set to ducking animation
+		bclr	#5,_objStatus(a0)			; Stop pushing
+		move.b	#5,_objAnim(a0)			; Set to ducking animation
 
-		btst	#cStandBit,oStatus(a0)		; Is Sonic standing on an object?
+		btst	#cStandBit,_objStatus(a0)		; Is Sonic standing on an object?
 		beq.w	.ChkBalance			; If not, branch
-		movea.w	oInteract(a0),a1		; Get interacted object
-		tst.b	oStatus(a1)			; Is Sonic standing on it?
+		movea.w	_objInteract(a0),a1		; Get interacted object
+		tst.b	_objStatus(a1)			; Is Sonic standing on it?
 		bmi.s	.ChkLookUp			; If not, branch
 		moveq	#0,d1
-		move.b	oColW(a1),d1			; Get width of object
+		move.b	_objColW(a1),d1			; Get width of object
 		move.w	d1,d2				; Copy it
 		add.w	d2,d2				; Double the copy
 		subq.w	#4,d2				; Subtract 4 from the copy
-		add.w	oXPos(a0),d1			; Add Sonic's X position
-		sub.w	oXPos(a1),d1			; Subtract the object's X position
+		add.w	_objXPos(a0),d1			; Add Sonic's X position
+		sub.w	_objXPos(a1),d1			; Subtract the object's X position
 		cmpi.w	#4,d1				; Is Sonic balancing on the left side of it?
 		blt.s	.BalanceOnObjLeft		; If so, branch
 		cmp.w	d2,d1				; Is Sonic balacning on the right side of it?
@@ -376,33 +376,33 @@ ObjPlayer_MoveGround:
 		jsr	PlayerChkFloorDist		; Get floor distance
 		cmpi.w	#$C,d1				; Is Sonic balancing?
 		blt.s	.ChkLookUp			; If not, branch
-		cmpi.b	#3,oNextTilt(a0)		; Is Sonic balancing on the right side?
+		cmpi.b	#3,_objNextTilt(a0)		; Is Sonic balancing on the right side?
 		bne.s	.ChkLeftBalance			; If not, branch
 
 .BalanceOnObjRight:
-		bclr	#0,oStatus(a0)			; Face right
+		bclr	#0,_objStatus(a0)			; Face right
 		bra.s	.SetBalanceAnim			; Set the animation
 
 .ChkLeftBalance:
-		cmpi.b	#3,oTilt(a0)			; Is Sonic balancing on the left side?
+		cmpi.b	#3,_objTilt(a0)			; Is Sonic balancing on the left side?
 		bne.s	.ChkLookUp			; If not, branch
 
 .BalanceOnObjLeft:
-		bset	#0,oStatus(a0)			; Face left
+		bset	#0,_objStatus(a0)			; Face left
 
 .SetBalanceAnim:
-		move.b	#6,oAni(a0)			; Set balancing animation
+		move.b	#6,_objAnim(a0)			; Set balancing animation
 		bra.s	.ResetScr			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkLookUp:
 		btst	#0,plrCtrlHold.w		; Is the up button being held?
 		beq.s	.ChkDown			; If not, branch
-		move.b	#7,oAni(a0)			; Set to looking up animation
+		move.b	#7,_objAnim(a0)			; Set to looking up animation
 
-		addq.b	#1,oScrlDelay(a0)		; Increment scroll delay counter
-		cmpi.b	#$78,oScrlDelay(a0)		; Has it reached $78?
+		addq.b	#1,_objScrlDelay(a0)		; Increment scroll delay counter
+		cmpi.b	#$78,_objScrlDelay(a0)		; Has it reached $78?
 		blo.s	.ResetScrPart2			; If not, branch
-		move.b	#$78,oScrlDelay(a0)		; Cap at $78
+		move.b	#$78,_objScrlDelay(a0)		; Cap at $78
 		cmpi.w	#200,panCamYPos.w		; Has the camera finished scrolling?
 		beq.s	.UpdateSpdOnGround		; If so, branch
 		addq.w	#2,panCamYPos.w		; Scroll the camera
@@ -411,19 +411,19 @@ ObjPlayer_MoveGround:
 .ChkDown:
 		btst	#1,plrCtrlHold.w		; Is the down button being held?
 		beq.s	.ResetScr			; If not, branch
-		move.b	#8,oAni(a0)			; Set to ducking animation
+		move.b	#8,_objAnim(a0)			; Set to ducking animation
 
-		addq.b	#1,oScrlDelay(a0)		; Increment scroll delay counter
-		cmpi.b	#$78,oScrlDelay(a0)		; Has it reached $78?
+		addq.b	#1,_objScrlDelay(a0)		; Increment scroll delay counter
+		cmpi.b	#$78,_objScrlDelay(a0)		; Has it reached $78?
 		blo.s	.ResetScrPart2			; If not, branch
-		move.b	#$78,oScrlDelay(a0)		; Cap at $78
+		move.b	#$78,_objScrlDelay(a0)		; Cap at $78
 		cmpi.w	#8,panCamYPos.w		; Has the camera finished scrolling?
 		beq.s	.UpdateSpdOnGround		; If so, branch
 		subq.w	#2,panCamYPos.w		; Scroll the camera
 		bra.s	.UpdateSpdOnGround		; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ResetScr:
-		clr.b	oScrlDelay(a0)			; Reset scroll delay counter
+		clr.b	_objScrlDelay(a0)			; Reset scroll delay counter
 
 .ResetScrPart2:
 		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
@@ -439,7 +439,7 @@ ObjPlayer_MoveGround:
 		andi.b	#$C,d0				; Are left or right held?
 		bne.s	.ApplySpeed			; If so, branch
 
-		move.w	oGVel(a0),d0			; Get current ground velocity
+		move.w	_objGVel(a0),d0			; Get current ground velocity
 		beq.s	.ApplySpeed			; If it's already 0, branch
 		bmi.s	.SettleLeft			; Settle left if going left
 
@@ -455,35 +455,35 @@ ObjPlayer_MoveGround:
 		moveq	#0,d0				; Stop the movement
 
 .SetSpeed:
-		move.w	d0,oGVel(a0)			; Set ground velocity
+		move.w	d0,_objGVel(a0)			; Set ground velocity
 
 .ApplySpeed:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		jsr	CalcSine.w			; Get the sine and cosine
-		muls.w	oGVel(a0),d1			; Multiply cosine with ground velocity
-		muls.w	oGVel(a0),d0			; Multiply sine with ground velocity
+		muls.w	_objGVel(a0),d1			; Multiply cosine with ground velocity
+		muls.w	_objGVel(a0),d0			; Multiply sine with ground velocity
 		asr.l	#8,d1				; Shift the values over
 		asr.l	#8,d0				; ''
-		move.w	d1,oXVel(a0)			; Set the X velocity
-		move.w	d0,oYVel(a0)			; Set the Y velocity
+		move.w	d1,_objXVel(a0)			; Set the X velocity
+		move.w	d0,_objYVel(a0)			; Set the Y velocity
 
 ObjPlayer_CheckWalls:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		andi.b	#$3F,d0				; Is Sonic on an angle?
 		beq.s	.Skip				; If not, branch
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$40,d0				; Is Sonic on an upwards wall or ceiling?
 		bmi.s	.End				; If so, branch
 
 .Skip:
 		moveq	#$40,d1				; If going left, make the modifier $40
-		tst.w	oGVel(a0)			; Check speed
+		tst.w	_objGVel(a0)			; Check speed
 		beq.s	.End				; Branch if not moving
 		bmi.s	.CheckPush			; Branch if going left
 		neg.w	d1				; Negate the modifier
 
 .CheckPush:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		add.b	d1,d0				; Add modifier
 		push.w	d0				; Save it
 		jsr	PlayerCalcRoomInFront		; Calculate the distance in front of Sonic
@@ -498,27 +498,27 @@ ObjPlayer_CheckWalls:
 		beq.s	.PushRightWall			; If so, branch
 		cmpi.b	#$80,d0				; Is Sonic pushing on a floor?
 		beq.s	.PushFloor			; If so, branch
-		add.w	d1,oXVel(a0)			; Push out to the right
-		clr.w	oGVel(a0)			; Stop moving
-		btst	#0,oStatus(a0)			; Is Sonic facing right?
+		add.w	d1,_objXVel(a0)			; Push out to the right
+		clr.w	_objGVel(a0)			; Stop moving
+		btst	#0,_objStatus(a0)			; Is Sonic facing right?
 		bne.s	.End				; If not, branch
-		bset	#5,oStatus(a0)			; Start pushing
+		bset	#5,_objStatus(a0)			; Start pushing
 		rts
 
 .PushFloor:
-		sub.w	d1,oYVel(a0)			; Push out upwards
+		sub.w	d1,_objYVel(a0)			; Push out upwards
 		rts
 
 .PushRightWall:
-		sub.w	d1,oXVel(a0)			; Push out to the left
-		clr.w	oGVel(a0)			; Stop moving
-		btst	#0,oStatus(a0)			; Is Sonic facing left?
+		sub.w	d1,_objXVel(a0)			; Push out to the left
+		clr.w	_objGVel(a0)			; Stop moving
+		btst	#0,_objStatus(a0)			; Is Sonic facing left?
 		beq.s	.End				; If not, branch
-		bset	#5,oStatus(a0)			; Start pushing
+		bset	#5,_objStatus(a0)			; Start pushing
 		rts
 
 .PushCeiling:
-		add.w	d1,oYVel(a0)			; Push out downwards
+		add.w	d1,_objYVel(a0)			; Push out downwards
 
 .End:
 		rts
@@ -526,15 +526,15 @@ ObjPlayer_CheckWalls:
 ; Move left on the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MoveLeft:
-		move.w	oGVel(a0),d0			; Get current speed
+		move.w	_objGVel(a0),d0			; Get current speed
 		beq.s	.SetFlip			; If not moving yet, branch
 		bpl.s	.Skid				; If moving right, check for skidding
 
 .SetFlip:
-		bset	#0,oStatus(a0)			; Set flip flag
+		bset	#0,_objStatus(a0)			; Set flip flag
 		bne.s	.MoveLeft			; If it was already set, branch
-		bclr	#5,oStatus(a0)			; Stop pushing
-		move.b	#1,oPrevAni(a0)			; Reset the animation
+		bclr	#5,_objStatus(a0)			; Stop pushing
+		move.b	#1,_objPrevAnim(a0)			; Reset the animation
 
 .MoveLeft:
 		sub.w	d5,d0				; Subtract acceleration
@@ -548,8 +548,8 @@ ObjPlayer_MoveLeft:
 		move.w	d1,d0				; Cap at the top speed
 
 .SetSpeed:
-		move.w	d0,oGVel(a0)			; Set speed
-		clr.b	oAni(a0)			; Set animation to moving
+		move.w	d0,_objGVel(a0)			; Set speed
+		clr.b	_objAnim(a0)			; Set animation to moving
 
 .End:
 		rts
@@ -564,27 +564,27 @@ ObjPlayer_MoveLeft:
 		moveq	#-$80,d0			; Set speed to -$80
 
 .SetSkidSpeed:
-		move.w	d0,oGVel(a0)			; Set speed
-		move.b	oAngle(a0),d0			; Get angle
+		move.w	d0,_objGVel(a0)			; Set speed
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$20,d0				; Shift it
 		andi.b	#$C0,d0				; Is Sonic on a slope?
 		bne.s	.End				; If so, branch
 		cmpi.w	#$400,d0			; Is Sonic's speed at least 4 pixels per frame?
 		blt.s	.End				; If not, branch
-		move.b	#$D,oAni(a0)			; Set animation to skidding
-		bclr	#0,oStatus(a0)			; Clear flip flag
+		move.b	#$D,_objAnim(a0)			; Set animation to skidding
+		bclr	#0,_objStatus(a0)			; Clear flip flag
 		playSnd	#sSkid, 2			; Play skid sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move right on the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MoveRight:
-		move.w	oGVel(a0),d0			; Get current speed
+		move.w	_objGVel(a0),d0			; Get current speed
 		bmi.s	.Skid				; If it's negative, skid
-		bclr	#0,oStatus(a0)			; Clear flip flag
+		bclr	#0,_objStatus(a0)			; Clear flip flag
 		beq.s	.MoveRight			; Branch if it was already cleared
-		bclr	#5,oStatus(a0)			; Stop pushing
-		move.b	#1,oPrevAni(a0)			; Reset the animation
+		bclr	#5,_objStatus(a0)			; Stop pushing
+		move.b	#1,_objPrevAnim(a0)			; Reset the animation
 
 .MoveRight:
 		add.w	d5,d0				; Add acceleration
@@ -596,8 +596,8 @@ ObjPlayer_MoveRight:
 		move.w	d6,d0				; Cap at top speed
 
 .SetSpeed:
-		move.w	d0,oGVel(a0)			; Set speed
-		clr.b	oAni(a0)			; Set animation to moving
+		move.w	d0,_objGVel(a0)			; Set speed
+		clr.b	_objAnim(a0)			; Set animation to moving
 
 .End:
 		rts
@@ -612,29 +612,29 @@ ObjPlayer_MoveRight:
 		move.w	#$80,d0				; Set speed to $80
 
 .SetSkidSpeed:
-		move.w	d0,oGVel(a0)			; Set speed
-		move.b	oAngle(a0),d0			; Get angle
+		move.w	d0,_objGVel(a0)			; Set speed
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$20,d0				; Shift it
 		andi.b	#$C0,d0				; Is Sonic on a slope?
 		bne.s	.End				; If so, branch
 		cmpi.w	#-$400,d0			; Is Sonic's speed at least -4 pixels per frame?
 		bgt.s	.End				; If not, branch
-		move.b	#$D,oAni(a0)			; Set animation to skidding
-		bset	#0,oStatus(a0)			; Set flip flag
+		move.b	#$D,_objAnim(a0)			; Set animation to skidding
+		bset	#0,_objStatus(a0)			; Set flip flag
 		playSnd	#sSkid, 2			; Play skid sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do movement while rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MoveRoll:
-		move.w	oTopSpd(a0),d6			; Get top speed
+		move.w	_objTopSpd(a0),d6			; Get top speed
 		asl.w	#1,d6				; ''
-		move.w	oAcc(a0),d5			; Get acceleration
+		move.w	_objAccel(a0),d5			; Get acceleration
 		asr.w	#1,d5				; ''
-		move.w	oDec(a0),d4			; Get deceleration
+		move.w	_objDecel(a0),d4			; Get deceleration
 		asr.w	#2,d4				; ''
 
-		tst.b	oMoveLock(a0)			; Is the move lock timer active?
+		tst.b	_objMoveLock(a0)			; Is the move lock timer active?
 		bne.w	.UpdateSpd			; If so, branch
 
 		btst	#2,plrCtrlHold.w		; Is left being held?
@@ -647,7 +647,7 @@ ObjPlayer_MoveRoll:
 		bsr.w	ObjPlayer_RollRight		; Handle right movement
 
 .Decelerate:
-		move.w	oGVel(a0),d0			; Get ground velocity
+		move.w	_objGVel(a0),d0			; Get ground velocity
 		beq.s	.ChkStop			; If Sonic isn't moving, branch
 		bmi.s	.DecLeft			; If Sonic is moving left, branch
 
@@ -656,7 +656,7 @@ ObjPlayer_MoveRoll:
 		moveq	#0,d0				; Cap at 0
 
 .SetGVel:
-		move.w	d0,oGVel(a0)			; Set ground velocity
+		move.w	d0,_objGVel(a0)			; Set ground velocity
 		bra.s	.ChkStop			; Continue
 
 .DecLeft:
@@ -665,34 +665,34 @@ ObjPlayer_MoveRoll:
 		moveq	#0,d0				; Cap at 0
 
 .SetGVel2:
-		move.w	d0,oGVel(a0)			; Set ground velocity
+		move.w	d0,_objGVel(a0)			; Set ground velocity
 
 .ChkStop:
-		tst.w	oGVel(a0)			; Is Sonic still moving?
+		tst.w	_objGVel(a0)			; Is Sonic still moving?
 		bne.s	.UpdateSpd			; If so, branch
 
-		tst.b	oBallMode(a0)			; Are we in ball mode?
+		tst.b	_objBallMode(a0)			; Are we in ball mode?
 		bne.s	.KeepRoll			; If so, branch
-		bclr	#2,oStatus(a0)			; Stop rolling
-		move.b	oInitColH(a0),oColH(a0)		; Reset collision height
-		move.b	oInitColW(a0),oColW(a0)		; Reset collision width
-		move.b	#5,oAni(a0)			; Use standing animation
-		subq.w	#5,oYPos(a0)			; Align Sonic with the ground
+		bclr	#2,_objStatus(a0)			; Stop rolling
+		move.b	_objInitColH(a0),_objColH(a0)		; Reset collision height
+		move.b	_objInitColW(a0),_objColW(a0)		; Reset collision width
+		move.b	#5,_objAnim(a0)			; Use standing animation
+		subq.w	#5,_objYPos(a0)			; Align Sonic with the ground
 		bra.s	.UpdateSpd			; Continue
 
 .KeepRoll:
-		move.w	#$400,oGVel(a0)			; Speed up again
-		btst	#0,oStatus(a0)			; Are we facing right?
+		move.w	#$400,_objGVel(a0)			; Speed up again
+		btst	#0,_objStatus(a0)			; Are we facing right?
 		beq.s	.UpdateSpd			; If so, branch
-		neg.w	oGVel(a0)			; Go the other way
+		neg.w	_objGVel(a0)			; Go the other way
 
 .UpdateSpd:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		jsr	CalcSine.w			; Get sine and cosine
-		muls.w	oGVel(a0),d0			; Multiply sine with ground velocity
+		muls.w	_objGVel(a0),d0			; Multiply sine with ground velocity
 		asr.l	#8,d0				; Shift over
-		move.w	d0,oYVel(a0)			; Set Y velocity
-		muls.w	oGVel(a0),d1			; Multiply cosine with ground velocity
+		move.w	d0,_objYVel(a0)			; Set Y velocity
+		muls.w	_objGVel(a0),d1			; Multiply cosine with ground velocity
 		asr.l	#8,d1				; Shift over
 
 		cmpi.w	#$1000,d1			; Is the speed > $10 pixels per frame?
@@ -705,19 +705,19 @@ ObjPlayer_MoveRoll:
 		move.w	#-$1000,d1			; Cap the speed
 
 .SetXVel:
-		move.w	d1,oXVel(a0)			; Set X velocity
+		move.w	d1,_objXVel(a0)			; Set X velocity
 		bra.w	ObjPlayer_CheckWalls		; Check wall collision
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle left movement for rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_RollLeft:
-		move.w	oGVel(a0),d0			; Get ground velocity
+		move.w	_objGVel(a0),d0			; Get ground velocity
 		beq.s	.SetLeft			; If Sonic isn't moving, branch
 		bpl.s	.Dec				; If Sonic is moving right, branch
 
 .SetLeft:
-		bset	#0,oStatus(a0)			; Face left
-		move.b	#2,oAni(a0)			; Use rolling animation
+		bset	#0,_objStatus(a0)			; Face left
+		move.b	#2,_objAnim(a0)			; Use rolling animation
 		rts
 
 .Dec:
@@ -726,16 +726,16 @@ ObjPlayer_RollLeft:
 		move.w	#-$80,d0			; Set new speed
 
 .SetGVel:
-		move.w	d0,oGVel(a0)			; Set ground velocity
+		move.w	d0,_objGVel(a0)			; Set ground velocity
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle left movement for rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_RollRight:
-		move.w	oGVel(a0),d0			; Get ground velocity
+		move.w	_objGVel(a0),d0			; Get ground velocity
 		bmi.s	.Dec				; If Sonic is moving left, branch
-		bclr	#0,oStatus(a0)			; Face right
-		move.b	#2,oAni(a0)			; Use rolling animation
+		bclr	#0,_objStatus(a0)			; Face right
+		move.b	#2,_objAnim(a0)			; Use rolling animation
 		rts
 
 .Dec:
@@ -744,20 +744,20 @@ ObjPlayer_RollRight:
 		move.w	#$80,d0				; Set new speed
 
 .SetGVel:
-		move.w	d0,oGVel(a0)			; Set ground velocity
+		move.w	d0,_objGVel(a0)			; Set ground velocity
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do movement in the air
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_MoveAir:
-		move.w	oTopSpd(a0),d6			; Get top speed
-		move.w	oAcc(a0),d5			; Get accleration
+		move.w	_objTopSpd(a0),d6			; Get top speed
+		move.w	_objAccel(a0),d5			; Get accleration
 		add.w	d5,d5				; Double it
-		move.w	oXVel(a0),d0			; Get X velocity
+		move.w	_objXVel(a0),d0			; Get X velocity
 
 		btst	#2,plrCtrlHold.w		; Is left being held?
 		beq.s	.NotLeft			; If not, branch
-		bset	#0,oStatus(a0)			; Face left
+		bset	#0,_objStatus(a0)			; Face left
 		sub.w	d5,d0				; Subtract acceleration
 		move.w	d6,d1				; Get top speed
 		neg.w	d1				; Negate it
@@ -771,7 +771,7 @@ ObjPlayer_MoveAir:
 .NotLeft:
 		btst	#3,plrCtrlHold.w		; Is right being held?
 		beq.s	.NotRight			; If not, branch
-		bclr	#0,oStatus(a0)			; Face right
+		bclr	#0,_objStatus(a0)			; Face right
 		add.w	d5,d0				; Add acceleration
 		cmp.w	d6,d0				; Has Sonic reached the top speed?
 		blt.s	.NotRight			; If not, branch
@@ -781,7 +781,7 @@ ObjPlayer_MoveAir:
 		move.w	d6,d0				; Cap at top speed
 
 .NotRight:
-		move.w	d0,oXVel(a0)			; Set X velocity
+		move.w	d0,_objXVel(a0)			; Set X velocity
 
 .ResetScr
 		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
@@ -793,9 +793,9 @@ ObjPlayer_MoveAir:
 		subq.w	#2,panCamYPos.w		; Scroll the camera down
 
 .DecelerateAtPeak:
-		cmpi.w	#-$400,oYVel(a0)		; Is Sonic at least going -4 pixels per frame up?
+		cmpi.w	#-$400,_objYVel(a0)		; Is Sonic at least going -4 pixels per frame up?
 		bcs.s	.End				; If not, branch
-		move.w	oXVel(a0),d0			; Get X velocity
+		move.w	_objXVel(a0),d0			; Get X velocity
 		move.w	d0,d1				; Save it
 		asr.w	#5,d1				; Turn it into the acceleration
 		beq.s	.End				; If it's 0, branch
@@ -813,7 +813,7 @@ ObjPlayer_MoveAir:
 		moveq	#0,d0				; Cap at 0
 
 .DecSetSpeed:
-		move.w	d0,oXVel(a0)			; Set thhe X velocity
+		move.w	d0,_objXVel(a0)			; Set thhe X velocity
 
 .End:
 		rts
@@ -821,20 +821,20 @@ ObjPlayer_MoveAir:
 ; Handle level boundaries
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_LvlBound:
-		tst.w	oYVel(a0)
+		tst.w	_objYVel(a0)
 		bpl.s	.XBound
-		move.w	oYPos(a0),d1
+		move.w	_objYPos(a0),d1
 		addi.w	#$10,d1
 		move.w	minCamYPos.w,d0		; Get upper boundary position
 		cmp.w	d1,d0				; Has Sonic touched the upper boundary?
 		ble.s	.XBound				; If so, branch
-		move.w	d0,oYPos(a0)
-		clr.w	oYVel(a0)
-		clr.w	oGVel(a0)
+		move.w	d0,_objYPos(a0)
+		clr.w	_objYVel(a0)
+		clr.w	_objGVel(a0)
 
 .XBound:
-		move.l	oXPos(a0),d1			; Get X position
-		move.w	oXVel(a0),d0			; Get X velocity
+		move.l	_objXPos(a0),d1			; Get X position
+		move.w	_objXVel(a0),d0			; Get X velocity
 		ext.l	d0
 		asl.l	#8,d0				; Shift it
 		add.l	d0,d1				; Add to X position
@@ -851,7 +851,7 @@ ObjPlayer_LvlBound:
 .ChkBottom:
 		move.w	maxCamYPos.w,d0		; Get max camera Y position
 		addi.w	#224,d0				; Get bottom boundary position
-		cmp.w	oYPos(a0),d0			; Has Sonic touched the bottom boundary?
+		cmp.w	_objYPos(a0),d0			; Has Sonic touched the bottom boundary?
 		blt.s	.TouchedBottom			; If so, branch
 		rts
 
@@ -866,59 +866,59 @@ ObjPlayer_LvlBound:
 		rts
 
 .TouchedSide:
-		clr.w	oXVel(a0)			; Stop X movement
-		move.w	d0,oXPos(a0)			; Move Sonic out of the boundary
-		clr.b	oXPos+2(a0)			; Clear the subpixel of the X position
-		clr.w	oGVel(a0)			; Stop ground movement
+		clr.w	_objXVel(a0)			; Stop X movement
+		move.w	d0,_objXPos(a0)			; Move Sonic out of the boundary
+		clr.b	_objXPos+2(a0)			; Clear the subpixel of the X position
+		clr.w	_objGVel(a0)			; Stop ground movement
 		bra.s	.ChkBottom			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle peelout
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Peelout:
-		tst.b	oDashFlag(a0)			; Is Sonic doing the peelout?
+		tst.b	_objDashFlag(a0)			; Is Sonic doing the peelout?
 		beq.s	.ChkUp				; If not, branch
 		bmi.s	.ChkLaunch			; If so, branch
 		rts
 
 .ChkUp:
-		cmpi.b	#7,oAni(a0)			; Is Sonic looking up?
+		cmpi.b	#7,_objAnim(a0)			; Is Sonic looking up?
 		bne.w	.End				; If not, branch
 		move.b	plrCtrlPress.w,d0		; Get controller bits
 		andi.b	#$70,d0				; Are A, B, or C pressed?
 		beq.w	.End				; If not, branch
 
-		clr.b	oAni(a0)			; Set to peelout charge animation
-		clr.b	oDashTimer(a0)			; Reset the dash timer
-		move.w	#$C,oGVel(a0)			; Reset ground velocity
-		btst	#0,oStatus(a0)			; Is Sonic facing left?
+		clr.b	_objAnim(a0)			; Set to peelout charge animation
+		clr.b	_objDashTimer(a0)			; Reset the dash timer
+		move.w	#$C,_objGVel(a0)			; Reset ground velocity
+		btst	#0,_objStatus(a0)			; Is Sonic facing left?
 		beq.s	.SetAni				; If so, branch
-		neg.w	oGVel(a0)			; Go the other way
+		neg.w	_objGVel(a0)			; Go the other way
 
 .SetAni:
 		playSnd	#sCharge, 2			; Play charge sound
 
 		addq.l	#4,sp				; Don't return to caller
-		st	oDashFlag(a0)			; Set the peelout flag
+		st	_objDashFlag(a0)			; Set the peelout flag
 		jmp	PlayerAnglePos			; Update position and angle along the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkLaunch:
 		btst	#0,plrCtrlHold.w		; Is up being held?
 		bne.w	.Charge				; If so, branch
-		clr.b	oDashFlag(a0)			; Clear the dash flag
+		clr.b	_objDashFlag(a0)			; Clear the dash flag
 
-		cmpi.b	#30,oDashTimer(a0)		; Has Sonic charged up enough?
+		cmpi.b	#30,_objDashTimer(a0)		; Has Sonic charged up enough?
 		bne.s	.StopSound			; If not, branch
 
-		clr.b	oAni(a0)			; Reset animation
-		move.w	#$C00,oGVel(a0)			; Set ground velocity
-		btst	#6,oStatus(a0)
+		clr.b	_objAnim(a0)			; Reset animation
+		move.w	#$C00,_objGVel(a0)			; Set ground velocity
+		btst	#6,_objStatus(a0)
 		beq.s	.NoWater
-		lsr.w	oGVel(a0)
+		lsr.w	_objGVel(a0)
 
 .NoWater:
-		btst	#0,oStatus(a0)			; Is Sonic facing left?
+		btst	#0,_objStatus(a0)			; Is Sonic facing left?
 		beq.s	.FinishDash			; If not, branch
-		neg.w	oGVel(a0)			; Go the other way
+		neg.w	_objGVel(a0)			; Go the other way
 
 .FinishDash:
 		playSnd	#sChargeRelease, 2		; Play charge release sound
@@ -926,17 +926,17 @@ ObjPlayer_Peelout:
 		bra.s	.DoUpdates			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Charge:
-		cmpi.b	#30,oDashTimer(a0)		; Has Sonic charged enough?
+		cmpi.b	#30,_objDashTimer(a0)		; Has Sonic charged enough?
 		beq.s	.DoUpdates			; If so, branch
-		addq.b	#1,oDashTimer(a0)		; Increment the timer
-		addi.w	#$66,oGVel(a0)			; Increment ground velocity to handle animation and extended camera
-		btst	#0,oStatus(a0)			; Is Sonic facing left?
+		addq.b	#1,_objDashTimer(a0)		; Increment the timer
+		addi.w	#$66,_objGVel(a0)			; Increment ground velocity to handle animation and extended camera
+		btst	#0,_objStatus(a0)			; Is Sonic facing left?
 		beq.s	.DoUpdates			; If so, branch
-		subi.w	#$66*2,oGVel(a0)		; Go the other way
+		subi.w	#$66*2,_objGVel(a0)		; Go the other way
 		bra.s	.DoUpdates			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .StopSound:
-		clr.w	oGVel(a0)			; Stop ground movement
+		clr.w	_objGVel(a0)			; Stop ground movement
 
 		playSnd	#sChargeStop, 2			; Play charge stop sound
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -959,54 +959,54 @@ ObjPlayer_Peelout:
 ; Handle spindash
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Spindash:
-		tst.b	oDashFlag(a0)			; Is Sonic doing the spindash?
+		tst.b	_objDashFlag(a0)			; Is Sonic doing the spindash?
 		beq.s	.ChkDown			; If not, branch
 		bpl.s	.ChkLaunch			; If so, branch
 		rts
 
 .ChkDown:
-		cmpi.b	#8,oAni(a0)			; Is Sonic ducking?
+		cmpi.b	#8,_objAnim(a0)			; Is Sonic ducking?
 		bne.w	.End				; If not, branch
 		move.b	plrCtrlPress.w,d0		; Get controller bits
 		andi.b	#$70,d0				; Are A, B, or C pressed?
 		beq.w	.End				; If not, branch
 
-		clr.b	oDashTimer(a0)			; Reset the dash timer
-		move.w	#$C,oGVel(a0)			; Reset ground velocity
-		btst	#0,oStatus(a0)			; Is Sonic facing left?
+		clr.b	_objDashTimer(a0)			; Reset the dash timer
+		move.w	#$C,_objGVel(a0)			; Reset ground velocity
+		btst	#0,_objStatus(a0)			; Is Sonic facing left?
 		beq.s	.SetAni				; If so, branch
-		neg.w	oGVel(a0)			; Go the other way
+		neg.w	_objGVel(a0)			; Go the other way
 
 .SetAni:
-		move.b	#$E,oColH(a0)			; Reduce Sonic's hitbox
-		move.b	#7,oColW(a0)			; ''
-		addq.w	#5,oYPos(a0)			; Align Sonic to the ground
-		move.b	#2,oAni(a0)			; Set to spin animation
+		move.b	#$E,_objColH(a0)			; Reduce Sonic's hitbox
+		move.b	#7,_objColW(a0)			; ''
+		addq.w	#5,_objYPos(a0)			; Align Sonic to the ground
+		move.b	#2,_objAnim(a0)			; Set to spin animation
 
 		playSnd	#sCharge, 2			; Play charge sound
 
 		addq.l	#4,sp				; Don't return to caller
-		move.b	#1,oDashFlag(a0)		; Set the spindash flag
+		move.b	#1,_objDashFlag(a0)		; Set the spindash flag
 		jmp	PlayerAnglePos			; Update position and angle along the ground
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .ChkLaunch:
 		btst	#1,plrCtrlHold.w		; Is down being held?
 		bne.w	.Charge				; If so, branch
-		clr.b	oDashFlag(a0)			; Clear the dash flag
+		clr.b	_objDashFlag(a0)			; Clear the dash flag
 
-		cmpi.b	#45,oDashTimer(a0)		; Has Sonic charged up enough?
+		cmpi.b	#45,_objDashTimer(a0)		; Has Sonic charged up enough?
 		bne.s	.StopSound			; If not, branch
 
-		bset	#2,oStatus(a0)			; Set the roll flag
-		move.w	#$C00,oGVel(a0)			; Set ground velocity
-		btst	#6,oStatus(a0)
+		bset	#2,_objStatus(a0)			; Set the roll flag
+		move.w	#$C00,_objGVel(a0)			; Set ground velocity
+		btst	#6,_objStatus(a0)
 		beq.s	.NoWater
-		lsr.w	oGVel(a0)
+		lsr.w	_objGVel(a0)
 
 .NoWater:
-		btst	#0,oStatus(a0)			; Is Sonic facing left?
+		btst	#0,_objStatus(a0)			; Is Sonic facing left?
 		beq.s	.FinishDash			; If not, branch
-		neg.w	oGVel(a0)			; Go the other way
+		neg.w	_objGVel(a0)			; Go the other way
 
 .FinishDash:
 		playSnd	#sChargeRelease, 2		; Play charge release sound
@@ -1014,20 +1014,20 @@ ObjPlayer_Spindash:
 		bra.s	.DoUpdates			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .Charge:
-		cmpi.b	#45,oDashTimer(a0)		; Has Sonic charged enough?
+		cmpi.b	#45,_objDashTimer(a0)		; Has Sonic charged enough?
 		beq.s	.DoUpdates			; If so, branch
-		addq.b	#1,oDashTimer(a0)		; Increment the timer
-		addi.w	#$46,oGVel(a0)			; Increment ground velocity to handle animation and extended camera
-		btst	#0,oStatus(a0)			; Is Sonic facing left?
+		addq.b	#1,_objDashTimer(a0)		; Increment the timer
+		addi.w	#$46,_objGVel(a0)			; Increment ground velocity to handle animation and extended camera
+		btst	#0,_objStatus(a0)			; Is Sonic facing left?
 		beq.s	.DoUpdates			; If so, branch
-		subi.w	#$46*2,oGVel(a0)		; Go the other way
+		subi.w	#$46*2,_objGVel(a0)		; Go the other way
 		bra.s	.DoUpdates			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .StopSound:
-		clr.w	oGVel(a0)			; Stop ground movement
-		move.b	oInitColH(a0),oColH(a0)		; Reset collision height
-		move.b	oInitColW(a0),oColW(a0)		; Reset collision width
-		subq.w	#5,oYPos(a0)			; Align Sonic with the ground
+		clr.w	_objGVel(a0)			; Stop ground movement
+		move.b	_objInitColH(a0),_objColH(a0)		; Reset collision height
+		move.b	_objInitColW(a0),_objColW(a0)		; Reset collision width
+		subq.w	#5,_objYPos(a0)			; Align Sonic with the ground
 
 		playSnd	#sChargeStop, 2			; Play charge stop sound
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1061,37 +1061,37 @@ ObjPlayer_ChkJump:
 		beq.w	.End				; If not, branch
 
 		moveq	#0,d0
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$80,d0				; Shift it to check the ceiling
 		jsr	PlayerCalcRoomOverHead		; Get room over Sonic's head
 		cmpi.w	#6,d1				; Is it at least 6 pixels?
 		blt.w	.End				; If not, branch
 
 		move.w	#JUMP_HEIGHT,d2			; Standard jump height
-		btst	#6,oStatus(a0)
+		btst	#6,_objStatus(a0)
 		beq.s	.NoWater
 		subi.w	#$300,d2
 
 .NoWater:
 		moveq	#0,d0
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		subi.b	#$40,d0				; Shift it
 		jsr	CalcSine.w			; Get the sine and cosine
 		muls.w	d2,d1				; Mutliply cosine with jump height
 		muls.w	d2,d0				; Mutliply sine with jump height
 		asr.l	#8,d1				; Shift the values over
 		asr.l	#8,d0				; ''
-		add.w	d1,oXVel(a0)			; Add to X velocity
-		add.w	d0,oYVel(a0)			; Add to Y velocity
-		ori.b	#6,oStatus(a0)			; Set "in air" and roll flags
-		bclr	#5,oStatus(a0)			; Clear "pushing" flag
+		add.w	d1,_objXVel(a0)			; Add to X velocity
+		add.w	d0,_objYVel(a0)			; Add to Y velocity
+		ori.b	#6,_objStatus(a0)			; Set "in air" and roll flags
+		bclr	#5,_objStatus(a0)			; Clear "pushing" flag
 		addq.w	#4,sp				; Do not return to collaer
-		st	oJumping(a0)			; Set the jumping flag
+		st	_objJumping(a0)			; Set the jumping flag
 		playSnd	#sLeap, 2			; Play jump sound
-		move.b	#$E,oColH(a0)			; Reduce Sonic's hitbox
-		move.b	#7,oColW(a0)			; ''
-		addq.w	#5,oYPos(a0)			; Align Sonic to the ground
-		move.b	#2,oAni(a0)			; Set jumping animation
+		move.b	#$E,_objColH(a0)			; Reduce Sonic's hitbox
+		move.b	#7,_objColW(a0)			; ''
+		addq.w	#5,_objYPos(a0)			; Align Sonic to the ground
+		move.b	#2,_objAnim(a0)			; Set jumping animation
 
 .End:
 		rts
@@ -1099,11 +1099,11 @@ ObjPlayer_ChkJump:
 ; Handle variable jumping
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_JumpHeight:
-		tst.b	oJumping(a0)			; Is Sonic jumping?
+		tst.b	_objJumping(a0)			; Is Sonic jumping?
 		beq.s	.UpVelCap			; If not, branch
 
 		move.w	#-MIN_JMP_HEIGHT,d1		; Standard minimum height
-		cmp.w	oYVel(a0),d1			; Is Sonic jumping at least hte minimum height?
+		cmp.w	_objYVel(a0),d1			; Is Sonic jumping at least hte minimum height?
 		ble.s	.End				; If not, branch
 		move.b	plrCtrlHold.w,d0		; Get held buttons
 		andi.b	#$70,d0				; Are A, B, or C pressed?
@@ -1114,23 +1114,23 @@ ObjPlayer_JumpHeight:
 .NoDebug:
 		tst.b	d0
 		bne.s	.End				; If not, branch
-		move.w	d1,oYVel(a0)			; Set to minimum height
+		move.w	d1,_objYVel(a0)			; Set to minimum height
 
 .End:
 		rts
 
 .UpVelCap:
-		tst.b	oBallMode(a0)			; Are we in ball mode?
+		tst.b	_objBallMode(a0)			; Are we in ball mode?
 		bne.s	.End				; If so, branch
-		cmpi.w	#-$FC0,oYVel(a0)		; Cap Y velocity at -$FC0 when going up
+		cmpi.w	#-$FC0,_objYVel(a0)		; Cap Y velocity at -$FC0 when going up
 		bge.s	.End				; ''
-		move.w	#-$FC0,oYVel(a0)		; ''
+		move.w	#-$FC0,_objYVel(a0)		; ''
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Gradually reset Sonic's angle in mid air
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_JumpAngle:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		beq.s	ObjPlayer_JumpFlip		; If it's already reset, branch
 		bpl.s	.Decrease			; If it's positive, branch
 
@@ -1146,39 +1146,39 @@ ObjPlayer_JumpAngle:
 		moveq	#0,d0				; Reset the angle
 
 .SetAngle:
-		move.b	d0,oAngle(a0)			; Set the new angle
+		move.b	d0,_objAngle(a0)			; Set the new angle
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Update Sonic's angle while he's tumbling in the air
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_JumpFlip:
-		move.b	oFlipAngle(a0),d0		; Get flip angle
+		move.b	_objFlipAngle(a0),d0		; Get flip angle
 		beq.s	.End				; If it's 0, branch
-		tst.w	oFlipDir(a0)			; Is Sonic flipping left?
+		tst.w	_objFlipDir(a0)			; Is Sonic flipping left?
 		bmi.s	.FlipLeft			; IF so, branch
 
 .FlipRight:
-		move.b	oFlipSpeed(a0),d1		; Get flip speed
+		move.b	_objFlipSpeed(a0),d1		; Get flip speed
 		add.b	d1,d0				; Add to angle
 		bcc.s	.FlipSet			; If it hasn't wrapped over, branch
-		subq.b	#1,oFlipRemain(a0)		; Decrement flips remaining
+		subq.b	#1,_objFlipRemain(a0)		; Decrement flips remaining
 		bcc.s	.FlipSet			; If there are still some left
-		clr.b	oFlipRemain(a0)			; Clear flips remaining
+		clr.b	_objFlipRemain(a0)			; Clear flips remaining
 		moveq	#0,d0				; Reset angle
 		bra.s	.FlipSet			; Continue
 
 .FlipLeft:
-		tst.b	oFlipTurned(a0)			; Is the flipping inverted?
+		tst.b	_objFlipTurned(a0)			; Is the flipping inverted?
 		bne.s	.FlipRight			; If so, branch
-		move.b	oFlipSpeed(a0),d1		; Get flip speed
+		move.b	_objFlipSpeed(a0),d1		; Get flip speed
 		sub.b	d1,d0				; Subtract from angle
 		bcc.s	.FlipSet			; If it hasn't wrapped over, branch
-		subq.b	#1,oFlipRemain(a0)		; Decrement flips remaining
+		subq.b	#1,_objFlipRemain(a0)		; Decrement flips remaining
 		bcc.s	.FlipSet			; If there are still some left
-		clr.b	oFlipRemain(a0)			; Clear flips remaining
+		clr.b	_objFlipRemain(a0)			; Clear flips remaining
 		moveq	#0,d0				; Reset angle
 
 .FlipSet:
-		move.b	d0,oFlipAngle(a0)		; Update the angle
+		move.b	d0,_objFlipAngle(a0)		; Update the angle
 
 .End:
 		rts
@@ -1186,7 +1186,7 @@ ObjPlayer_JumpFlip:
 ; Check for rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ChkRoll:
-		move.w	oGVel(a0),d0			; Get ground velocity
+		move.w	_objGVel(a0),d0			; Get ground velocity
 		bpl.s	.ChkSpd				; Get absolute value
 		neg.w	d0				; ''
 
@@ -1205,18 +1205,18 @@ ObjPlayer_ChkRoll:
 ; Make Sonic roll
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_DoRoll:
-		btst	#2,oStatus(a0)			; Is Sonic already rolling?
+		btst	#2,_objStatus(a0)			; Is Sonic already rolling?
 		bne.s	.End				; If so, branch
-		bset	#2,oStatus(a0)			; Set roll flag
+		bset	#2,_objStatus(a0)			; Set roll flag
 
-		move.b	#$E,oColH(a0)			; Reduce Sonic's hitbox
-		move.b	#7,oColW(a0)			; ''
-		addq.w	#5,oYPos(a0)			; Align Sonic to the ground
-		move.b	#2,oAni(a0)			; Set rolling animation
+		move.b	#$E,_objColH(a0)			; Reduce Sonic's hitbox
+		move.b	#7,_objColW(a0)			; ''
+		addq.w	#5,_objYPos(a0)			; Align Sonic to the ground
+		move.b	#2,_objAnim(a0)			; Set rolling animation
 
-		tst.w	oGVel(a0)			; Is Sonic moving already?
+		tst.w	_objGVel(a0)			; Is Sonic moving already?
 		bne.s	.End				; IF not, branch
-		move.w	#$200,oGVel(a0)			; Set speed
+		move.w	#$200,_objGVel(a0)			; Set speed
 
 .End:
 		rts
@@ -1224,17 +1224,17 @@ ObjPlayer_DoRoll:
 ; Slow Sonic down as he goes up a slope or speed him up when he does down one
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_SlopePush:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$60,d0				; Shift it
 		cmpi.b	#$C0,d0				; Is Sonic on a steep slope or ceiling?
 		bcc.s	.End				; If not, branch
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		jsr	CalcSine.w			; Get the sine of it
 		muls.w	#$20,d0				; Multiple it by $20
 		asr.l	#8,d0				; Shift it
-		tst.w	oGVel(a0)			; Check speed
+		tst.w	_objGVel(a0)			; Check speed
 		beq.s	.End				; If Sonic is not moving, branch
-		add.w	d0,oGVel(a0)			; Add to ground velocity
+		add.w	d0,_objGVel(a0)			; Add to ground velocity
 
 .End:
 		rts
@@ -1242,22 +1242,22 @@ ObjPlayer_SlopePush:
 ; Check if Sonic is to fall off a slope
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_FallOffSlope:
-		tst.b	oMoveLock(a0)			; Is the move lock timer, active?
+		tst.b	_objMoveLock(a0)			; Is the move lock timer, active?
 		bne.s	.End				; If so, branch
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$20,d0				; Shift it
 		andi.b	#$C0,d0				; Get quadrant
 		beq.s	.End				; If Sonic is on the floor, branch
-		move.w	oGVel(a0),d0			; Get speed
+		move.w	_objGVel(a0),d0			; Get speed
 		bpl.s	.ChkSpeed			; If it's already positive, branch
 		neg.w	d0				; Force it to be positive
 
 .ChkSpeed:
 		cmpi.w	#$280,d0			; Is Sonic going at least 2.5 pixels per frame?
 		bcc.s	.End				; If so, branch
-		clr.w	oGVel(a0)			; Stop movement
-		bset	#1,oStatus(a0)			; Set "in air" flag
-		move.b	#$1E,oMoveLock(a0)		; Set move lock timer
+		clr.w	_objGVel(a0)			; Stop movement
+		bset	#1,_objStatus(a0)			; Set "in air" flag
+		move.b	#$1E,_objMoveLock(a0)		; Set move lock timer
 
 .End:
 		rts
@@ -1265,24 +1265,24 @@ ObjPlayer_FallOffSlope:
 ; Affect Sonic's speed on slopes while rolling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_RollSlopePush:
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		addi.b	#$60,d0				; ''
 		cmpi.b	#$C0,d0				; Is Sonic on a steep enough slope?
 		bcc.s	.End				; If not, branch
 
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		jsr	CalcSine.w			; Get sine
 		muls.w	#$50,d0				; Multiply sine by $50
 		asr.l	#8,d0				; Shift over
 
-		tst.w	oGVel(a0)			; Is Sonic moving right?
+		tst.w	_objGVel(a0)			; Is Sonic moving right?
 		bmi.s	.PushLeft			; If not, branch
 		tst.w	d0				; Is the push speed positive?
 		bpl.s	.Push				; If so, branch
 		asr.l	#2,d0				; Shift over more
 
 .Push:
-		add.w	d0,oGVel(a0)			; Add push speed
+		add.w	d0,_objGVel(a0)			; Add push speed
 		rts
 
 .PushLeft:
@@ -1291,7 +1291,7 @@ ObjPlayer_RollSlopePush:
 		asr.l	#2,d0				; Shift over more
 
 .Push2:
-		add.w	d0,oGVel(a0)			; Add push speed
+		add.w	d0,_objGVel(a0)			; Add push speed
 
 .End:
 		rts
@@ -1302,21 +1302,21 @@ ObjPlayer_ChkBounce:
 		tst.b	rFlooactIDive.w		; Is the floor active?
 		beq.w	.End				; If so, branch
 
-		btst	#1,oStatus(a0)			; Is Sonic in the air?
+		btst	#1,_objStatus(a0)			; Is Sonic in the air?
 		beq.s	.ChkDown			; If not, branch
 
-		tst.w	oYVel(a0)			; Is Sonic falling?
+		tst.w	_objYVel(a0)			; Is Sonic falling?
 		beq.w	.ChkBounceUp			; If not, branch
 		bmi.w	.ChkBounceUp			; ''
 
 .ChkDown:
-		move.w	oYPos(a0),d2			; Get Y of left sensor
-		move.b	oColH(a0),d0			; ''
+		move.w	_objYPos(a0),d2			; Get Y of left sensor
+		move.b	_objColH(a0),d0			; ''
 		ext.w	d0				; ''
 		add.w	d0,d2				; ''
 		addq.w	#2,d2				; ''
-		move.w	oXPos(a0),d3			; Get X of left sensor
-		move.b	oColW(a0),d0			; ''
+		move.w	_objXPos(a0),d3			; Get X of left sensor
+		move.b	_objColW(a0),d0			; ''
 		ext.w	d0				; ''
 		sub.w	d0,d3				; ''
 		jsr	Level_FindBlock			; Get the block located there
@@ -1325,13 +1325,13 @@ ObjPlayer_ChkBounce:
 		cmpi.w	#$80,d0				; Is the block the bouncy floor?
 		beq.s	.Bounce				; If so, branch
 
-		move.w	oYPos(a0),d2			; Get Y of right sensor
-		move.b	oColH(a0),d0			; ''
+		move.w	_objYPos(a0),d2			; Get Y of right sensor
+		move.b	_objColH(a0),d0			; ''
 		ext.w	d0				; ''
 		add.w	d0,d2				; ''
 		addq.w	#2,d2				; ''
-		move.w	oXPos(a0),d3			; Get X of right sensor
-		move.b	oColW(a0),d0			; ''
+		move.w	_objXPos(a0),d3			; Get X of right sensor
+		move.b	_objColW(a0),d0			; ''
 		ext.w	d0				; ''
 		add.w	d0,d3				; ''
 		jsr	Level_FindBlock			; Get the block located there
@@ -1341,33 +1341,33 @@ ObjPlayer_ChkBounce:
 		bne.s	.End				; If not, branch
 
 .Bounce:
-		move.w	#-$1600,oYVel(a0)		; Bounce Sonic up
-		bset	#1,oStatus(a0)			; Set in air flag
-		clr.b	oJumping(a0)			; Clear jump flag
-		clr.b	oDashTimer(a0)			; Reset dash timer
-		clr.b	oDashFlag(a0)			; Reset dash flag
+		move.w	#-$1600,_objYVel(a0)		; Bounce Sonic up
+		bset	#1,_objStatus(a0)			; Set in air flag
+		clr.b	_objJumping(a0)			; Clear jump flag
+		clr.b	_objDashTimer(a0)			; Reset dash timer
+		clr.b	_objDashFlag(a0)			; Reset dash flag
 
 		playSnd	#sFloorBounce, 2		; Play the floor bounce sound
 
-		btst	#2,oStatus(a0)			; Is Sonic already rolling?
+		btst	#2,_objStatus(a0)			; Is Sonic already rolling?
 		bne.s	.End				; If so, branch
-		bset	#2,oStatus(a0)			; Set roll flag
-		move.b	#$E,oColH(a0)			; Reduce Sonic's hitbox
-		move.b	#7,oColW(a0)			; ''
-		addq.w	#5,oYPos(a0)			; Align Sonic to the ground
-		move.b	#2,oAni(a0)			; Set rolling animation
+		bset	#2,_objStatus(a0)			; Set roll flag
+		move.b	#$E,_objColH(a0)			; Reduce Sonic's hitbox
+		move.b	#7,_objColW(a0)			; ''
+		addq.w	#5,_objYPos(a0)			; Align Sonic to the ground
+		move.b	#2,_objAnim(a0)			; Set rolling animation
 
 .End:
 		rts
 
 .ChkBounceUp:
-		move.w	oYPos(a0),d2			; Get Y of left sensor
-		move.b	oColH(a0),d0			; ''
+		move.w	_objYPos(a0),d2			; Get Y of left sensor
+		move.b	_objColH(a0),d0			; ''
 		ext.w	d0				; ''
 		sub.w	d0,d2				; ''
 		subq.w	#2,d2				; ''
-		move.w	oXPos(a0),d3			; Get X of left sensor
-		move.b	oColW(a0),d0			; ''
+		move.w	_objXPos(a0),d3			; Get X of left sensor
+		move.b	_objColW(a0),d0			; ''
 		ext.w	d0				; ''
 		sub.w	d0,d3				; ''
 		jsr	Level_FindBlock			; Get the block located there
@@ -1376,13 +1376,13 @@ ObjPlayer_ChkBounce:
 		cmpi.w	#$80,d0				; Is the block the bouncy floor?
 		beq.s	.BounceUp			; If so, branch
 
-		move.w	oYPos(a0),d2			; Get Y of right sensor
-		move.b	oColH(a0),d0			; ''
+		move.w	_objYPos(a0),d2			; Get Y of right sensor
+		move.b	_objColH(a0),d0			; ''
 		ext.w	d0				; ''
 		sub.w	d0,d2				; ''
 		subq.w	#2,d2				; ''
-		move.w	oXPos(a0),d3			; Get X of right sensor
-		move.b	oColW(a0),d0			; ''
+		move.w	_objXPos(a0),d3			; Get X of right sensor
+		move.b	_objColW(a0),d0			; ''
 		ext.w	d0				; ''
 		add.w	d0,d3				; ''
 		jsr	Level_FindBlock			; Get the block located there
@@ -1394,21 +1394,21 @@ ObjPlayer_ChkBounce:
 .BounceUp:
 		addq.l	#4,sp				; Don't return to caller
 
-		move.w	#$1600,oYVel(a0)		; Bounce Sonic up
-		bset	#1,oStatus(a0)			; Set in air flag
-		clr.b	oJumping(a0)			; Clear jump flag
-		clr.b	oDashTimer(a0)			; Reset dash timer
-		clr.b	oDashFlag(a0)			; Reset dash flag
+		move.w	#$1600,_objYVel(a0)		; Bounce Sonic up
+		bset	#1,_objStatus(a0)			; Set in air flag
+		clr.b	_objJumping(a0)			; Clear jump flag
+		clr.b	_objDashTimer(a0)			; Reset dash timer
+		clr.b	_objDashFlag(a0)			; Reset dash flag
 
 		playSnd	#sFloorBounce, 2		; Play the floor bounce sound
 
-		btst	#2,oStatus(a0)			; Is Sonic already rolling?
+		btst	#2,_objStatus(a0)			; Is Sonic already rolling?
 		bne.s	.End2				; If so, branch
-		bset	#2,oStatus(a0)			; Set roll flag
-		move.b	#$E,oColH(a0)			; Reduce Sonic's hitbox
-		move.b	#7,oColW(a0)			; ''
-		addq.w	#5,oYPos(a0)			; Align Sonic to the ground
-		move.b	#2,oAni(a0)			; Set rolling animation
+		bset	#2,_objStatus(a0)			; Set roll flag
+		move.b	#$E,_objColH(a0)			; Reduce Sonic's hitbox
+		move.b	#7,_objColW(a0)			; ''
+		addq.w	#5,_objYPos(a0)			; Align Sonic to the ground
+		move.b	#2,_objAnim(a0)			; Set rolling animation
 
 .End2:
 		rts
@@ -1416,11 +1416,11 @@ ObjPlayer_ChkBounce:
 ; Check for bars to hang on to
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ChkHang:
-		btst	#3,oFlags(a0)			; Are we already hanging?
+		btst	#3,_objFlags(a0)			; Are we already hanging?
 		bne.s	.End				; If so, branch
 
-		move.w	oXPos(a0),d3			; X position
-		move.w	oYPos(a0),d2			; Y position
+		move.w	_objXPos(a0),d3			; X position
+		move.w	_objYPos(a0),d2			; Y position
 		subi.w	#$18,d2				; ''
 		jsr	Level_FindBlock			; Get the block located there
 		move.w	(a1),d0				; ''
@@ -1428,19 +1428,19 @@ ObjPlayer_ChkHang:
 		cmpi.w	#$81,d0				; Is the block the bar?
 		bne.s	.End				; If not, branch
 
-		bclr	#2,oStatus(a0)			; Clear roll flag
-		clr.l	oXVel(a0)			; Stop movement
-		clr.w	oGVel(a0)			; ''
-		bset	#3,oFlags(a0)			; Set hanging flag
-		move.b	#$A,oAni(a0)			; Set hanging animation
-		move.b	#7,oHangAniTime(a0)		; Animation timer
-		move.w	oYPos(a0),d0			; Align with bar
+		bclr	#2,_objStatus(a0)			; Clear roll flag
+		clr.l	_objXVel(a0)			; Stop movement
+		clr.w	_objGVel(a0)			; ''
+		bset	#3,_objFlags(a0)			; Set hanging flag
+		move.b	#$A,_objAnim(a0)			; Set hanging animation
+		move.b	#7,_objHangAniTime(a0)		; Animation timer
+		move.w	_objYPos(a0),d0			; Align with bar
 		subi.w	#$18,d0				; ''
 		andi.w	#$FFF0,d0			; ''
 		addi.w	#$18,d0				; ''
-		move.w	d0,oYPos(a0)			; ''
-		clr.b	oAngle(a0)			; Reset angle
-		bclr	#1,oRender(a0)			; ''
+		move.w	d0,_objYPos(a0)			; ''
+		clr.b	_objAngle(a0)			; Reset angle
+		bclr	#1,_objRender(a0)			; ''
 
 .End:
 		rts
@@ -1448,8 +1448,8 @@ ObjPlayer_ChkHang:
 ; Hang onto the bars
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Hang:
-		move.w	oXPos(a0),d3			; X position
-		move.w	oYPos(a0),d2			; Y position
+		move.w	_objXPos(a0),d3			; X position
+		move.w	_objYPos(a0),d2			; Y position
 		subi.w	#$18,d2				; ''
 		jsr	Level_FindBlock			; Get the block located there
 		move.w	(a1),d0				; ''
@@ -1461,10 +1461,10 @@ ObjPlayer_Hang:
 		beq.s	.MoveX				; If not, branch
 
 .FallOff:
-		bclr	#3,oFlags(a0)			; Stop hanging
-		addi.w	#$10,oYPos(a0)			; Fall off
-		move.b	oInitColH(a0),oColH(a0)		; Reset collision height
-		move.b	oInitColW(a0),oColW(a0)		; Reset collision width
+		bclr	#3,_objFlags(a0)			; Stop hanging
+		addi.w	#$10,_objYPos(a0)			; Fall off
+		move.b	_objInitColH(a0),_objColH(a0)		; Reset collision height
+		move.b	_objInitColW(a0),_objColW(a0)		; Reset collision width
 		rts
 
 .MoveX:
@@ -1472,28 +1472,28 @@ ObjPlayer_Hang:
 		btst	#2,plrCtrlHold.w		; Are we going left?
 		beq.s	.ChkRight			; If not, branch
 		neg.w	d0				; Go the other way
-		bset	#0,oStatus(a0)			; Face to the left
-		bset	#0,oRender(a0)			; ''
+		bset	#0,_objStatus(a0)			; Face to the left
+		bset	#0,_objRender(a0)			; ''
 		bra.s	.DoMove				; Continue
 
 .ChkRight:
 		btst	#3,plrCtrlHold.w		; Are we going left?
 		beq.s	.ResetScr			; If not, branch
-		bclr	#0,oStatus(a0)			; Face to the right
-		bclr	#0,oRender(a0)			; ''
+		bclr	#0,_objStatus(a0)			; Face to the right
+		bclr	#0,_objRender(a0)			; ''
 
 .DoMove:
-		add.w	d0,oXPos(a0)			; Move
-		subq.b	#1,oHangAniTime(a0)		; Decrement animation timer
+		add.w	d0,_objXPos(a0)			; Move
+		subq.b	#1,_objHangAniTime(a0)		; Decrement animation timer
 		bpl.s	.ResetScr			; If it hasn't run out, branch
-		move.b	#7,oHangAniTime(a0)		; Reset timer
-		addq.b	#1,oAniFrame(a0)		; Increment animation frame
-		cmpi.b	#4,oAniFrame(a0)		; Have we reached the last one?
+		move.b	#7,_objHangAniTime(a0)		; Reset timer
+		addq.b	#1,_objAnimFrame(a0)		; Increment animation frame
+		cmpi.b	#4,_objAnimFrame(a0)		; Have we reached the last one?
 		bcs.s	.ResetScr			; If not, branch
-		clr.b	oAniFrame(a0)			; Reset animation frame
+		clr.b	_objAnimFrame(a0)			; Reset animation frame
 
 .ResetScr:
-		clr.b	oScrlDelay(a0)			; Reset scroll delay counter
+		clr.b	_objScrlDelay(a0)			; Reset scroll delay counter
 		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
 		beq.s	.End				; If so, branch
 		bhs.s	.ScrollUp			; If it's below the center, branch
@@ -1508,8 +1508,8 @@ ObjPlayer_Hang:
 ; Check for electricity
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_ChkElectric:
-		move.w	oXPos(a0),d3			; X position
-		move.w	oYPos(a0),d2			; Y position
+		move.w	_objXPos(a0),d3			; X position
+		move.w	_objYPos(a0),d2			; Y position
 		jsr	Level_FindBlock			; Get the block located there
 		move.w	(a1),d0				; ''
 		andi.w	#$3FF,d0			; ''
@@ -1529,43 +1529,43 @@ ObjPlayer_ChkElectric:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_GetHurt:
 		displaySprite	2,a0,a1,1		; Add sprite if not already being displayed
-		tst.b	oInvulTime(a0)			; Are we invulnerable?
+		tst.b	_objInvulTime(a0)			; Are we invulnerable?
 		bne.w	.End				; If so, branch
 		tst.w	ringCount.w			; Does Sonic have any rings?
 		beq.w	ObjPlayer_GetKilled		; If not, branch
 		jsr	FindFreeObj.w
 		beq.s	.Hurt
-		move.l	#ObjRingLoss,oAddr(a1)
-		move.w	oXPos(a0),oXPos(a1)
-		move.w	oYPos(a0),oYPos(a1)
+		move.l	#ObjRingLoss,_objAddress(a1)
+		move.w	_objXPos(a0),_objXPos(a1)
+		move.w	_objYPos(a0),_objYPos(a1)
 
 .Hurt:
-		move.b	#8,oRoutine(a0)			; Set to hurt routine
+		move.b	#8,_objRoutine(a0)			; Set to hurt routine
 		jsr	PlayerResetOnFloorPart2	; Reset Sonic like he would touching the ground
-		clr.b	oScrlDelay(a0)			; Reset scroll delay counter
-		bclr	#0,oFlags(a0)			; Allow modes
-		bclr	#3,oFlags(a0)			; Stop hanging
-		bset	#1,oStatus(a0)			; Set the "in air" flag
-		move.b	#$1A,oAni(a0)			; Set to hurt animation
-		move.b	#$78,oInvulTime(a0)		; Set invulnerable timer
+		clr.b	_objScrlDelay(a0)			; Reset scroll delay counter
+		bclr	#0,_objFlags(a0)			; Allow modes
+		bclr	#3,_objFlags(a0)			; Stop hanging
+		bset	#1,_objStatus(a0)			; Set the "in air" flag
+		move.b	#$1A,_objAnim(a0)			; Set to hurt animation
+		move.b	#$78,_objInvulTime(a0)		; Set invulnerable timer
 
-		move.w	#-$400,oYVel(a0)		; Make Sonic bounce away
-		move.w	#-$200,oXVel(a0)		; ''
-		btst	#6,oStatus(a0)			; Is Sonic underwater?
+		move.w	#-$400,_objYVel(a0)		; Make Sonic bounce away
+		move.w	#-$200,_objXVel(a0)		; ''
+		btst	#6,_objStatus(a0)			; Is Sonic underwater?
 		beq.s	.ChkReverse			; If not, branch
-		move.w	#-$200,oYVel(a0)		; Make Sonic bounce away slower
-		move.w	#-$100,oXVel(a0)
+		move.w	#-$200,_objYVel(a0)		; Make Sonic bounce away slower
+		move.w	#-$100,_objXVel(a0)
 
 .ChkReverse:
-		move.w	oXPos(a0),d0			; Get X position
-		cmp.w	oXPos(a2),d0			; Is Sonic left of the object that hurt him?
+		move.w	_objXPos(a0),d0			; Get X position
+		cmp.w	_objXPos(a2),d0			; Is Sonic left of the object that hurt him?
 		bcs.s	.ChkSnd				; If so, branch
-		neg.w	oXVel(a0)			; Make Sonic bounce the other way if on the right side
+		neg.w	_objXVel(a0)			; Make Sonic bounce the other way if on the right side
 
 .ChkSnd:
-		clr.w	oGVel(a0)			; Reset ground velocity
+		clr.w	_objGVel(a0)			; Reset ground velocity
 
-	;	cmpi.l	#ObjSpike,oAddr(a2)		; Did Sonic hit a spike?
+	;	cmpi.l	#ObjSpike,_objAddress(a2)		; Did Sonic hit a spike?
 	;	beq.s	.End				; If not, branch
 		playSnd	#sHurt, 2			; Play hurt sound
 
@@ -1581,18 +1581,18 @@ ObjPlayer_Hurt:
 		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.NoPlacementEnter		; If not, branch
 		move.b	#1,debugMode.w		; Enable debug placement mode
-		move.l	#DebugPlacement,oAddr(a0)	; Set to debug placement mode
+		move.l	#DebugPlacement,_objAddress(a0)	; Set to debug placement mode
 		rts
 
 .NoPlacementEnter:
 		jsr	ObjectMove.w			; Allow movement
-		addi.w	#$30,oYVel(a0)			; Apply gravity
-		btst	#6,oStatus(a0)			; Is Sonic underwater?
+		addi.w	#$30,_objYVel(a0)			; Apply gravity
+		btst	#6,_objStatus(a0)			; Is Sonic underwater?
 		beq.s	.NotWater			; If not, branch
-		subi.w	#$20,oYVel(a0)			; Reduce gravity underwater
+		subi.w	#$20,_objYVel(a0)			; Reduce gravity underwater
 
 .NotWater:
-		move.b	#$1A,oAni(a0)			; Force the hurt animation
+		move.b	#$1A,_objAnim(a0)			; Force the hurt animation
 		bsr.s	.ChkStop			; Check if Sonic has hit the ground or the bottom boundary
 
 		cmpi.w	#(224/2)-16,panCamYPos.w	; Is the camera centered vertically?
@@ -1611,20 +1611,20 @@ ObjPlayer_Hurt:
 .ChkStop:
 		move.w	maxCamYPos.w,d0		; Get bottom boundary
 		addi.w	#224,d0				; ''
-		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
+		cmp.w	_objYPos(a0),d0			; Has Sonic hit it?
 		blt.s	ObjPlayer_GetKilled		; If so, branch
 
 		jsr	PlayerChkCollision		; Check for level collision
-		btst	#1,oStatus(a0)			; Is Sonic still in midair?
+		btst	#1,_objStatus(a0)			; Is Sonic still in midair?
 		bne.s	.End				; If so, branch
 
 		moveq	#0,d0
-		move.w	d0,oYVel(a0)			; Stop Sonic's movement
-		move.w	d0,oXVel(a0)			; ''
-		move.w	d0,oGVel(a0)			; ''
-		move.b	d0,oFlags(a0)			; Allow Sonic to move
-		move.b	d0,oAni(a0)			; Reset animation
-		move.b	#4,oRoutine(a0)			; Set back to main routine
+		move.w	d0,_objYVel(a0)			; Stop Sonic's movement
+		move.w	d0,_objXVel(a0)			; ''
+		move.w	d0,_objGVel(a0)			; ''
+		move.b	d0,_objFlags(a0)			; Allow Sonic to move
+		move.b	d0,_objAnim(a0)			; Reset animation
+		move.b	#4,_objRoutine(a0)			; Set back to main routine
 
 .End:
 		rts
@@ -1633,18 +1633,18 @@ ObjPlayer_Hurt:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_GetKilled:
 		displaySprite	2,a0,a1,1		; Add sprite if not already being displayed
-		move.b	#$C,oRoutine(a0)			; Set to the death routine
+		move.b	#$C,_objRoutine(a0)			; Set to the death routine
 		jsr	PlayerResetOnFloorPart2	; Reset Sonic like he would touching the ground
-		clr.b	oScrlDelay(a0)			; Reset scroll delay counter
-		bset	#1,oStatus(a0)			; Set the "in air" flag
-		move.b	#$18,oAni(a0)			; Set to death animation
+		clr.b	_objScrlDelay(a0)			; Reset scroll delay counter
+		bset	#1,_objStatus(a0)			; Set the "in air" flag
+		move.b	#$18,_objAnim(a0)			; Set to death animation
 
-		move.w	#-$700,oYVel(a0)		; Make Sonic bounce up
-		clr.w	oXVel(a0)			; Lock Sonic horizontally
-		clr.w	oGVel(a0)			; ''
+		move.w	#-$700,_objYVel(a0)		; Make Sonic bounce up
+		clr.w	_objXVel(a0)			; Lock Sonic horizontally
+		clr.w	_objGVel(a0)			; ''
 		move.w	#$FFFF,camLocked.w		; Lock the camera
 
-	;	cmpi.l	#ObjSpike,oAddr(a2)		; Did Sonic hit a spike?
+	;	cmpi.l	#ObjSpike,_objAddress(a2)		; Did Sonic hit a spike?
 	;	beq.s	.End				; If not, branch
 		playSnd	#sDeath,2			; Play death sound
 
@@ -1660,12 +1660,12 @@ ObjPlayer_Dead:
 		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.NoPlacementEnter		; If not, branch
 		move.b	#1,debugMode.w		; Enable debug placement mode
-		move.l	#DebugPlacement,oAddr(a0)	; Set to debug placement mode
+		move.l	#DebugPlacement,_objAddress(a0)	; Set to debug placement mode
 		rts
 
 .NoPlacementEnter:
-		move.b	#$18,oAni(a0)			; Force the death animation
-		ori.w	#$8000,oVRAM(a0)		; Force high priority
+		move.b	#$18,_objAnim(a0)			; Force the death animation
+		ori.w	#$8000,_objVRAM(a0)		; Force high priority
 		bsr.s	ObjPlayer_ChkBound		; Check for when Sonic goes off screen
 		jsr	ObjectMoveAndFall.w		; Allow movement
 		bsr.w	ObjPlayer_Animate		; Animate sprite
@@ -1674,11 +1674,11 @@ ObjPlayer_Dead:
 ObjPlayer_ChkBound:
 		move.w	maxCamYPos.w,d0		; Get bottom boundary
 		addi.w	#$100,d0			; ''
-		cmp.w	oYPos(a0),d0			; Has Sonic hit it?
+		cmp.w	_objYPos(a0),d0			; Has Sonic hit it?
 		bge.s	.End				; If not, branch
 
-		move.b	#$10,oRoutine(a0)			; Go to gone routine
-		move.b	#60,oDeathTimer(a0)		; Set death timer to 1 second
+		move.b	#$10,_objRoutine(a0)			; Go to gone routine
+		move.b	#60,_objDeathTimer(a0)		; Set death timer to 1 second
 
 .End:
 		rts
@@ -1686,9 +1686,9 @@ ObjPlayer_ChkBound:
 ; Wait for level reload or game/time over
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Gone:
-		tst.b	oDeathTimer(a0)
+		tst.b	_objDeathTimer(a0)
 		beq.s	.End
-		subq.b	#1,oDeathTimer(a0)		; Decrement the death counter
+		subq.b	#1,_objDeathTimer(a0)		; Decrement the death counter
 		bne.s	.End				; If it hasn't run out, branch
 		st	lvlReload.w			; Reload the level
 
@@ -1698,9 +1698,9 @@ ObjPlayer_Gone:
 ; Display Sonic's sprite
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjPlayer_Display:
-		move.b	oInvulTime(a0),d0		; Get invulnerability timer
+		move.b	_objInvulTime(a0),d0		; Get invulnerability timer
 		beq.s	.Display			; If it's 0, branch
-		subq.b	#1,oInvulTime(a0)		; Decrement invulnerability timer
+		subq.b	#1,_objInvulTime(a0)		; Decrement invulnerability timer
 		lsr.w	#3,d0				; Can Sonic's sprite be displayed?
 		bcs.s	.Display			; If so, branch
 	removeSprite	a0,a1,1				; Remove sprite if displayed
@@ -1723,37 +1723,37 @@ ObjPlayer_LoadDPLCs:
 ObjPlayer_Animate:
 		lea	Ani_ObjPlayer,a1			; Animation script
 		moveq	#0,d0
-		move.b	oAni(a0),d0			; Get animation ID
-		cmp.b	oPrevAni(a0),d0			; Has it changed?
+		move.b	_objAnim(a0),d0			; Get animation ID
+		cmp.b	_objPrevAnim(a0),d0			; Has it changed?
 		beq.s	.Run				; If not, branch
-		move.b	d0,oPrevAni(a0)			; Save the new ID
-		clr.b	oAniFrame(a0)			; Reset animation
-		clr.b	oAniTimer(a0)			; Reset animation timer
-		bclr	#5,oStatus(a0)			; Clear "pushing" flag
+		move.b	d0,_objPrevAnim(a0)			; Save the new ID
+		clr.b	_objAnimFrame(a0)			; Reset animation
+		clr.b	_objAnimTimer(a0)			; Reset animation timer
+		bclr	#5,_objStatus(a0)			; Clear "pushing" flag
 
 .Run:
 		add.w	d0,d0				; Turn ID into offset
 		adda.w	(a1,d0.w),a1			; Get pointer to current animation script
 		move.b	(a1),d0				; Get first byte
 		bmi.s	.WalkRunAnim			; If this is a special animation, branch
-		move.b	oStatus(a0),d1			; Get status
+		move.b	_objStatus(a0),d1			; Get status
 		andi.b	#1,d1				; Only get horizontal flip bit
-		andi.b	#$FC,oRender(a0)		; Mask out flip bits in render flags
-		or.b	d1,oRender(a0)			; Set flip bits
-		subq.b	#1,oAniTimer(a0)		; Decrement animation timer
+		andi.b	#$FC,_objRender(a0)		; Mask out flip bits in render flags
+		or.b	d1,_objRender(a0)			; Set flip bits
+		subq.b	#1,_objAnimTimer(a0)		; Decrement animation timer
 		bpl.s	.Wait				; If it hasn't run out, branch
-		move.b	d0,oAniTimer(a0)		; Set new animation timer
+		move.b	d0,_objAnimTimer(a0)		; Set new animation timer
 
 .GetFrame:
 		moveq	#0,d1
-		move.b	oAniFrame(a0),d1		; Get current value in the script
+		move.b	_objAnimFrame(a0),d1		; Get current value in the script
 		move.b	1(a1,d1.w),d0			; ''
 		cmpi.b	#$FD,d0				; Is it a command value?
 		bhs.s	.CmdReset			; If so, branch
 
 .Next:
-		move.b	d0,oFrame(a0)			; Set mapping frame ID
-		addq.b	#1,oAniFrame(a0)		; Advance into the animation script
+		move.b	d0,_objFrame(a0)			; Set mapping frame ID
+		addq.b	#1,_objAnimFrame(a0)		; Advance into the animation script
 
 .Wait:
 		rts
@@ -1761,7 +1761,7 @@ ObjPlayer_Animate:
 .CmdReset:
 		addq.b	#1,d0				; Is this flag $FF (reset)?
 		bne.s	.CmdJump			; If not, branch
-		clr.b	oAniFrame(a0)			; Reset animation
+		clr.b	_objAnimFrame(a0)			; Reset animation
 		move.b	1(a1),d0			; Get first frame ID
 		bra.s	.Next				; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1769,7 +1769,7 @@ ObjPlayer_Animate:
 		addq.b	#1,d0				; Is this flag $FE (jump)?
 		bne.s	.CmdSetAnim			; If not, branch
 		move.b	2(a1,d1.w),d0			; Get jump offset
-		sub.b	d0,oAniFrame(a0)		; Go back
+		sub.b	d0,_objAnimFrame(a0)		; Go back
 		sub.b	d0,d1				; ''
 		move.b	1(a1,d1.w),d0			; Get new frame ID
 		bra.s	.Next				; Continue
@@ -1777,29 +1777,29 @@ ObjPlayer_Animate:
 .CmdSetAnim:
 		addq.b	#1,d0				; Is this flag $FD (set animation ID)?
 		bne.s	.CmdEnd				; If not, branch
-		move.b	2(a1,d1.w),oAni(a0)		; Set new animation ID
+		move.b	2(a1,d1.w),_objAnim(a0)		; Set new animation ID
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .CmdEnd:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .WalkRunAnim:
-		subq.b	#1,oAniTimer(a0)		; Decrement animation timer
+		subq.b	#1,_objAnimTimer(a0)		; Decrement animation timer
 		bpl.s	.Wait				; If it hasn't run out, branch
 		addq.b	#1,d0				; Is the animation walking/running?
 		bne.w	.RollAnim			; If not, branch
 
 		moveq	#0,d0
-		move.b	oFlipAngle(a0),d0		; Is Sonic tumbling in the air?
+		move.b	_objFlipAngle(a0),d0		; Is Sonic tumbling in the air?
 		bne.w	.TumbleAnim			; If so, branch
 
 		moveq	#0,d1				; Intial flip bits
-		move.b	oAngle(a0),d0			; Get angle
+		move.b	_objAngle(a0),d0			; Get angle
 		bmi.s	.ChkStatus			; If it's negative, branch
 		beq.s	.ChkStatus			; If it's zero, branch
 		subq.b	#1,d0				; Decrement angle if it's positive
 
 .ChkStatus:
-		move.b	oStatus(a0),d2			; Get status
+		move.b	_objStatus(a0),d2			; Get status
 		andi.b	#1,d2				; Is Sonic mirrored horizontally?
 		bne.s	.ChkFlip			; If so, branch
 		not.b	d0				; Reverse angle
@@ -1810,17 +1810,17 @@ ObjPlayer_Animate:
 		moveq	#3,d1				; Flags to flip Sonic's sprite
 
 .SetFlags:
-		andi.b	#$FC,oRender(a0)		; Mask out flip bits
+		andi.b	#$FC,_objRender(a0)		; Mask out flip bits
 		eor.b	d1,d2				; Flip
-		or.b	d2,oRender(a0)			; Set in render flags
+		or.b	d2,_objRender(a0)			; Set in render flags
 
-		btst	#5,oStatus(a0)			; Is Sonic pushing?
+		btst	#5,_objStatus(a0)			; Is Sonic pushing?
 		bne.w	.DoPushAnim			; If so, branch
 
 		lsr.b	#4,d0				; Divide angle by $10
 		andi.b	#6,d0				; Get angle section
 
-		move.w	oGVel(a0),d2			; Get Sonic's speed
+		move.w	_objGVel(a0),d2			; Get Sonic's speed
 		bpl.s	.GetAnim			; If it's already positive, branch
 		neg.w	d2				; Force it to be positive
 
@@ -1850,51 +1850,51 @@ ObjPlayer_Animate:
 
 .SetTimer:
 		lsr.w	#8,d2				; ''
-		move.b	d2,oAniTimer(a0)		; Set timer
+		move.b	d2,_objAnimTimer(a0)		; Set timer
 		bsr.w	.GetFrame			; Get the next frame
-		add.b	d3,oFrame(a0)			; Add angle offset
+		add.b	d3,_objFrame(a0)			; Add angle offset
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .TumbleAnim:
-		move.b	oFlipAngle(a0),d0		; Get flip angle
+		move.b	_objFlipAngle(a0),d0		; Get flip angle
 		moveq	#0,d1
-		move.b	oStatus(a0),d2			; Get status
+		move.b	_objStatus(a0),d2			; Get status
 		andi.b	#1,d2				; Are we are facing left?
 		bne.s	.TumbleLeft			; If so, branch
 
-		andi.b	#$FC,oRender(a0)		; Clear flip bits
+		andi.b	#$FC,_objRender(a0)		; Clear flip bits
 		addi.b	#$B,d0				; Get map frame
 		divu.w	#$16,d0				; ''
 		addi.b	#$68,d0				; ''
-		move.b	d0,oFrame(a0)			; Set map frame
-		clr.b	oAniTimer(a0)			; Reset animation timer
+		move.b	d0,_objFrame(a0)			; Set map frame
+		clr.b	_objAnimTimer(a0)			; Reset animation timer
 		rts
 
 .TumbleLeft:
-		andi.b	#$FC,oRender(a0)		; Clear flip bits
-		tst.b	oFlipTurned(a0)			; Is flipping inverted?
+		andi.b	#$FC,_objRender(a0)		; Clear flip bits
+		tst.b	_objFlipTurned(a0)			; Is flipping inverted?
 		beq.s	.NotInverted			; If not, branch
-		ori.b	#1,oRender(a0)			; Face left
+		ori.b	#1,_objRender(a0)			; Face left
 		addi.b	#$B,d0				; Get map frame
 		bra.s	.SetLeftFrame			; Continue
 
 .NotInverted:
-		ori.b	#3,oRender(a0)			; Face left and be upside down
+		ori.b	#3,_objRender(a0)			; Face left and be upside down
 		neg.b	d0				; Get map frame
 		addi.b	#$8F,d0				; ''
 
 .SetLeftFrame:
 		divu.w	#$16,d0				; Continue getting map frame
 		addi.b	#$68,d0				; ''
-		move.b	d0,oFrame(a0)			; Set map frame
-		clr.b	oAniTimer(a0)			; Reset animation timer
+		move.b	d0,_objFrame(a0)			; Set map frame
+		clr.b	_objAnimTimer(a0)			; Reset animation timer
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .RollAnim:
 		addq.b	#1,d0				; Is the animation rolling?
 		bne.s	.PushAnim			; If not, branch
 
-		move.w	oGVel(a0),d2			; Get Sonic's speed
+		move.w	_objGVel(a0),d2			; Get Sonic's speed
 		bpl.s	.GetAnim2			; If it's already negative, branch
 		neg.w	d2				; Force it to be negative
 
@@ -1912,12 +1912,12 @@ ObjPlayer_Animate:
 
 .SetTimer2:
 		lsr.w	#8,d2				; ''
-		move.b	d2,oAniTimer(a0)		; Set timer
+		move.b	d2,_objAnimTimer(a0)		; Set timer
 
-		move.b	oStatus(a0),d1			; Get status
+		move.b	_objStatus(a0),d1			; Get status
 		andi.b	#1,d1				; Get horizontal flip flag only
-		andi.b	#$FC,oRender(a0)		; Clear flip bits in render flags
-		or.b	d1,oRender(a0)			; Set new flip bits
+		andi.b	#$FC,_objRender(a0)		; Clear flip bits in render flags
+		or.b	d1,_objRender(a0)			; Set new flip bits
 
 		bra.w	.GetFrame			; Get the next frame
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1926,7 +1926,7 @@ ObjPlayer_Animate:
 		bne.s	.HangAnim			; If not, branch
 
 .DoPushAnim:
-		move.w	oGVel(a0),d2			; Get Sonic's speed
+		move.w	_objGVel(a0),d2			; Get Sonic's speed
 		bmi.s	.GetAnim3			; If it's already negative, branch
 		neg.w	d2				; Force it to be negative
 
@@ -1937,15 +1937,15 @@ ObjPlayer_Animate:
 
 .SetTimer3:
 		lsr.w	#6,d2				; ''
-		move.b	d2,oAniTimer(a0)		; Set timer
+		move.b	d2,_objAnimTimer(a0)		; Set timer
 		lea	SonicAni_Push,a1		; Pushing animation
 		bra.w	.GetFrame			; Get the next frame
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .HangAnim:
 		moveq	#0,d1
-		move.b	oAniFrame(a0),d1		; Get animation frame
-		move.b	1(a1,d1.w),oFrame(a0)		; Set map frame
-		clr.b	oAniTimer(a0)			; Clear animation timer
+		move.b	_objAnimFrame(a0),d1		; Get animation frame
+		move.b	1(a1,d1.w),_objFrame(a0)		; Set map frame
+		clr.b	_objAnimTimer(a0)			; Clear animation timer
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Handle debug placement mode
@@ -1964,26 +1964,26 @@ DebugPlacement:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Debug_Init:
 		addq.b	#2,debugMode.w		; Next routine
-		clr.b	oFrame(a0)			; Reset mapping frame
-		clr.b	oAni(a0)			; Reset animation
-		clr.w	oGVel(a0)			; Reset ground velocity
+		clr.b	_objFrame(a0)			; Reset mapping frame
+		clr.b	_objAnim(a0)			; Reset animation
+		clr.w	_objGVel(a0)			; Reset ground velocity
 		clr.w	camLocked.w			; Unlock the camera
-		clr.b	oBallMode(a0)			; Reset ball mode
-		clr.b	oAngle(a0)			; Reset angle
-		move.b	#4,oRoutine(a0)			; Set routine to main
+		clr.b	_objBallMode(a0)			; Reset ball mode
+		clr.b	_objAngle(a0)			; Reset angle
+		move.b	#4,_objRoutine(a0)			; Set routine to main
 
-		move.w	oInteract(a0),d0		; Get object interacted with last
+		move.w	_objInteract(a0),d0		; Get object interacted with last
 		beq.s	.NoInteract			; If there is none, branch
 		movea.w	d0,a1
-		bclr	#3,oStatus(a1)			; Clear flags
-		bclr	#5,oStatus(a1)			; ''
-		clr.w	oInteract(a0)			; No more interaction
+		bclr	#3,_objStatus(a1)			; Clear flags
+		bclr	#5,_objStatus(a1)			; ''
+		clr.w	_objInteract(a0)			; No more interaction
 
 .NoInteract:
-		clr.b	oFlags(a0)			; Reset flags
-		clr.b	oStatus(a0)			; Reset status
-		andi.b	#$FC,oRender(a0)		; Mask out flip bits in render flags
-		move.b	#1,oFrame(a0)			; Display the standing frame
+		clr.b	_objFlags(a0)			; Reset flags
+		clr.b	_objStatus(a0)			; Reset status
+		andi.b	#$FC,_objRender(a0)		; Mask out flip bits in render flags
+		move.b	#1,_objFrame(a0)			; Display the standing frame
 		bsr.w	ObjPlayer_LoadDPLCs		; Load DPLCs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Debug_Main:
@@ -1996,38 +1996,38 @@ Debug_Control:
 		moveq	#6,d0				; Speed
 		btst	#0,ctrlHoldP1.w			; Is up being held?
 		beq.s	.NoUp				; If not, branch
-		sub.w	d0,oYPos(a0)			; Move up
+		sub.w	d0,_objYPos(a0)			; Move up
 
 .NoUp:
 		btst	#1,ctrlHoldP1.w			; Is down being held?
 		beq.s	.NoDown				; If not, branch
-		add.w	d0,oYPos(a0)			; Move down
+		add.w	d0,_objYPos(a0)			; Move down
 
 .NoDown:
 		btst	#2,ctrlHoldP1.w			; Is left being held?
 		beq.s	.NoLeft				; If not, branch
-		sub.w	d0,oXPos(a0)			; Move left
+		sub.w	d0,_objXPos(a0)			; Move left
 
 .NoLeft:
 		btst	#3,ctrlHoldP1.w			; Is right being held?
 		beq.s	.NoRight			; If not, branch
-		add.w	d0,oXPos(a0)			; Move right
+		add.w	d0,_objXPos(a0)			; Move right
 
 .NoRight:
 		btst	#4,ctrlPressP1.w			; Has the B button been pressed?
 		beq.s	.ChkWrap			; If not, branch
 		moveq	#0,d0
 		move.b	d0,debugMode.w		; Disable debug placement mode
-		move.b	d0,oXPos+2(a0)			; Reset X subpixel
-		move.b	d0,oYPos+2(a0)			; Reset Y subpixel
-		move.w	d0,oXVel(a0)			; Reset X velocity
-		move.w	d0,oYVel(a0)			; Reset Y velocity
-		move.w	d0,oGVel(a0)			; Reset ground velocity
-		andi.b	#1,oStatus(a0)			; Reset status
-		bset	#1,oStatus(a0)			; Set "in air" flag
-		move.l	#ObjPlayer,oAddr(a0)		; Use normal Sonic object
-		move.b	oInitColH(a0),oColH(a0)		; Reset collision height
-		move.b	oInitColW(a0),oColW(a0)		; Reset collision width
+		move.b	d0,_objXPos+2(a0)			; Reset X subpixel
+		move.b	d0,_objYPos+2(a0)			; Reset Y subpixel
+		move.w	d0,_objXVel(a0)			; Reset X velocity
+		move.w	d0,_objYVel(a0)			; Reset Y velocity
+		move.w	d0,_objGVel(a0)			; Reset ground velocity
+		andi.b	#1,_objStatus(a0)			; Reset status
+		bset	#1,_objStatus(a0)			; Set "in air" flag
+		move.l	#ObjPlayer,_objAddress(a0)		; Use normal Sonic object
+		move.b	_objInitColH(a0),_objColH(a0)		; Reset collision height
+		move.b	_objInitColW(a0),_objColW(a0)		; Reset collision width
 
 .ChkWrap:
 		rts

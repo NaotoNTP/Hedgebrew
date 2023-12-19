@@ -1,20 +1,20 @@
 ; =========================================================================================================================================================
 ; Bubble generator object
 ; =========================================================================================================================================================
-		rsset	oLvlSSTs
-oBubOrgX	rs.w	1
-oBubInhale	rs.b	1
-oBubAng		rs.b	1
-oBubTime	rs.b	1
-oBubFreq	rs.b	1
-oBubTypeInd	rs.w	1
-oBub_Unk36	rs.w	1
-oBub_Unk38	rs.w	1
-oBubTypeAddr	rs.l	1
+		rsset	_objLvlSSTs
+_objBubOrgX	rs.w	1
+_objBubInhale	rs.b	1
+_objBubAng	rs.b	1
+_objBubTime	rs.b	1
+_objBubFreq	rs.b	1
+_objBubTypeInd	rs.w	1
+_objBubUnk36	rs.w	1
+_objBubUnk38	rs.w	1
+_objBubTypeAddr	rs.l	1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBubbles:
 		moveq	#0,d0
-		move.b	oRoutine(a0),d0			; Get routine ID
+		move.b	_objRoutine(a0),d0			; Get routine ID
 		move.w	.Index(pc,d0.w),d0		; Get routine pointer
 		jmp	.Index(pc,d0.w)			; Jump to it
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,63 +27,63 @@ ObjBubbles:
 		dc.w	ObjBubbles_Maker-.Index
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBubbles_Init:
-		addq.b	#2,oRoutine(a0)			; Next routine
-		move.l	#Map_ObjBubbles,oMap(a0)	; Mappings
-		move.w	#$8319,oVRAM(a0)		; Tile properties
-		move.b	#$84,oRender(a0)		; Render flags
+		addq.b	#2,_objRoutine(a0)			; Next routine
+		move.l	#Map_ObjBubbles,_objMapping(a0)	; Mappings
+		move.w	#$8319,_objVRAM(a0)		; Tile properties
+		move.b	#$84,_objRender(a0)		; Render flags
 		move.w	#rSprInput+$80,oPrio(a0)	; Priority
-		move.b	#$10,oDrawW(a0)			; Sprite width
-		move.b	#$10,oDrawH(a0)			; Sprite height
-		move.b	oSubtype(a0),d0
+		move.b	#$10,_objDrawW(a0)			; Sprite width
+		move.b	#$10,_objDrawH(a0)			; Sprite height
+		move.b	_objSubtype(a0),d0
 		bpl.s	.Bubble
 
-		addq.b	#8,oRoutine(a0)
+		addq.b	#8,_objRoutine(a0)
 		andi.w	#$7F,d0
-		move.b	d0,oBubTime(a0)
-		move.b	d0,oBubFreq(a0)
-		move.b	#6,oAni(a0)
+		move.b	d0,_objBubTime(a0)
+		move.b	d0,_objBubFreq(a0)
+		move.b	#6,_objAnim(a0)
 		bra.w	ObjBubbles_Maker
 
 .Bubble:
-		move.b	d0,oAni(a0)
-		move.w	oXPos(a0),oBubOrgX(a0)
-		move.w	#-$88,oYVel(a0)
+		move.b	d0,_objAnim(a0)
+		move.w	_objXPos(a0),_objBubOrgX(a0)
+		move.w	#-$88,_objYVel(a0)
 		jsr	RandomNumber.w
-		move.b	d0,oBubAng(a0)
+		move.b	d0,_objBubAng(a0)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBubbles_Main:
 		lea	Ani_ObjBubbles,a1
 		jsr	AnimateObject.w
-		cmpi.b	#6,oFrame(a0)
+		cmpi.b	#6,_objFrame(a0)
 		bne.s	ObjBubbles_ChkWater
-		st	oBubInhale(a0)
+		st	_objBubInhale(a0)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBubbles_ChkWater:
 		move.w	waterYPos.w,d0		; Get water level
-		cmp.w	oYPos(a0),d0			; Have we gone beyond it?
+		cmp.w	_objYPos(a0),d0			; Have we gone beyond it?
 		bcs.s	.Wobble				; If not, branch
-		move.b	#6,oRoutine(a0)			; Next routine
-		addq.b	#3,oAni(a0)			; Next animation
+		move.b	#6,_objRoutine(a0)			; Next routine
+		addq.b	#3,_objAnim(a0)			; Next animation
 		bra.w	ObjBubbles_Display		; Continue
 
 .Wobble:
-		move.b	oBubAng(a0),d0
-		addq.b	#1,oBubAng(a0)
+		move.b	_objBubAng(a0),d0
+		addq.b	#1,_objBubAng(a0)
 		andi.w	#$7F,d0
 		lea	ObjDrownCnt_WobbleData,a1
 		move.b	(a1,d0.w),d0
 		ext.w	d0
-		add.w	oBubOrgX(a0),d0
-		move.w	d0,oXPos(a0)
-		tst.b	oBubInhale(a0)
+		add.w	_objBubOrgX(a0),d0
+		move.w	d0,_objXPos(a0)
+		tst.b	_objBubInhale(a0)
 		beq.s	.Display
 		bsr.w	ObjBubbles_ChkSonic
-		cmpi.b	#6,oRoutine(a0)
+		cmpi.b	#6,_objRoutine(a0)
 		beq.s	ObjBubbles_Display
 
 .Display:
 		jsr	ObjectMove.w
-		tst.b	oRender(a0)
+		tst.b	_objRender(a0)
 		bpl.s	ObjBubbles_Delete
 		jmp	DisplayObject.w
 
@@ -93,21 +93,21 @@ ObjBubbles_Delete:
 ObjBubbles_Display:
 		lea	Ani_ObjBubbles,a1
 		jsr	AnimateObject.w
-		tst.b	oRender(a0)
+		tst.b	_objRender(a0)
 		bpl.s	ObjBubbles_Delete
 		jmp	DisplayObject.w
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBubbles_Maker:
-		tst.w	oBub_Unk36(a0)
+		tst.w	_objBubUnk36(a0)
 		bne.s	.loc_12874
 		move.w	waterYPos.w,d0		; Get water level
-		cmp.w	oYPos(a0),d0			; Have we gone beyond it?
+		cmp.w	_objYPos(a0),d0			; Have we gone beyond it?
 		bcc.w	.ChkDel				; If so, branch
-		tst.b	oRender(a0)
+		tst.b	_objRender(a0)
 		bpl.w	.ChkDel
-		subq.w	#1,oBub_Unk38(a0)
+		subq.w	#1,_objBubUnk38(a0)
 		bpl.w	.loc_12914
-		move.w	#1,oBub_Unk36(a0)
+		move.w	#1,_objBubUnk36(a0)
 
 .TryAgain:
 		jsr	RandomNumber.w
@@ -116,77 +116,77 @@ ObjBubbles_Maker:
 		cmpi.w	#6,d0
 		bcc.s	.TryAgain
 
-		move.b	d0,oBubTypeInd(a0)
+		move.b	d0,_objBubTypeInd(a0)
 		andi.w	#$C,d1
 		lea	.BubTypes(pc),a1
 		adda.w	d1,a1
-		move.l	a1,oBubTypeAddr(a0)
-		subq.b	#1,oBubTime(a0)
+		move.l	a1,_objBubTypeAddr(a0)
+		subq.b	#1,_objBubTime(a0)
 		bpl.s	.loc_12872
-		move.b	oBubFreq(a0),oBubTime(a0)
-		bset	#7,oBub_Unk36(a0)
+		move.b	_objBubFreq(a0),_objBubTime(a0)
+		bset	#7,_objBubUnk36(a0)
 
 .loc_12872:
 		bra.s	.loc_1287C
 
 .loc_12874:
-		subq.w	#1,oBub_Unk38(a0)
+		subq.w	#1,_objBubUnk38(a0)
 		bpl.w	.loc_12914
 
 .loc_1287C:
 		jsr	RandomNumber.w
 		andi.w	#$1F,d0
-		move.w	d0,oBub_Unk38(a0)
+		move.w	d0,_objBubUnk38(a0)
 		jsr	FindFreeObj.w
 		bne.s	.Fail
-		move.l	oAddr(a0),oAddr(a1)
-		move.w	oXPos(a0),oXPos(a1)
+		move.l	_objAddress(a0),_objAddress(a1)
+		move.w	_objXPos(a0),_objXPos(a1)
 		jsr	RandomNumber.w
 		andi.w	#$F,d0
 		subq.w	#8,d0
-		add.w	d0,oXPos(a1)
-		move.w	oYPos(a0),oYPos(a1)
+		add.w	d0,_objXPos(a1)
+		move.w	_objYPos(a0),_objYPos(a1)
 		moveq	#0,d0
-		move.b	oBubTypeInd(a0),d0
-		movea.l	oBubTypeAddr(a0),a2
-		move.b	(a2,d0.w),oSubtype(a1)
-		btst	#7,oBub_Unk36(a0)
+		move.b	_objBubTypeInd(a0),d0
+		movea.l	_objBubTypeAddr(a0),a2
+		move.b	(a2,d0.w),_objSubtype(a1)
+		btst	#7,_objBubUnk36(a0)
 		beq.s	.Fail
 		jsr	RandomNumber.w
 		andi.w	#3,d0
 		bne.s	.loc_buh
-		bset	#6,oBub_Unk36(a0)
+		bset	#6,_objBubUnk36(a0)
 		bne.s	.Fail
-		move.b	#2,oSubtype(a1)
+		move.b	#2,_objSubtype(a1)
 
 .loc_buh:
-		tst.b	oBubTypeInd(a0)
+		tst.b	_objBubTypeInd(a0)
 		bne.s	.Fail
-		bset	#6,oBub_Unk36(a0)
+		bset	#6,_objBubUnk36(a0)
 		bne.s	.Fail
-		move.b	#2,oSubtype(a1)
+		move.b	#2,_objSubtype(a1)
 
 .Fail:
-		subq.b	#1,oBubTypeInd(a0)
+		subq.b	#1,_objBubTypeInd(a0)
 		bpl.s	.loc_12914
 		jsr	RandomNumber.w
 		andi.w	#$7F,d0
 		addi.w	#$80,d0
-		add.w	d0,oBub_Unk38(a0)
-		clr.w	oBub_Unk36(a0)
+		add.w	d0,_objBubUnk38(a0)
+		clr.w	_objBubUnk36(a0)
 
 .loc_12914:
 		lea	Ani_ObjBubbles,a1
 		jsr	AnimateObject.w
 
 .ChkDel:
-		move.w	oXPos(a0),d0
+		move.w	_objXPos(a0),d0
 		andi.w	#$FF80,d0
 		sub.w	objMgrCoarseX.w,d0
 		cmpi.w	#$280,d0
 		bhi.s	.Delete
 		move.w	waterYPos.w,d0
-		cmp.w	oYPos(a0),d0
+		cmp.w	_objYPos(a0),d0
 		blo.s	.Display
 		rts
 
@@ -194,7 +194,7 @@ ObjBubbles_Maker:
 		jmp	DisplayObject.w
 
 .Delete:
-		move.w	oRespawn(a0),d0			; Get respawn table entry address
+		move.w	_objRespawn(a0),d0			; Get respawn table entry address
 		beq.s	.DoDelete			; If 0, branch
 		movea.w	d0,a2
 		bclr	#7,(a2)				; Mark as gone
@@ -211,19 +211,19 @@ ObjBubbles_ChkSonic:
 		
 		tst.b	debugMode.w
 		bne.w	.End
-		btst	#0,oFlags(a1)
+		btst	#0,_objFlags(a1)
 		bne.w	.End
 		
-		move.w	oXPos(a1),d0
-		move.w	oXPos(a0),d1
+		move.w	_objXPos(a1),d0
+		move.w	_objXPos(a0),d1
 		subi.w	#$10,d1
 		cmp.w	d0,d1
 		bcc.s	.End
 		addi.w	#$20,d1
 		cmp.w	d0,d1
 		bcs.s	.End
-		move.w	oYPos(a1),d0
-		move.w	oYPos(a0),d1
+		move.w	_objYPos(a1),d0
+		move.w	_objYPos(a0),d1
 		cmp.w	d0,d1
 		bcc.s	.End
 		addi.w	#$10,d1
@@ -232,24 +232,24 @@ ObjBubbles_ChkSonic:
 
 		jsr	ObjDrown_ResetDrown
 		playSnd	#sBubble, 2
-		clr.l	oXVel(a1)
-		clr.w	oGVel(a1)
-		move.b	#$15,oAni(a1)
-		move.b	#$23,oMoveLock(a1)
-		clr.b	oJumping(a1)
-		bclr	#5,oStatus(a1)
-		btst	#2,oStatus(a1)
+		clr.l	_objXVel(a1)
+		clr.w	_objGVel(a1)
+		move.b	#$15,_objAnim(a1)
+		move.b	#$23,_objMoveLock(a1)
+		clr.b	_objJumping(a1)
+		bclr	#5,_objStatus(a1)
+		btst	#2,_objStatus(a1)
 		beq.s	.Burst
-		bclr	#2,oStatus(a1)
-		move.b	oInitColH(a1),oColH(a1)		; Reset collision height
-		move.b	oInitColW(a1),oColW(a1)		; Reset collision width
-		subq.w	#5,oYPos(a1)			; Align Sonic with the ground
+		bclr	#2,_objStatus(a1)
+		move.b	_objInitColH(a1),_objColH(a1)		; Reset collision height
+		move.b	_objInitColW(a1),_objColW(a1)		; Reset collision width
+		subq.w	#5,_objYPos(a1)			; Align Sonic with the ground
 
 .Burst:
-		cmpi.b	#6,oRoutine(a0)
+		cmpi.b	#6,_objRoutine(a0)
 		beq.s	.End
-		move.b	#6,oRoutine(a0)
-		addq.b	#3,oAni(a0)
+		move.b	#6,_objRoutine(a0)
+		addq.b	#3,_objAnim(a0)
 
 .End:
 		rts

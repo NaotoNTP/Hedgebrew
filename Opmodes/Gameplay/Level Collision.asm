@@ -6,15 +6,15 @@
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkCollision:
 		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
-		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
+		cmpi.b	#$C,_objTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
 		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
-		move.b	oLRBSolid(a0),d5		; Get LRB solid bits
+		move.b	_objLRBSolid(a0),d5		; Get LRB solid bits
 		
-		move.w	oXVel(a0),d1			; Get X velocity
-		move.w	oYVel(a0),d2			; Get Y velocity
+		move.w	_objXVel(a0),d1			; Get X velocity
+		move.w	_objYVel(a0),d2			; Get Y velocity
 		jsr	CalcArcTan.w			; Get the angle
 		subi.b	#$20,d0				; Shift it over
 		andi.b	#$C0,d0				; Get the quadrant
@@ -29,22 +29,22 @@ PlayerHitFloorAndWalls:
 		bsr.w	PlayerChkLeftWallDist		; Get left wall distance
 		tst.w	d1				; Have we hit the wall?
 		bpl.s	.NoLeftHit			; If not, branch
-		sub.w	d1,oXPos(a0)			; Move out of the wall
-		clr.w	oXVel(a0)			; Stop moving
+		sub.w	d1,_objXPos(a0)			; Move out of the wall
+		clr.w	_objXVel(a0)			; Stop moving
 
 .NoLeftHit:
 		bsr.w	PlayerChkRightWallDist		; Get right wall distance
 		tst.w	d1				; Have we hit the wall?
 		bpl.s	.NoRightHit			; If not, branch
-		add.w	d1,oXPos(a0)			; Move out of the wall
-		clr.w	oXVel(a0)			; Stop moving
+		add.w	d1,_objXPos(a0)			; Move out of the wall
+		clr.w	_objXVel(a0)			; Stop moving
 
 .NoRightHit:
 		bsr.w	PlayerChkFloor			; Get floor distance
 		tst.w	d1				; Have we hit the floor?
 		bpl.s	.End				; If not, branch
 
-		move.b	oYVel(a0),d2			; Get the integer part of the Y velocity
+		move.b	_objYVel(a0),d2			; Get the integer part of the Y velocity
 		addq.b	#8,d2				; Get the max distance we have to have from the floor in order to collide with it
 		neg.b	d2				; Negate it since we are in the floor
 		cmp.b	d2,d1				; Is the chosen primary distance small enough?
@@ -53,8 +53,8 @@ PlayerHitFloorAndWalls:
 		blt.s	.End				; If not, branch
 
 .TouchFloor:
-		move.b	d3,oAngle(a0)			; Set the angle
-		add.w	d1,oYPos(a0)			; Move out of the floor
+		move.b	d3,_objAngle(a0)			; Set the angle
+		add.w	d1,_objYPos(a0)			; Move out of the floor
 		move.b	d3,d0				; Copy angle
 		addi.b	#$20,d0				; Shift it
 		andi.b	#$40,d0				; Are we on a wall?
@@ -63,26 +63,26 @@ PlayerHitFloorAndWalls:
 		addi.b	#$10,d0				; Shift it
 		andi.b	#$20,d0				; Are we on a slope?
 		beq.s	.HitFloor			; If not, branch
-		asr	oYVel(a0)			; Divide the Y velocity by 2
+		asr	_objYVel(a0)			; Divide the Y velocity by 2
 		bra.s	.HitSlope			; Continue
 
 .HitFloor:
-		clr.w	oYVel(a0)			; Stop Y movement
-		move.w	oXVel(a0),oGVel(a0)		; Set ground velocity
+		clr.w	_objYVel(a0)			; Stop Y movement
+		move.w	_objXVel(a0),_objGVel(a0)		; Set ground velocity
 		bra.w	PlayerResetOnFloor		; Reset status on floor
 
 .HitWall:
-		clr.w	oXVel(a0)			; Stop X movement
-		cmpi.w	#$FC0,oYVel(a0)			; Cap the Y velocity at $FC0
+		clr.w	_objXVel(a0)			; Stop X movement
+		cmpi.w	#$FC0,_objYVel(a0)			; Cap the Y velocity at $FC0
 		ble.s	.HitSlope			; ''
-		move.w	#$FC0,oYVel(a0)			; ''
+		move.w	#$FC0,_objYVel(a0)			; ''
 
 .HitSlope:
 		bsr.w	PlayerResetOnFloor		; Reset status on floor
-		move.w	oYVel(a0),oGVel(a0)		; Set ground velocity
+		move.w	_objYVel(a0),_objGVel(a0)		; Set ground velocity
 		tst.b	d3				; Have we touched a right side angle ($80-$FF)?
 		bpl.s	.End				; If so, branch
-		neg.w	oGVel(a0)			; Negate the ground velocity
+		neg.w	_objGVel(a0)			; Negate the ground velocity
 
 .End:
 		rts
@@ -91,9 +91,9 @@ PlayerHitLWall:
 		bsr.w	PlayerChkLeftWallDist		; Get left wall distance
 		tst.w	d1				; Have we hit the wall?
 		bpl.s	.ChkCeil			; If not, branch
-		sub.w	d1,oXPos(a0)			; Move out of the wall
-		clr.w	oXVel(a0)			; Stop moving
-		move.w	oYVel(a0),oGVel(a0)		; Set ground velocity
+		sub.w	d1,_objXPos(a0)			; Move out of the wall
+		clr.w	_objXVel(a0)			; Stop moving
+		move.w	_objYVel(a0),_objGVel(a0)		; Set ground velocity
 
 .ChkCeil:
 		bsr.w	PlayerChkCeiling		; Get ceiling distance
@@ -102,10 +102,10 @@ PlayerHitLWall:
 		neg.w	d1				; Get the distance inside the ceiling
 		cmpi.w	#$14,d1				; Are we too far into the ceiling?
 		bhs.s	.ChkRightWall			; If so, branch
-		add.w	d1,oYPos(a0)			; Move out of the ceiling
-		tst.w	oYVel(a0)			; Are we moving up?
+		add.w	d1,_objYPos(a0)			; Move out of the ceiling
+		tst.w	_objYVel(a0)			; Are we moving up?
 		bpl.s	.End				; If not, branch
-		clr.w	oYVel(a0)			; Stop Y movement
+		clr.w	_objYVel(a0)			; Stop Y movement
 
 .End:
 		rts
@@ -114,22 +114,22 @@ PlayerHitLWall:
 		bsr.w	PlayerChkRightWallDist		; Get right wall distance
 		tst.w	d1				; Have we hit the wall?
 		bpl.s	.End2				; If not, branch
-		add.w	d1,oXPos(a0)			; Move out of the wall
-		clr.w	oXVel(a0)			; Stop moving
+		add.w	d1,_objXPos(a0)			; Move out of the wall
+		clr.w	_objXVel(a0)			; Stop moving
 		
 .End2:
 		rts
 
 .ChkFloor:
-		tst.w	oYVel(a0)			; Are we moving up?
+		tst.w	_objYVel(a0)			; Are we moving up?
 		bmi.s	.End3				; If so, branch
 		bsr.w	PlayerChkFloor			; Get floor distance
 		tst.w	d1				; Have we hit the ceiling?
 		bpl.s	.End3				; If not, branch
-		add.w	d1,oYPos(a0)			; Move out of the ceiling
-		move.b	d3,oAngle(a0)			; Set angle
-		clr.w	oYVel(a0)			; Stop Y movement
-		move.w	oXVel(a0),oGVel(a0)		; Set ground velocity
+		add.w	d1,_objYPos(a0)			; Move out of the ceiling
+		move.b	d3,_objAngle(a0)			; Set angle
+		clr.w	_objYVel(a0)			; Stop Y movement
+		move.w	_objXVel(a0),_objGVel(a0)		; Set ground velocity
 		bra.w	PlayerResetOnFloor		; Reset status on floor
 		
 .End3:
@@ -139,35 +139,35 @@ PlayerHitCeilAndWalls:
 		bsr.w	PlayerChkLeftWallDist		; Get left wall distance
 		tst.w	d1				; Have we hit the wall?
 		bpl.s	.NoLeftHit			; If not, branch
-		sub.w	d1,oXPos(a0)			; Move out of the wall
-		clr.w	oXVel(a0)			; Stop moving
+		sub.w	d1,_objXPos(a0)			; Move out of the wall
+		clr.w	_objXVel(a0)			; Stop moving
 
 .NoLeftHit:
 		bsr.w	PlayerChkRightWallDist		; Get right wall distance
 		tst.w	d1				; Have we hit the wall?
 		bpl.s	.NoRightHit			; If not, branch
-		add.w	d1,oXPos(a0)			; Move out of the wall
-		clr.w	oXVel(a0)			; Stop moving
+		add.w	d1,_objXPos(a0)			; Move out of the wall
+		clr.w	_objXVel(a0)			; Stop moving
 
 .NoRightHit:
 		bsr.w	PlayerChkCeiling		; Get ceiling distance
 		tst.w	d1				; Have we hit the floor?
 		bpl.s	.End				; If not, branch
-		sub.w	d1,oYPos(a0)			; Move out of ceiling
+		sub.w	d1,_objYPos(a0)			; Move out of ceiling
 		move.b	d3,d0				; Get angle
 		addi.b	#$20,d0				; Shift it
 		andi.b	#$40,d0				; Are we on a wall?
 		bne.s	.HitWall			; If so, branch
-		clr.w	oYVel(a0)			; Stop Y movement
+		clr.w	_objYVel(a0)			; Stop Y movement
 		rts
 
 .HitWall:
-		move.b	d3,oAngle(a0)			; Set angle
+		move.b	d3,_objAngle(a0)			; Set angle
 		bsr.w	PlayerResetOnFloor		; Reset status on floor
-		move.w	oYVel(a0),oGVel(a0)		; Set ground velocity
+		move.w	_objYVel(a0),_objGVel(a0)		; Set ground velocity
 		tst.b	d3				; Have we touched a right side angle ($80-$FF)?
 		bpl.s	.End				; If so, branch
-		neg.w	oGVel(a0)			; Negate the ground velocity
+		neg.w	_objGVel(a0)			; Negate the ground velocity
 
 .End:
 		rts
@@ -176,32 +176,32 @@ PlayerHitRWall:
 		bsr.w	PlayerChkRightWallDist		; Get right wall distance
 		tst.w	d1				; Have we hit the wall?
 		bpl.s	.ChkCeil			; If not, branch
-		add.w	d1,oXPos(a0)			; Move out of the wall
-		clr.w	oXVel(a0)			; Stop moving
-		move.w	oYVel(a0),oGVel(a0)		; Set ground velocity
+		add.w	d1,_objXPos(a0)			; Move out of the wall
+		clr.w	_objXVel(a0)			; Stop moving
+		move.w	_objYVel(a0),_objGVel(a0)		; Set ground velocity
 
 .ChkCeil:
 		bsr.w	PlayerChkCeiling		; Get ceiling distance
 		tst.w	d1				; Have we hit the ceiling?
 		bpl.s	.ChkFloor			; If not, branch
-		sub.w	d1,oYPos(a0)			; Move out of the ceiling
-		tst.w	oYVel(a0)			; Are we moving up?
+		sub.w	d1,_objYPos(a0)			; Move out of the ceiling
+		tst.w	_objYVel(a0)			; Are we moving up?
 		bpl.s	.End				; If not, branch
-		clr.w	oYVel(a0)			; Stop Y movement
+		clr.w	_objYVel(a0)			; Stop Y movement
 
 .End:
 		rts
 
 .ChkFloor:
-		tst.w	oYVel(a0)			; Are we moving up?
+		tst.w	_objYVel(a0)			; Are we moving up?
 		bmi.s	.End2				; If so, branch
 		bsr.w	PlayerChkFloor			; Get floor distance
 		tst.w	d1				; Have we hit the ceiling?
 		bpl.s	.End2				; If not, branch
-		add.w	d1,oYPos(a0)			; Move out of the ceiling
-		move.b	d3,oAngle(a0)			; Set angle
-		clr.w	oYVel(a0)			; Stop Y movement
-		move.w	oXVel(a0),oGVel(a0)		; Set ground velocity
+		add.w	d1,_objYPos(a0)			; Move out of the ceiling
+		move.b	d3,_objAngle(a0)			; Set angle
+		clr.w	_objYVel(a0)			; Stop Y movement
+		move.w	_objXVel(a0),_objGVel(a0)		; Set ground velocity
 		bra.s	PlayerResetOnFloor		; Reset status on floor
 		
 .End2:
@@ -210,52 +210,52 @@ PlayerHitRWall:
 ; Reset a player object's status on the floor
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerResetOnFloor:
-		tst.b	oBallMode(a0)			; Are we in ball mode?
+		tst.b	_objBallMode(a0)			; Are we in ball mode?
 		bne.s	PlayerResetOnFloorPart3	; If so, branch
-		clr.b	oAni(a0)			; Set walking animation
+		clr.b	_objAnim(a0)			; Set walking animation
 		
 PlayerResetOnFloorPart2:
-		btst	#2,oStatus(a0)			; Was Sonic rolling?
+		btst	#2,_objStatus(a0)			; Was Sonic rolling?
 		beq.s	PlayerResetOnFloorPart3	; If so, branch
-		bclr	#2,oStatus(a0)			; Clear roll flag
-		move.b	oInitColW(a0),oColW(a0)		; Reset collision width
-		move.b	oInitColH(a0),oColH(a0)		; Reset collision height
-		clr.b	oAni(a0)			; Set walking animation
-		subq.w	#5,oYPos(a0)			; Align with floor
+		bclr	#2,_objStatus(a0)			; Clear roll flag
+		move.b	_objInitColW(a0),_objColW(a0)		; Reset collision width
+		move.b	_objInitColH(a0),_objColH(a0)		; Reset collision height
+		clr.b	_objAnim(a0)			; Set walking animation
+		subq.w	#5,_objYPos(a0)			; Align with floor
 
 PlayerResetOnFloorPart3:
-		andi.b	#$DD,oStatus(a0)		; Clear "pushing", and "jumping" flag
-		clr.b	oJumping(a0)			; Clear jumping flag
-		clr.b	oFlipAngle(a0)			; Reset flip angle
-		clr.b	oFlipTurned(a0)			; Reset flip inverted flag
-		clr.b	oFlipRemain(a0)			; Reset flips remaining
+		andi.b	#$DD,_objStatus(a0)		; Clear "pushing", and "jumping" flag
+		clr.b	_objJumping(a0)			; Clear jumping flag
+		clr.b	_objFlipAngle(a0)			; Reset flip angle
+		clr.b	_objFlipTurned(a0)			; Reset flip inverted flag
+		clr.b	_objFlipRemain(a0)			; Reset flips remaining
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Calculate the room in front of a player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerCalcRoomInFront:
 		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
-		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
+		cmpi.b	#$C,_objTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
 		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
-		move.b	oLRBSolid(a0),d5		; Get LRB solid bits
+		move.b	_objLRBSolid(a0),d5		; Get LRB solid bits
 		
-		move.l	oXPos(a0),d3			; Get X position
-		move.l	oYPos(a0),d2			; Get Y position
-		move.w	oXVel(a0),d1			; Get X velocity
+		move.l	_objXPos(a0),d3			; Get X position
+		move.l	_objYPos(a0),d2			; Get Y position
+		move.w	_objXVel(a0),d1			; Get X velocity
 		ext.l	d1				; ''
 		asl.l	#8,d1				; Shift it
 		add.l	d1,d3				; Add onto X position
-		move.w	oYVel(a0),d1			; Get Y velocity
+		move.w	_objYVel(a0),d1			; Get Y velocity
 		ext.l	d1				; ''
 		asl.l	#8,d1				; Shift it
 		add.l	d1,d2				; Add onto Y position
 		swap	d2				; Get actual Y
 		swap	d3				; Get actual X
-		move.b	d0,oNextTilt(a0)		; Set primary angle
-		move.b	d0,oTilt(a0)			; Set secondary angle
+		move.b	d0,_objNextTilt(a0)		; Set primary angle
+		move.b	d0,_objTilt(a0)			; Set secondary angle
 		move.b	d0,d1				; Copy angle
 		btst	#6,d0				; Are we in quadrants 0 or $80? (use 5 instaead of 6 for 8 directions)
 		beq.s	.DownUp				; If not, branch
@@ -280,14 +280,14 @@ PlayerCalcRoomInFront:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerCalcRoomOverHead:
 		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
-		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
+		cmpi.b	#$C,_objTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
 		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
-		move.b	oLRBSolid(a0),d5		; Get LRB solid bits
-		move.b	d0,oNextTilt(a0)		; Set primary angle
-		move.b	d0,oTilt(a0)			; Set secondary angle
+		move.b	_objLRBSolid(a0),d5		; Get LRB solid bits
+		move.b	d0,_objNextTilt(a0)		; Set primary angle
+		move.b	d0,_objTilt(a0)			; Set secondary angle
 		
 		addi.b	#$20,d0				; Shift the angle
 		andi.b	#$C0,d0				; Get quadrant
@@ -302,40 +302,40 @@ PlayerCalcRoomOverHead:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkFloor:
 		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
-		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
+		cmpi.b	#$C,_objTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
 		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
-		move.b	oTopSolid(a0),d5		; Get top solid bits
+		move.b	_objTopSolid(a0),d5		; Get top solid bits
 		
 		; Get the angle on the bottom right sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindFloor			; Find the floor
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Subtract from X position
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindFloor			; Find the floor
@@ -345,10 +345,10 @@ PlayerChkFloor:
 		clr.b	d2				; Angle value for when the object touched an odd angle (usually $FF)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerPickAngle:
-		move.b	oTilt(a0),d3			; Get secondary angle
+		move.b	_objTilt(a0),d3			; Get secondary angle
 		cmp.w	d0,d1				; Is the primary floor distance lower than the secondary?
 		ble.s	.ChkSetAngle			; If not, branch
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		exg.l	d0,d1				; Switch floor distance values
 		
 .ChkSetAngle:
@@ -362,19 +362,19 @@ PlayerPickAngle:
 ; Get the distance between the floor and the player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkFloorDist:
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 
 PlayerChkFloorDist_Part2:
 		addi.w	#10,d2				; Check 10 pixels down
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; No flip bits
 		bsr.w	Level_FindFloor			; Find the floor
 		clr.b	d2				; Angle value for when the object touched an odd angle (usually $FF)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerGetPrimaryAngle:
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		btst	#0,d3				; Is this an odd angle (usually $FF)?
 		beq.s	.End				; If not, branch
 		move.b	d2,d3				; Set the new angle value
@@ -383,22 +383,22 @@ PlayerGetPrimaryAngle:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 sub_F846:
-		move.w	oXPos(a0),d3
-		move.w	oYPos(a0),d2
+		move.w	_objXPos(a0),d3
+		move.w	_objYPos(a0),d2
 		subq.w	#4,d2
 		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
-		cmpi.b	#$D,oLRBSolid(a0)		; Are we on the primary path?
+		cmpi.b	#$D,_objLRBSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
 		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		clr.b	(a4)				; Clear it
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; No flip bits
-		move.b	oLRBSolid(a0),d5		; Solidity bits
+		move.b	_objLRBSolid(a0),d5		; Solidity bits
 		bsr.w	Level_FindFloor			; Find the floor
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		btst	#0,d3				; Are we on an odd angle (usually $FF)?
 		beq.s	.End				; If not, branch
 		clr.b	d3				; Angle value for when the object touched an odd angle (usually $FF)
@@ -409,29 +409,29 @@ sub_F846:
 ; Check for the edge of a floor
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkFloorEdge:
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objXPos(a0),d3			; Get X position
 
 PlayerChkFloorEdge_Part2:
-		move.w	oYPos(a0),d2			; Get Y position
+		move.w	_objYPos(a0),d2			; Get Y position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
 
 PlayerChkFloorEdge_Part3:
 		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
-		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
+		cmpi.b	#$C,_objTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
 		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		clr.b	(a4)				; Clear it
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; No flip bits
-		move.b	oTopSolid(a0),d5		; Solidity bits
+		move.b	_objTopSolid(a0),d5		; Solidity bits
 		bsr.w	Level_FindFloor			; Find the floor
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		btst	#0,d3				; Are we on an odd angle (usually $FF)?
 		beq.s	.End				; If not, branch
 		clr.b	d3				; Angle value for when the object touched an odd angle (usually $FF)
@@ -442,22 +442,22 @@ PlayerChkFloorEdge_Part3:
 ; Get the distance between the floor and an object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjCheckFloorDist:
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objXPos(a0),d3			; Get X position
 		
 ObjCheckFloorDist_Part2:
-		move.w	oYPos(a0),d2			; Get Y position
+		move.w	_objYPos(a0),d2			; Get Y position
 
 ObjCheckFloorDist_Part3:
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		clr.b	(a4)				; Clear it
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; No flip bits
 		moveq	#$C,d5				; Solidity bits
 		bsr.w	Level_FindFloor			; Find the floor
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		btst	#0,d3				; Are we on an odd angle (usually $FF)?
 		beq.s	.End				; If not, branch
 		clr.b	d3				; Angle value for when the object touched an odd angle (usually $FF)
@@ -469,32 +469,32 @@ ObjCheckFloorDist_Part3:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkRightCeilDist:
 		; Get the angle on the bottom right (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision height
+		move.b	_objColW(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract from Y position
-		move.b	oColH(a0),d0			; Get collision width
+		move.b	_objColH(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindWall			; Find the wall
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision height
+		move.b	_objColW(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColH(a0),d0			; Get collision width
+		move.b	_objColH(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindWall			; Find the wall
@@ -507,12 +507,12 @@ PlayerChkRightCeilDist:
 ; Get the distance between a right wall and a player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkRightWallDist:
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 
 PlayerChkRightWallDist_Part2:
 		addi.w	#10,d3				; Check 10 pixels to the right
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; No flip bits
 		bsr.w	Level_FindWall			; Find the wall
@@ -522,15 +522,15 @@ PlayerChkRightWallDist_Part2:
 ; Get the distance between a right wall and an object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjCheckRightWallDist:
-		add.w	oXPos(a0),d3			; Add X position
-		move.w	oYPos(a0),d2			; Get Y position
-		lea	oNextTilt(a0),a4		; Primary angle
+		add.w	_objXPos(a0),d3			; Add X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		lea	_objNextTilt(a0),a4		; Primary angle
 		clr.b	(a4)				; Clear it
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; No flip bits
 		moveq	#$D,d5				; Solidity bits
 		bsr.w	Level_FindWall			; Find the wall
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		btst	#0,d3				; Are we on an odd angle (usually $FF)?
 		beq.s	.End				; If not, branch
 		move.b	#-$40,d3			; Angle value for when the object touched an odd angle (usually $FF)
@@ -542,34 +542,34 @@ ObjCheckRightWallDist:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkCeiling:
 		; Get the angle on the bottom right sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract from Y position
 		eori.w	#$F,d2				; Flip it
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$800,d6			; Vertical flip
 		bsr.w	Level_FindFloor			; Find the floor
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract from Y position
 		eori.w	#$F,d2				; Flip it
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Subtract from X position
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$800,d6			; Vertical flip
 		bsr.w	Level_FindFloor			; Find the floor
@@ -582,13 +582,13 @@ PlayerChkCeiling:
 ; Get the distance between a ceiling and a player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkCeilingDist:
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 
 PlayerChkCeilingDist_Part2:
 		subi.w	#10,d2				; Check 10 pixels up
 		eori.w	#$F,d2				; Flip it
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$800,d6			; Vertical flip
 		bsr.w	Level_FindFloor			; Find the floor
@@ -598,19 +598,19 @@ PlayerChkCeilingDist_Part2:
 ; Get the distance between a ceiling and an object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjCheckCeilingDist:
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0		; Get collision height
+		move.b	_objColH(a0),d0		; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract it from Y position
 		eori.w	#$F,d2				; Flip it
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$800,d6			; Vertical flip
 		moveq	#$D,d5				; Solidity bits
 		bsr.w	Level_FindWall			; Find the wall
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		btst	#0,d3				; Are we on an odd angle (usually $FF)?
 		beq.s	.End				; If not, branch
 		move.b	#$80,d3				; Angle value for when the object touched an odd angle (usually $FF)
@@ -622,34 +622,34 @@ ObjCheckCeilingDist:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkLeftCeilDist:
 		; Get the angle on the bottom right (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract from Y position
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Subtract from X position
 		eori.w	#$F,d3				; Flip it
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$400,d6			; Horizontal flip
 		bsr.w	Level_FindWall			; Find the wall
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Subtract from X position
 		eori.w	#$F,d3				; Flip it
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$400,d6			; Horizontal flip
 		bsr.w	Level_FindWall			; Find the wall
@@ -662,13 +662,13 @@ PlayerChkLeftCeilDist:
 ; Get the distance between a left wall and a player object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerChkLeftWallDist:
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 
 PlayerChkLeftWallDist_Part2:
 		subi.w	#10,d3				; Check 10 pixels to the left
 		eori.w	#$F,d3				; Flip it
-		lea	oNextTilt(a0),a4		; Primary angle
+		lea	_objNextTilt(a0),a4		; Primary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$400,d6			; Horizontal flip
 		bsr.w	Level_FindWall			; Find the wall
@@ -678,16 +678,16 @@ PlayerChkLeftWallDist_Part2:
 ; Get the distance between a left wall and an object
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjCheckLeftWallDist:
-		add.w	oXPos(a0),d3			; Add X position
+		add.w	_objXPos(a0),d3			; Add X position
 		eori.w	#$F,d3				; Flip it
-		move.w	oYPos(a0),d2			; Get Y position
-		lea	oNextTilt(a0),a4		; Primary angle
+		move.w	_objYPos(a0),d2			; Get Y position
+		lea	_objNextTilt(a0),a4		; Primary angle
 		clr.b	(a4)				; Clear it
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$400,d6			; Horizontal flip
 		moveq	#$D,d5				; Solidity bits
 		bsr.w	Level_FindWall			; Find the wall
-		move.b	oNextTilt(a0),d3		; Get primary angle
+		move.b	_objNextTilt(a0),d3		; Get primary angle
 		btst	#0,d3				; Are we on an odd angle (usually $FF)?
 		beq.s	.End				; If not, branch
 		move.b	#$40,d3				; Angle value for when the object touched an odd angle (usually $FF)
@@ -699,19 +699,19 @@ ObjCheckLeftWallDist:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerAnglePos:
 		move.l	primaryColPtr.w,currentColAddr.w	; Get primary collision address
-		cmpi.b	#$C,oTopSolid(a0)		; Are we on the primary path?
+		cmpi.b	#$C,_objTopSolid(a0)		; Are we on the primary path?
 		beq.s	.NotPrimary			; If not, branch
 		move.l	secondaryColPtr.w,currentColAddr.w	; Get secondary collision address
 
 .NotPrimary:
-		move.b	oTopSolid(a0),d5		; Get top solid bits
-		btst	#3,oStatus(a0)			; Are we standing on a player object?
+		move.b	_objTopSolid(a0),d5		; Get top solid bits
+		btst	#3,_objStatus(a0)			; Are we standing on a player object?
 		beq.s	.NotOnObj			; If not, branch
-		clr.w	oNextTilt(a0)			; Set the angles to 0
+		clr.w	_objNextTilt(a0)			; Set the angles to 0
 		rts
 
 .NotOnObj:
-		move.w	#$0303,oNextTilt(a0)		; Set the angles to 3
+		move.w	#$0303,_objNextTilt(a0)		; Set the angles to 3
 		
 		; Get which quadrant the object is in on the ground
 		; This makes it so that angles:
@@ -719,7 +719,7 @@ PlayerAnglePos:
 		;	$1F-$5F = Quadrant $40 (left wall)
 		;	$60-$A0 = Quadrant $80 (ceiling)
 		;	$A1-$DF = Quadrant $C0 (right wall)
-		move.b	oAngle(a0),d0			; Get the angle
+		move.b	_objAngle(a0),d0			; Get the angle
 		btst	#6,d0				; Are we in quadrants 0 or $80? (use 5 instaead of 6 for 8 directions)
 		beq.s	.DownUp				; If not, branch
 		addq.b	#1,d0				; Shift the angle
@@ -738,32 +738,32 @@ PlayerAnglePos:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerMoveFloor:
 		; Get the angle on the bottom right sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindFloor			; Find the floor
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Add onto X position
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindFloor			; Find the floor
@@ -778,13 +778,13 @@ PlayerMoveFloor:
 		bpl.s	.ChkFall			; If the there's possibly a floor below us, branch
 		cmpi.w	#-$E,d1				; Have we hit a wall?
 		blt.s	.End				; If so, branch
-		add.w	d1,oYPos(a0)			; Move us on to the surface
+		add.w	d1,_objYPos(a0)			; Move us on to the surface
 
 .End:
 		rts
 
 .ChkFall:
-		move.b	oXVel(a0),d0			; Get the integer part of the X velocity
+		move.b	_objXVel(a0),d0			; Get the integer part of the X velocity
 		bpl.s	.GetMinDist			; If it's already positive, branch
 		neg.b	d0				; Force it to be positive
 
@@ -797,75 +797,75 @@ PlayerMoveFloor:
 .ChkDist:
 		cmp.b	d0,d1				; Are we about to fall off?
 		bgt.s	.SetAir				; If so, branch
-		add.w	d1,oYPos(a0)			; Move us on to the surface
+		add.w	d1,_objYPos(a0)			; Move us on to the surface
 		rts
 
 .SetAir:
-		bset	#1,oStatus(a0)			; Set "in air" flag
-		bclr	#5,oStatus(a0)			; Clear "pushing" flag
-		move.b	#1,oPrevAni(a0)			; Reset the animation
+		bset	#1,_objStatus(a0)			; Set "in air" flag
+		bclr	#5,_objStatus(a0)			; Clear "pushing" flag
+		move.b	#1,_objPrevAnim(a0)			; Reset the animation
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Set the objects's angle
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerSetAngle:
-		move.b	oTilt(a0),d2			; Get secondary angle
+		move.b	_objTilt(a0),d2			; Get secondary angle
 		cmp.w	d0,d1				; Is the primary floor distance lower than the secondary?
 		ble.s	.ChkSetAngle			; If not, branch
-		move.b	oNextTilt(a0),d2		; Get primary angle
+		move.b	_objNextTilt(a0),d2		; Get primary angle
 		move.w	d0,d1				; Get primary floor distance
 		
 .ChkSetAngle:
 		btst	#0,d2				; Is this an odd angle (usually $FF)?
 		bne.s	.LatchOnFlat			; If so, branch
 		move.b	d2,d0				; Get angle change
-		sub.b	oAngle(a0),d0			; ''
+		sub.b	_objAngle(a0),d0			; ''
 		bpl.s	.ChkDist			; ''
 		neg.b	d0				; ''
 
 .ChkDist:
 		cmpi.b	#$20,d0				; Has the player moved $20 degrees or more?
 		bhs.s	.LatchOnFlat			; If so, branch
-		move.b	d2,oAngle(a0)			; Set the new angle value
+		move.b	d2,_objAngle(a0)			; Set the new angle value
 		rts
 
 .LatchOnFlat:
-		move.b	oAngle(a0),d2			; Get old angle value
+		move.b	_objAngle(a0),d2			; Get old angle value
 		addi.b	#$20,d2				; Shift the angle
 		andi.b	#$C0,d2				; Flatten the angle
-		move.b	d2,oAngle(a0)			; Set the new angle value
+		move.b	d2,_objAngle(a0)			; Set the new angle value
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move the object along the right wall
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerMoveRWall:
 		; Get the angle on the bottom right (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Add onto Y position
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindWall			; Find the wall
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#$10,a3				; Height of bottom right sensor
 		clr.w	d6				; Don't switch any flip bits for blocks
 		bsr.w	Level_FindWall			; Find the wall
@@ -880,13 +880,13 @@ PlayerMoveRWall:
 		bpl.s	.ChkFall			; If the there's possibly a floor below us, branch
 		cmpi.w	#-$E,d1				; Have we hit a wall?
 		blt.s	.End				; If so, branch
-		add.w	d1,oXPos(a0)			; Move us on to the surface
+		add.w	d1,_objXPos(a0)			; Move us on to the surface
 
 .End:
 		rts
 
 .ChkFall:
-		move.b	oYVel(a0),d0			; Get the integer part of the Y velocity
+		move.b	_objYVel(a0),d0			; Get the integer part of the Y velocity
 		bpl.s	.GetMinDist			; If it's already positive, branch
 		neg.b	d0				; Force it to be positive
 
@@ -899,47 +899,47 @@ PlayerMoveRWall:
 .ChkDist:
 		cmp.b	d0,d1				; Are we about to fall off?
 		bgt.s	.SetAir				; If so, branch
-		add.w	d1,oXPos(a0)			; Move us on to the surface
+		add.w	d1,_objXPos(a0)			; Move us on to the surface
 		rts
 
 .SetAir:
-		bset	#1,oStatus(a0)			; Set "in air" flag
-		bclr	#5,oStatus(a0)			; Clear "pushing" flag
-		move.b	#1,oPrevAni(a0)			; Reset the animation
+		bset	#1,_objStatus(a0)			; Set "in air" flag
+		bclr	#5,_objStatus(a0)			; Clear "pushing" flag
+		move.b	#1,_objPrevAnim(a0)			; Reset the animation
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move the object along the ceiling
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerMoveCeiling:
 		; Get the angle on the bottom right (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract from the Y position
 		eori.w	#$F,d2				; Flip it
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d3				; Add onto X position
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$800,d6			; Vertical flip
 		bsr.w	Level_FindFloor			; Find the floor
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract from the Y position
 		eori.w	#$F,d2				; Flip it
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Subtract from the X position
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$800,d6			; Vertical flip
 		bsr.w	Level_FindFloor			; Find the floor
@@ -954,13 +954,13 @@ PlayerMoveCeiling:
 		bpl.s	.ChkFall			; If the there's possibly a floor below us, branch
 		cmpi.w	#-$E,d1				; Have we hit a wall?
 		blt.s	.End				; If so, branch
-		sub.w	d1,oYPos(a0)			; Move us on to the surface
+		sub.w	d1,_objYPos(a0)			; Move us on to the surface
 
 .End:
 		rts
 
 .ChkFall:
-		move.b	oXVel(a0),d0			; Get the integer part of the X velocity
+		move.b	_objXVel(a0),d0			; Get the integer part of the X velocity
 		bpl.s	.GetMinDist			; If it's already positive, branch
 		neg.b	d0				; Force it to be positive
 
@@ -973,47 +973,47 @@ PlayerMoveCeiling:
 .ChkDist:
 		cmp.b	d0,d1				; Are we about to fall off?
 		bgt.s	.SetAir				; If so, branch
-		sub.w	d1,oYPos(a0)			; Move us on to the surface
+		sub.w	d1,_objYPos(a0)			; Move us on to the surface
 		rts
 
 .SetAir:
-		bset	#1,oStatus(a0)			; Set "in air" flag
-		bclr	#5,oStatus(a0)			; Clear "pushing" flag
-		move.b	#1,oPrevAni(a0)			; Reset the animation
+		bset	#1,_objStatus(a0)			; Set "in air" flag
+		bclr	#5,_objStatus(a0)			; Clear "pushing" flag
+		move.b	#1,_objPrevAnim(a0)			; Reset the animation
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move the object along the left wall
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 PlayerMoveLWall:
 		; Get the angle on the bottom right (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		sub.w	d0,d2				; Subtract from the Y position
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Subtract from X position
 		eori.w	#$F,d3				; Flip it
-		lea	oNextTilt(a0),a4		; Get primary angle
+		lea	_objNextTilt(a0),a4		; Get primary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$400,d6			; Horizontal flip
 		bsr.w	Level_FindWall			; Find the wall
 		push.w	d1				; Save the primary floor distance
 
 		; Get the angle on the bottom left (rotated) sensor
-		move.w	oYPos(a0),d2			; Get Y position
-		move.w	oXPos(a0),d3			; Get X position
+		move.w	_objYPos(a0),d2			; Get Y position
+		move.w	_objXPos(a0),d3			; Get X position
 		moveq	#0,d0
-		move.b	oColW(a0),d0			; Get collision width
+		move.b	_objColW(a0),d0			; Get collision width
 		ext.w	d0				; ''
 		add.w	d0,d2				; Add onto Y position
-		move.b	oColH(a0),d0			; Get collision height
+		move.b	_objColH(a0),d0			; Get collision height
 		ext.w	d0				; ''
 		sub.w	d0,d3				; Subtract from X position
 		eori.w	#$F,d3				; Flip it
-		lea	oTilt(a0),a4			; Get secondary angle
+		lea	_objTilt(a0),a4			; Get secondary angle
 		movea.w	#-$10,a3			; Height of bottom right sensor
 		move.w	#$400,d6			; Horizontal flip
 		bsr.w	Level_FindWall			; Find the wall
@@ -1028,13 +1028,13 @@ PlayerMoveLWall:
 		bpl.s	.ChkFall			; If the there's possibly a floor below us, branch
 		cmpi.w	#-$E,d1				; Have we hit a wall?
 		blt.s	.End				; If so, branch
-		sub.w	d1,oXPos(a0)			; Move us on to the surface
+		sub.w	d1,_objXPos(a0)			; Move us on to the surface
 
 .End:
 		rts
 
 .ChkFall:
-		move.b	oYVel(a0),d0			; Get the integer part of the Y velocity
+		move.b	_objYVel(a0),d0			; Get the integer part of the Y velocity
 		bpl.s	.GetMinDist			; If it's already positive, branch
 		neg.b	d0				; Force it to be positive
 
@@ -1047,13 +1047,13 @@ PlayerMoveLWall:
 .ChkDist:
 		cmp.b	d0,d1				; Are we about to fall off?
 		bgt.s	.SetAir				; If so, branch
-		sub.w	d1,oXPos(a0)			; Move us on to the surface
+		sub.w	d1,_objXPos(a0)			; Move us on to the surface
 		rts
 
 .SetAir:
-		bset	#1,oStatus(a0)			; Set "in air" flag
-		bclr	#5,oStatus(a0)			; Clear "pushing" flag
-		move.b	#1,oPrevAni(a0)			; Reset the animation
+		bset	#1,_objStatus(a0)			; Set "in air" flag
+		bclr	#5,_objStatus(a0)			; Clear "pushing" flag
+		move.b	#1,_objPrevAnim(a0)			; Reset the animation
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Find the nearest floor from the object's position

@@ -1,20 +1,20 @@
 ; =========================================================================================================================================================
 ; Water surface object
 ; =========================================================================================================================================================
-		rsset	oLvlSSTs
+		rsset	_objLvlSSTs
 
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBumper:
-		move.l	#ObjBumperMain,oAddr(a0)	; Next routine
-		move.l	#Map_ObjBumper,oMap(a0)		; Mappings
-		move.w	#$35B,oVRAM(a0)			; Tile properties
-		move.b	#4,oRender(a0)			; Render flags
+		move.l	#ObjBumperMain,_objAddress(a0)	; Next routine
+		move.l	#Map_ObjBumper,_objMapping(a0)		; Mappings
+		move.w	#$35B,_objVRAM(a0)			; Tile properties
+		move.b	#4,_objRender(a0)			; Render flags
 	displaySprite	1,a0,a1,0			; Priority
 		moveq	#$10,d1
-		move.b	d1,oDrawW(a0)
-		move.b	d1,oColW(a0)
-		move.b	d1,oDrawH(a0)
-		move.b	d1,oColH(a0)
+		move.b	d1,_objDrawW(a0)
+		move.b	d1,_objColW(a0)
+		move.b	d1,_objDrawH(a0)
+		move.b	d1,_objColH(a0)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBumperMain:
 		tst.b	debugMode.w
@@ -22,16 +22,16 @@ ObjBumperMain:
 
 		lea	.RangeData(pc),a1		; Range data
 		movea.w	playerPtrP1.w,a2		; Player object
-		cmpi.b	#$C,oRoutine(a2)
+		cmpi.b	#$C,_objRoutine(a2)
 		bcc.w	.Display
 		jsr	CheckObjInRange.w		; Is the player in range?
 		tst.w	d0				; ''
 		beq.s	.Display			; If not, branch
 
-		move.w	oXPos(a0),d1
-		move.w	oYPos(a0),d2
-		sub.w	oXPos(a2),d1
-		sub.w	oYPos(a2),d2
+		move.w	_objXPos(a0),d1
+		move.w	_objYPos(a0),d2
+		sub.w	_objXPos(a2),d1
+		sub.w	_objYPos(a2),d2
 		jsr	CalcArcTan.w
 		move.b	(frameCounter+3).w,d1
 		andi.w	#3,d1
@@ -39,24 +39,24 @@ ObjBumperMain:
 		jsr	CalcSine.w
 		muls.w	#-$700,d1
 		asr.l	#8,d1
-		move.w	d1,oXVel(a2)
+		move.w	d1,_objXVel(a2)
 		muls.w	#-$700,d0
 		asr.l	#8,d0
-		move.w	d0,oYVel(a2)
-		cmpi.b	#8,oRoutine(a2)
+		move.w	d0,_objYVel(a2)
+		cmpi.b	#8,_objRoutine(a2)
 		bne.s	.NotHurt
-		move.b	#2,oAni(a2)
-		addq.w	#5,oYPos(a2)
-		move.b	#$E,oColH(a2)
-		move.b	#7,oColW(a2)
-		bset	#2,oStatus(a2)
+		move.b	#2,_objAnim(a2)
+		addq.w	#5,_objYPos(a2)
+		move.b	#$E,_objColH(a2)
+		move.b	#7,_objColW(a2)
+		bset	#2,_objStatus(a2)
 
 .NotHurt:
-		move.b	#4,oRoutine(a2)
-		bset	#1,oStatus(a2)
-		bclr	#5,oStatus(a2)
-		clr.b	oJumping(a2)
-		move.b	#1,oAni(a0)
+		move.b	#4,_objRoutine(a2)
+		bset	#1,_objStatus(a2)
+		bclr	#5,_objStatus(a2)
+		clr.b	_objJumping(a2)
+		move.b	#1,_objAnim(a0)
 		playSnd	#sBumper, 2
 
 .Display:

@@ -22,16 +22,16 @@ InitObjectList:
 		lea	objMemory.w,a0			; load the objects list into a0
 		move.w	a0,objExecFree.w			; set the first object as the first free object
 		moveq	#OBJECT_COUNT-2,d0		; load object count to d0
-		moveq	#oSize,d1			; load object size to d1
+		moveq	#_objSize,d1			; load object size to d1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 .load
 		add.w	d1,a0				; go to the next object now
-		move.w	a0,oPrev-oSize(a0)		; save new previous pointer
-		clr.l	oDrawNext(a0)			; clear the display link values
+		move.w	a0,_objPrev-_objSize(a0)		; save new previous pointer
+		clr.l	_objDrawNext(a0)			; clear the display link values
 		dbf	d0,.load			; loop for every object
 
-		clr.w	oPrev(a0)			; set the last previous pointer to 0
+		clr.w	_objPrev(a0)			; set the last previous pointer to 0
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	; reset display table
@@ -63,13 +63,13 @@ FindFreeObj:
 		move.w	objExecFree.w,d0			; get pointer to the next free object
 		beq.s	.rts				; if it's a null pointer (z=1), return
 		movea.w	d0,a1				; load to a1
-		move.w	oPrev(a1),objExecFree.w		; copy the next free object pointer to list start
+		move.w	_objPrev(a1),objExecFree.w		; copy the next free object pointer to list start
 
 		move.w	objExecLast.w,a2			; load last object to a2
 		move.w	a1,objExecLast.w			; save as the new last object
-		move.w	oNext(a2),oNext(a1)		; copy the next pointer from old tail to new object
-		move.w	a1,oNext(a2)			; save new object as next pointer for old tail
-		move.w	a2,oPrev(a1)			; save old tail as prev pointer for new object
+		move.w	_objNext(a2),_objNext(a1)		; copy the next pointer from old tail to new object
+		move.w	a1,_objNext(a2)			; save new object as next pointer for old tail
+		move.w	a2,_objPrev(a1)			; save old tail as prev pointer for new object
 
 .rts:
 		rts
@@ -100,26 +100,26 @@ DeleteOtherObj:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 DeleteObject:
 	removeSprite	a0, a1, 1			; remove object display
-		move.w	oPrev(a0),a1			; copy previous pointer to a1
-		move.w	oNext(a0),oNext(a1)		; copy next pointer to previous object
-		move.w	oNext(a0),a1			; get next object to a1
-		move.w	oPrev(a0),oPrev(a1)		; copy previous pointer
+		move.w	_objPrev(a0),a1			; copy previous pointer to a1
+		move.w	_objNext(a0),_objNext(a1)		; copy next pointer to previous object
+		move.w	_objNext(a0),a1			; get next object to a1
+		move.w	_objPrev(a0),_objPrev(a1)		; copy previous pointer
 
-		move.w	objExecFree.w,oPrev(a0)		; get the head of the free list to previous pointer of this object
+		move.w	objExecFree.w,_objPrev(a0)		; get the head of the free list to previous pointer of this object
 		move.w	a0,objExecFree.w			; save as the new head of free list
 
 ; clear object memory
 		moveq	#0,d0				; clear d0
-		moveq	#(((oSize-oDrawPrev)>>2)-1),d1	; set loop count
+		moveq	#(((_objSize-_objDrawPrev)>>2)-1),d1	; set loop count
 
 		pea	(a2)				; backup a2
-		lea	oDrawPrev(a0),a2		; load the first property to clear to a2
+		lea	_objDrawPrev(a0),a2		; load the first property to clear to a2
 		
 .clrLoop:
 		move.l	d0,(a2)+			; clear a longword of the object slot's memory
 		dbf	d1,.clrLoop			; loop through to clear all object properties
 
-	if (oSize-oDrawPrev)&2
+	if (_objSize-_objDrawPrev)&2
 		move.w	d0,(a2)+			; clear the last word of data if the object ram per slot does not divide evenly by 4
 	endif
 
@@ -149,18 +149,18 @@ RendeobjMemory:
 .PrioLvlLoop:
 		move.w	(a5),a0				; Load priority level address to a0
 		add.w	#dSize,a5			; Skip bunch of shit
-		tst.w	oDrawNext(a0)			; Is the next pointer for a valid object?
+		tst.w	_objDrawNext(a0)			; Is the next pointer for a valid object?
 		beq.w	.NextPrioLvl			; If not, branch
 
 .ObjectLoop:
 	;	movea.w	(a4)+,a0			; Get object SST address
-		tst.l	oAddr(a0)			; Is this object slot used?
+		tst.l	_objAddress(a0)			; Is this object slot used?
 		beq.w	.NextObject			; If not, branch
 
-		andi.b	#$7F,oRender(a0)		; Clear on-screen flag
-		move.b	oRender(a0),d6			; Store render flags
-		move.w	oXPos(a0),d0			; Get X position
-		move.w	oYPos(a0),d1			; Get Y position
+		andi.b	#$7F,_objRender(a0)		; Clear on-screen flag
+		move.b	_objRender(a0),d6			; Store render flags
+		move.w	_objXPos(a0),d0			; Get X position
+		move.w	_objYPos(a0),d1			; Get Y position
 
 		btst	#6,d6				; Is the multi sprite flag set?
 		bne.w	.MultiDraw			; If so, branch
@@ -172,7 +172,7 @@ RendeobjMemory:
 
 .Render:
 		moveq	#0,d2
-		move.b	oDrawW(a0),d2			; Get sprite width
+		move.b	_objDrawW(a0),d2			; Get sprite width
 		move.w	d0,d3				; Get sprite X position
 		add.w	d2,d3				; Add width
 		bmi.s	.NextObject			; If it's off screen on the left, branch
@@ -183,7 +183,7 @@ RendeobjMemory:
 		addi.w	#128,d0				; Move sprite on screen
 
 		moveq	#0,d2
-		move.b	oDrawH(a0),d2			; Get sprite height
+		move.b	_objDrawH(a0),d2			; Get sprite height
 		move.w	d1,d3				; Get sprite Y position
 		add.w	d2,d3				; Add height
 		bmi.s	.NextObject			; If it's off screen on the top, branch
@@ -193,17 +193,17 @@ RendeobjMemory:
 		bge.s	.NextObject			; If so, branch
 		addi.w	#128,d1				; Move sprite on screen
 
-		ori.b	#$80,oRender(a0)		; Set on-screen flag
+		ori.b	#$80,_objRender(a0)		; Set on-screen flag
 		tst.w	d7				; Do we still have some sprite space left?
 		bmi.s	.NextObject			; If not, branch
 
-		move.l	oMap(a0),d4			; Get mappings pointer
+		move.l	_objMapping(a0),d4			; Get mappings pointer
 		beq.s	.NextObject			; If blank, branch
 		movea.l	d4,a1				; Store it
 		moveq	#0,d4
 		btst	#5,d6				; Is the static sprite flag set
 		bne.s	.Static				; If so, branch
-		move.b	oFrame(a0),d4			; Get mapping frame
+		move.b	_objFrame(a0),d4			; Get mapping frame
 		add.w	d4,d4				; Turn into offset
 		adda.w	(a1,d4.w),a1			; Get mapping frame data pointer
 		move.w	(a1)+,d4			; Get mapping frame sprite count
@@ -211,12 +211,12 @@ RendeobjMemory:
 		bmi.s	.NextObject			; If there are no sprites to draw, branch
 
 .Static:
-		move.w	oVRAM(a0),d5			; Get sprite tile properties
+		move.w	_objVRAM(a0),d5			; Get sprite tile properties
 		bsr.w	DrawSprite			; Draw the sprites
 
 .NextObject:	
-		move.w	oDrawNext(a0),a0		; Load next object to a0
-		tst.w	oDrawNext(a0)			; Check the next pointer for valid object
+		move.w	_objDrawNext(a0),a0		; Load next object to a0
+		tst.w	_objDrawNext(a0)			; Check the next pointer for valid object
 		bne.w	.ObjectLoop			; If there are still some sprites to draw in this priority level, branch
 
 .NextPrioLvl:
@@ -248,7 +248,7 @@ RendeobjMemory:
 
 .RenderMain:
 		moveq	#0,d2
-		move.b	oDrawW(a0),d2			; Get main sprite width
+		move.b	_objDrawW(a0),d2			; Get main sprite width
 		move.w	d0,d3				; Get main sprite X position
 		add.w	d2,d3				; Add width
 		bmi.s	.NextObject			; If it's off screen on the left, branch
@@ -258,7 +258,7 @@ RendeobjMemory:
 		bge.s	.NextObject			; If so, branch
 		addi.w	#128,d0				; Move sprite on screen
 
-		move.b	oDrawH(a0),d2			; Get main sprite height
+		move.b	_objDrawH(a0),d2			; Get main sprite height
 		move.w	d1,d3				; Get main sprite Y position
 		add.w	d2,d3				; Add height
 		bmi.s	.NextObject			; If it's off screen on the top, branch
@@ -268,16 +268,16 @@ RendeobjMemory:
 		bge.s	.NextObject			; If so, branch
 		addi.w	#128,d1				; Move sprite on screen
 
-		ori.b	#$80,oRender(a0)		; Set on-screen flag
+		ori.b	#$80,_objRender(a0)		; Set on-screen flag
 		tst.w	d7				; Do we still have some sprite space left?
 		bmi.w	.NextObject			; If not, branch
 
-		move.w	oVRAM(a0),d5			; Get sprite tile properties
-		move.l	oMap(a0),d4			; Get mappings pointer
+		move.w	_objVRAM(a0),d5			; Get sprite tile properties
+		move.l	_objMapping(a0),d4			; Get mappings pointer
 		beq.w	.NextObject			; If blank, branch
 		movea.l	d4,a2				; Store it
 		moveq	#0,d4
-		move.b	oFrame(a0),d4			; Get mapping frame
+		move.b	_objFrame(a0),d4			; Get mapping frame
 		add.w	d4,d4				; Turn into offset
 		lea	(a2),a1				; Copy mappings data pointer
 		adda.w	(a1,d4.w),a1			; Get mapping frame data pointer
@@ -292,10 +292,10 @@ RendeobjMemory:
 		bmi.w	.NextObject			; If not, branch
 
 .RenderSubSprites:
-		move.w	oSubCnt(a0),d3			; Get sub sprite count
+		move.w	_objSubCnt(a0),d3			; Get sub sprite count
 		subq.w	#1,d3				; Subtract 1
 		bmi.w	.NextObject			; If there are no sprites to draw, branch
-		lea	oSubStart(a0),a0		; Get sub sprite SSTs start
+		lea	_objSubStart(a0),a0		; Get sub sprite SSTs start
 
 .RenderSubSprs_Loop:
 		move.w	(a0)+,d0			; Get X position
@@ -337,33 +337,33 @@ RendeobjMemory:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 AnimateObject:
 		moveq	#0,d0
-		move.b	oAni(a0),d0			; Get animation ID
-		cmp.b	oPrevAni(a0),d0			; Has it changed?
+		move.b	_objAnim(a0),d0			; Get animation ID
+		cmp.b	_objPrevAnim(a0),d0			; Has it changed?
 		beq.s	.Run				; If not, branch
-		move.b	d0,oPrevAni(a0)			; Save the new ID
-		clr.b	oAniFrame(a0)			; Reset animation
-		clr.b	oAniTimer(a0)			; Reset animation timer
+		move.b	d0,_objPrevAnim(a0)			; Save the new ID
+		clr.b	_objAnimFrame(a0)			; Reset animation
+		clr.b	_objAnimTimer(a0)			; Reset animation timer
 
 .Run:
-		subq.b	#1,oAniTimer(a0)		; Decrement animation timer
+		subq.b	#1,_objAnimTimer(a0)		; Decrement animation timer
 		bpl.s	.Wait				; If it hasn't run out, branch
 		add.w	d0,d0				; Turn ID into offset
 		adda.w	(a1,d0.w),a1			; Get pointer to current animation script
-		move.b	(a1),oAniTimer(a0)		; Set new animation timer
+		move.b	(a1),_objAnimTimer(a0)		; Set new animation timer
 
 		moveq	#0,d1
-		move.b	oAniFrame(a0),d1		; Get current value in the script
+		move.b	_objAnimFrame(a0),d1		; Get current value in the script
 		move.b	1(a1,d1.w),d0			; ''
 		cmpi.b	#$FA,d0				; Is it a command value?
 		bhs.s	.CmdReset			; If so, branch
 
 .Next:
-		move.b	d0,oFrame(a0)			; Set mapping frame ID
-		move.b	oStatus(a0),d0			; Get status
+		move.b	d0,_objFrame(a0)			; Set mapping frame ID
+		move.b	_objStatus(a0),d0			; Get status
 		andi.b	#3,d0				; Only get flip bits
-		andi.b	#$FC,oRender(a0)		; Mask out flip bits in render flags
-		or.b	d0,oRender(a0)			; Set flip bits
-		addq.b	#1,oAniFrame(a0)		; Advance into the animation script
+		andi.b	#$FC,_objRender(a0)		; Mask out flip bits in render flags
+		or.b	d0,_objRender(a0)			; Set flip bits
+		addq.b	#1,_objAnimFrame(a0)		; Advance into the animation script
 
 .Wait:
 		rts
@@ -371,7 +371,7 @@ AnimateObject:
 .CmdReset:
 		addq.b	#1,d0				; Is this flag $FF (reset)?
 		bne.s	.CmdJump			; If not, branch
-		clr.b	oAniFrame(a0)			; Reset animation
+		clr.b	_objAnimFrame(a0)			; Reset animation
 		move.b	1(a1),d0			; Get first frame ID
 		bra.s	.Next				; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -379,7 +379,7 @@ AnimateObject:
 		addq.b	#1,d0				; Is this flag $FE (jump)?
 		bne.s	.CmdSetAnim			; If not, branch
 		move.b	2(a1,d1.w),d0			; Get jump offset
-		sub.b	d0,oAniFrame(a0)		; Go back
+		sub.b	d0,_objAnimFrame(a0)		; Go back
 		sub.b	d0,d1				; ''
 		move.b	1(a1,d1.w),d0			; Get new frame ID
 		bra.s	.Next				; Continue
@@ -387,21 +387,21 @@ AnimateObject:
 .CmdSetAnim:
 		addq.b	#1,d0				; Is this flag $FD (set animation ID)?
 		bne.s	.CmdNextRout			; If not, branch
-		move.b	2(a1,d1.w),oAni(a0)		; Set new animation ID
+		move.b	2(a1,d1.w),_objAnim(a0)		; Set new animation ID
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .CmdNextRout:
 		addq.b	#1,d0				; Is this flag $FC (next routine)?
 		bne.s	.CmdReset2ndRout		; If not, branch
-		addq.b	#2,oRoutine(a0)			; Next routine
-		clr.b	oAniTimer(a0)			; Reset animation timer
-		addq.b	#1,oAniFrame(a0)		; Next animation frame
+		addq.b	#2,_objRoutine(a0)			; Next routine
+		clr.b	_objAnimTimer(a0)			; Reset animation timer
+		addq.b	#1,_objAnimFrame(a0)		; Next animation frame
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .CmdReset2ndRout:
 		addq.b	#1,d0				; Is this flag $FB (reset secondary routine)?
 		bne.s	.CmdNext2ndRout			; If not, branch
-		clr.b	oAniTimer(a0)			; Reset animation timer
+		clr.b	_objAnimTimer(a0)			; Reset animation timer
 ;		clr.b	oWFZRout(a0)			; Reset routine
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -426,10 +426,10 @@ AnimateObject:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 LoadObjDPLCs:
 		moveq	#0,d0
-		move.b	oFrame(a0),d0			; Get mapping frame
-		cmp.b	oPrevDPLC(a0),d0		; Do we need to update the art?
+		move.b	_objFrame(a0),d0			; Get mapping frame
+		cmp.b	_objPrevDPLC(a0),d0		; Do we need to update the art?
 		beq.s	.End				; If not, branch
-		move.b	d0,oPrevDPLC(a0)		; Save the frame ID so we don't constantly load the art
+		move.b	d0,_objPrevDPLC(a0)		; Save the frame ID so we don't constantly load the art
 		add.w	d0,d0				; Turn ID into offset
 		adda.w	(a2,d0.w),a2			; Get pointer to DPLC data for the frame
 		move.w	(a2)+,d5			; Get DPLC entry count
@@ -464,14 +464,14 @@ LoadObjDPLCs:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjectMove:
-		move.w	oXVel(a0),d0			; Get X velocity
+		move.w	_objXVel(a0),d0			; Get X velocity
 		ext.l	d0				; ''
 		lsl.l	#8,d0				; Shift
-		add.l	d0,oXPos(a0)			; Add to the X position
-		move.w	oYVel(a0),d0			; Get Y velocity
+		add.l	d0,_objXPos(a0)			; Add to the X position
+		move.w	_objYVel(a0),d0			; Get Y velocity
 		ext.l	d0				; ''
 		lsl.l	#8,d0				; Shift
-		add.l	d0,oYPos(a0)			; Add to the Y position
+		add.l	d0,_objYPos(a0)			; Add to the Y position
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move an object by it's velocity values (with gravity)
@@ -483,15 +483,15 @@ ObjectMove:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjectMoveAndFall:
-		move.w	oXVel(a0),d0			; Get X velocity
+		move.w	_objXVel(a0),d0			; Get X velocity
 		ext.l	d0				; ''
 		lsl.l	#8,d0				; Shift
-		add.l	d0,oXPos(a0)			; Add to the X position
-		move.w	oYVel(a0),d0			; Get Y velocity
-		addi.w	#$38,oYVel(a0)			; Apply gravity
+		add.l	d0,_objXPos(a0)			; Add to the X position
+		move.w	_objYVel(a0),d0			; Get Y velocity
+		addi.w	#$38,_objYVel(a0)			; Apply gravity
 		ext.l	d0				; ''
 		lsl.l	#8,d0				; Shift
-		add.l	d0,oYPos(a0)			; Add to the Y position
+		add.l	d0,_objYPos(a0)			; Add to the Y position
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Check if a specific object is nearby
@@ -506,10 +506,10 @@ ObjectMoveAndFall:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 CheckObjInRange:
 		moveq	#0,d0
-		move.w	oXPos(a2),d1			; Get other object's position
-		move.w	oYPos(a2),d2			; ''
-		move.w	oXPos(a0),d3			; Get current object's position
-		move.w	oYPos(a0),d4			; ''
+		move.w	_objXPos(a2),d1			; Get other object's position
+		move.w	_objYPos(a2),d2			; ''
+		move.w	_objXPos(a0),d3			; Get current object's position
+		move.w	_objYPos(a0),d4			; ''
 		add.w	(a1)+,d3			; Get left boundary
 		move.w	d3,d5				; Copy
 		add.w	(a1)+,d5			; Get right boundary
@@ -751,24 +751,24 @@ Level_LoadObjs_SameXRange:
 		bhi.s	.LoadFail			; Branch if out of range in the botoom
 
 		bset	#7,(a3)				; Mark as loaded
-		move.w	-2(a0),oXPos(a1)			; Set X position
+		move.w	-2(a0),_objXPos(a1)			; Set X position
 		move.w	(a0),d1				; Get object's Y position
 		move.w	d1,d2				; Copy it
 		and.w	d5,d1				; Keep in range of 0-$FFF
-		move.w	d1,oYPos(a1)			; Set Y position
+		move.w	d1,_objYPos(a1)			; Set Y position
 
 		rol.w	#3,d2				; Get X and Y flip bits
 		andi.w	#3,d2				; ''
-		move.b	d2,oRender(a1)			; Set render flags
-		move.b	d2,oStatus(a1)			; Set status
+		move.b	d2,_objRender(a1)			; Set render flags
+		move.b	d2,_objStatus(a1)			; Set status
 
 		move.b	2(a0),d2			; Get ID
 		add.w	d2,d2				; Make it an index in the level object index list
 		add.w	d2,d2
-		move.l	(a4,d2.w),oAddr(a1)		; Set address
+		move.l	(a4,d2.w),_objAddress(a1)		; Set address
 
-		move.b	3(a0),oSubtype(a1)		; Set subtype
-		move.w	a3,oRespawn(a1)			; Set respawn address
+		move.b	3(a0),_objSubtype(a1)		; Set subtype
+		move.w	a3,_objRespawn(a1)			; Set respawn address
 
 		jsr	FindFreeObj.w			; Find a free object slot
 		beq.s	.LoadEnd			; If none could be loaded, branch
@@ -824,21 +824,21 @@ Level_LoadObject:
 
 .Spawn:
 		bset	#7,(a3)				; Mark as loaded
-		move.w	d7,oXPos(a1)			; Store X position
-		move.w	d1,oYPos(a1)			; Store Y position
+		move.w	d7,_objXPos(a1)			; Store X position
+		move.w	d1,_objYPos(a1)			; Store Y position
 
 		rol.w	#3,d2				; Get X and Y flip bits
 		andi.w	#3,d2				; ''
-		move.b	d2,oRender(a1)			; Set render flags
-		move.b	d2,oStatus(a1)			; Set status
+		move.b	d2,_objRender(a1)			; Set render flags
+		move.b	d2,_objStatus(a1)			; Set status
 
 		move.b	(a0)+,d2			; Get ID
 		add.w	d2,d2				; Make it an index in the level object index list
 		add.w	d2,d2
-		move.l	(a4,d2.w),oAddr(a1)		; Set address
+		move.l	(a4,d2.w),_objAddress(a1)		; Set address
 
-		move.b	(a0)+,oSubtype(a1)		; Set subtype
-		move.w	a3,oRespawn(a1)			; Set respawn address
+		move.b	(a0)+,_objSubtype(a1)		; Set subtype
+		move.w	a3,_objRespawn(a1)			; Set respawn address
 		
 		bra.w	FindFreeObj			; Find a free object slot
 		
@@ -852,7 +852,7 @@ Level_LoadObject:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 CheckObjActive:
-		move.w	oXPos(a0),d0			; Get X position
+		move.w	_objXPos(a0),d0			; Get X position
 
 CheckObjActive2:
 		andi.w	#$FF80,d0			; Only allow multiples of $80
@@ -862,7 +862,7 @@ CheckObjActive2:
 		rts
 
 .Delete:
-		move.w	oRespawn(a0),d0			; Get respawn table entry address
+		move.w	_objRespawn(a0),d0			; Get respawn table entry address
 		beq.s	.DoDelete			; If 0, branch
 		movea.w	d0,a2
 		bclr	#7,(a2)				; Mark as gone
@@ -888,14 +888,14 @@ GetOrientToPlayer:
 
 		movea.w	playerPtrP1.w,a1		; Get player object
 
-		move.w	oXPos(a0),d2			; Get horizonal distance
-		sub.w	oXPos(a1),d2			; ''
+		move.w	_objXPos(a0),d2			; Get horizonal distance
+		sub.w	_objXPos(a1),d2			; ''
 		bpl.s	.GetY				; Branch if the player is left from the object
 		addq.w	#2,d0				; Set flag to indicate that the player is right from the object
 
 .GetY:
-		move.w	oYPos(a0),d3			; Get vertical distance
-		sub.w	oYPos(a1),d3			; ''
+		move.w	_objYPos(a0),d3			; Get vertical distance
+		sub.w	_objYPos(a1),d3			; ''
 		bhs.s	.End				; Branch if the player is above the object
 		addq.w	#2,d1				; Set flag to indicate that the player is below the object
 
@@ -913,7 +913,7 @@ GetOrientToPlayer:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 CapObjSpeed:
-		move.w	oXVel(a0),d2			; Get X velocity
+		move.w	_objXVel(a0),d2			; Get X velocity
 		bpl.s	.ChkRight			; If we are going right, branch
 		neg.w	d0				; Get absolute speed
 		cmp.w	d0,d2				; Has it gone over the limit?
@@ -927,7 +927,7 @@ CapObjSpeed:
 		move.w	d0,d2				; Cap the speed
 
 .ChkUp:
-		move.w	oYVel(a0),d3			; Get Y velocity
+		move.w	_objYVel(a0),d3			; Get Y velocity
 		bpl.s	.ChkDown			; If we are going right, branch
 		neg.w	d1				; Get absolute speed
 		cmp.w	d1,d3				; Has it gone over the limit?
@@ -941,8 +941,8 @@ CapObjSpeed:
 		move.w	d1,d3				; Cap the speed
 
 .UpdateVel:
-		move.w	d2,oXVel(a0)			; Set X velocity
-		move.w	d2,oYVel(a0)			; Set Y velocity
+		move.w	d2,_objXVel(a0)			; Set X velocity
+		move.w	d2,_objYVel(a0)			; Set Y velocity
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Load a child object	NTP: no idea wtf to do about this one. do we even need it since all objects are kinda linked anyway? we'll have to see
@@ -960,10 +960,10 @@ CapObjSpeed:
 		move.w	a0,(a1,d0.w)			; Store parent object
 		move.w	(a2)+,d0			; Get child object SST
 		move.w	a1,(a0,d0.w)			; Store child object
-		move.l	(a2)+,oAddr(a1)			; Set object pointer
-		move.b	(a2)+,oSubtype(a1)		; Set subtype
-		move.w	oXPos(a0),oXPos(a1)			; Set X
-		move.w	oYPos(a0),oYPos(a1)			; Set Y
+		move.l	(a2)+,_objAddress(a1)			; Set object pointer
+		move.b	(a2)+,_objSubtype(a1)		; Set subtype
+		move.w	_objXPos(a0),_objXPos(a1)			; Set X
+		move.w	_objYPos(a0),_objYPos(a1)			; Set Y
 
 .End:
 		rts
