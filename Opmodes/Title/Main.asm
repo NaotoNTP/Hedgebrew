@@ -125,7 +125,7 @@ TitleScreen:
 ;		move.w	#320,(rObj_2+oY).w		; Set Y
 ;
 ;		jsr	RunObjects.w			; Run objects
-;		jsr	RendeobjMemory.w			; Render objects
+;		jsr	RenderObjects.w			; Render objects
 ;
 ;		clr.w	palCycTimer.w		; Reset palette cycle
 ;
@@ -141,7 +141,7 @@ TitleScreen:
 ;		bsr.s	Title_Updates			; Do updates
 ;		
 ;		jsr	RunObjects.w			; Run objects
-;		jsr	RendeobjMemory.w			; Render objects
+;		jsr	RenderObjects.w			; Render objects
 ;
 ;		lea	FreeMove_Cheat(pc),a0
 ;		lea	moveCheat.w,a1
@@ -170,7 +170,7 @@ TitleScreen:
 ;		bsr.s	Title_Updates			; Do updates
 ;
 ;		jsr	RunObjects.w			; Run objects
-;		jsr	RendeobjMemory.w			; Render objects
+;		jsr	RenderObjects.w			; Render objects
 ;		
 ;		tst.b	(rObj_2+oGloveTime).w		; Has the timer run out?
 ;		bpl.s	.PunchLoop			; If not, loop

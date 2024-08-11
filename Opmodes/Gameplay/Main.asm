@@ -130,7 +130,7 @@ Level_NoFade:
 		bsr.w	Level_RingsManager		; Initialize the ring manager
 		jsr	ObjectManager.w			; Run the object manager
 	runObjects
-		jsr	RendeobjMemory.w			; Render objects
+		jsr	RenderObjects.w			; Render objects
 
 		clr.b	lvlReload.w			; Clear the level reload flag
 
@@ -161,7 +161,7 @@ Level_NoFade:
 		bsr.w	Level_UpdatePlanes		; Update the planes (draw new tiles and scroll)
 		bsr.w	Level_UpdateWaterSurface	; Update the water surface
 
-		jsr	RendeobjMemory.w			; Render objects
+		jsr	RenderObjects.w			; Render objects
 
 		bsr.w	Level_WaterHeight		; Update water height
 		bsr.w	Level_AnimateArt		; Animate level art

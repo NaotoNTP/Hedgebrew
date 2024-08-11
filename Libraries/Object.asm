@@ -134,7 +134,7 @@ DeleteObject:
 ; RETURNS:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-RendeobjMemory:
+RenderObjects:
 		moveq	#($280/8)-1,d7			; Max sprite count
 		moveq	#0,d6				; Render flags
 
@@ -149,7 +149,7 @@ RendeobjMemory:
 .PrioLvlLoop:
 		move.w	(a5),a0				; Load priority level address to a0
 		add.w	#dSize,a5			; Skip bunch of shit
-		tst.w	_objDrawNext(a0)			; Is the next pointer for a valid object?
+		tst.w	_objDrawNext(a0)		; Is the next pointer for a valid object?
 		beq.w	.NextPrioLvl			; If not, branch
 
 .ObjectLoop:
@@ -172,7 +172,7 @@ RendeobjMemory:
 
 .Render:
 		moveq	#0,d2
-		move.b	_objDrawW(a0),d2			; Get sprite width
+		move.b	_objDrawW(a0),d2		; Get sprite width
 		move.w	d0,d3				; Get sprite X position
 		add.w	d2,d3				; Add width
 		bmi.s	.NextObject			; If it's off screen on the left, branch
@@ -216,7 +216,7 @@ RendeobjMemory:
 
 .NextObject:	
 		move.w	_objDrawNext(a0),a0		; Load next object to a0
-		tst.w	_objDrawNext(a0)			; Check the next pointer for valid object
+		tst.w	_objDrawNext(a0)		; Check the next pointer for valid object
 		bne.w	.ObjectLoop			; If there are still some sprites to draw in this priority level, branch
 
 .NextPrioLvl:

@@ -1088,7 +1088,7 @@ Level_FindFloor:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .IsSolid:
-		movea.l	currentColAddr.w,a2			; Get collision data pointer
+		movea.l	currentColAddr.w,a2		; Get collision data pointer
 		add.w	d0,d0				; Turn ID into offset
 		move.b	(a2,d0.w),d0			; Get collision block ID
 		andi.w	#$FF,d0				; ''
