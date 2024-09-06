@@ -69,14 +69,14 @@ MATH_GetSinCos:
 		dc.w	$00EC, $00EE, $00F1, $00F3, $00F4, $00F6, $00F8, $00F9, $00FB, $00FC, $00FD, $00FE, $00FE, $00FF, $00FF, $00FF
 		
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; Returns the arctangent (angle/direction) value of of a given directional vector
+; Returns the arctangent (angle) value for a given x/y distance
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; AGUMENTS:
-;	d1.w	- X distance/magnitude
-;	d2.w	- Y distance/magnitude
+;	d1.w	- X distance
+;	d2.w	- Y distance
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; RETURNS:
-;	d0.w	- Arctangent (angle/direction) value
+;	d0.w	- Arctangent (angle) value
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 MATH_GetArctan:
 		movem.l	d3-d4,-(sp)			; Backup d3-d4 and initialize them
