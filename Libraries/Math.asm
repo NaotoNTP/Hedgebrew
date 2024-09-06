@@ -18,7 +18,7 @@ MATH_GetRandom:
 		bls.s	.setSeed			; If the carry flag was set, or the result is zero, branch ahead
 
 .initSeed:	
-		eori.l  #$741B8CD7,d0			; Otherwise, perform an exclusive-OR on the result
+		eori.l  #$741B8CD7,d0			; Otherwise, perform an exclusive-OR against a magic number
 
 .setSeed:	
 		move.l  d0,(randomSeed).w		; Update the random seed value stored in memory
