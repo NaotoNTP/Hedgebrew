@@ -117,7 +117,7 @@ ObjChkPoint_Dongle:
 		move.b	_objAngle(a0),d0			; Get angle
 		subi.b	#$10,_objAngle(a0)			; Decrement angle
 		subi.b	#$40,d0				; Subtract $40
-		jsr	CalcSine.w			; Get sine and cosine
+		jsr	MATH_GetSinCos.w			; Get sine and cosine
 		muls.w	#$C00,d1			; Multiply cosine with $C00
 		swap	d1				; Get high word
 		add.w	_objDongleX(a0),d1			; Add dongle X

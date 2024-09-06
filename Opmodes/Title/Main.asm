@@ -185,7 +185,7 @@ TitleScreen:
 ;Title_Updates:
 ;		move.b	rLogoAngle.w,d0		; Get logo hover angle
 ;		addq.b	#4,rLogoAngle.w		; Increment angle
-;		jsr	CalcSine.w			; Get sine
+;		jsr	MATH_GetSinCos.w			; Get sine
 ;		asr.w	#5,d0				; ''
 ;		move.w	d0,vScrollBuffFG.w		; Set logo's Y position
 ;

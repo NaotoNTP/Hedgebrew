@@ -32,11 +32,11 @@ ObjBumperMain:
 		move.w	_objYPos(a0),d2
 		sub.w	_objXPos(a2),d1
 		sub.w	_objYPos(a2),d2
-		jsr	CalcArcTan.w
+		jsr	MATH_GetArcTan.w
 		move.b	(frameCounter+3).w,d1
 		andi.w	#3,d1
 		add.w	d1,d0
-		jsr	CalcSine.w
+		jsr	MATH_GetSinCos.w
 		muls.w	#-$700,d1
 		asr.l	#8,d1
 		move.w	d1,_objXVel(a2)

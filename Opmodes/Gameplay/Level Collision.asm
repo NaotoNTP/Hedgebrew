@@ -15,7 +15,7 @@ PlayerChkCollision:
 		
 		move.w	_objXVel(a0),d1			; Get X velocity
 		move.w	_objYVel(a0),d2			; Get Y velocity
-		jsr	CalcArcTan.w			; Get the angle
+		jsr	MATH_GetArcTan.w			; Get the angle
 		subi.b	#$20,d0				; Shift it over
 		andi.b	#$C0,d0				; Get the quadrant
 		cmpi.b	#$40,d0				; Are we hitting a left wall?
@@ -1058,7 +1058,7 @@ PlayerMoveLWall:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Find the nearest floor from the object's position
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; PARAMETERS:
+; AGUMENTS:
 ;	d2.w	- Y position of the object's bottom sensor
 ;	d3.w	- X position of the object's bottom sensor
 ;	d5.w	- Bit to chect for solidity
@@ -1222,7 +1222,7 @@ Level_FindFloor2:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Find the nearest wall from the object's position
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; PARAMETERS:
+; AGUMENTS:
 ;	d2.w	- Y position of the object's bottom sensor
 ;	d3.w	- X position of the object's bottom sensor
 ;	d5.w	- Bit to chect for solidity
@@ -1386,7 +1386,7 @@ Level_FindWall2:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Find the nearest block in the level from the player
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; PARAMETERS:
+; AGUMENTS:
 ;	d2.w	- Y position of the object's sensor
 ;	d3.w	- X position of the object's sensor
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

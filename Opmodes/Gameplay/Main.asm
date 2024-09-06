@@ -104,7 +104,7 @@ Level_NoFade:
 .NoWater:
 		move.w	#320/2,panCamXPos.w		; Set camera X center
 
-		jsr	InitOscillation.w		; Initialize oscillation
+		jsr	MATH_InitOscillators.w		; Initialize oscillation
 
 		bsr.w	Level_HandleCamera		; Initialize the camera
 		bsr.w	Level_InitHUD			; Initialize the HUD
@@ -147,7 +147,7 @@ Level_NoFade:
 		jsr	CheckPause.w			; Check for pausing
 		addq.w	#1,lvlFrameCnt.w			; Increment frame counter
 
-		jsr	UpdateOscillation.w		; Update oscillation
+		jsr	MATH_UpdOscillators.w		; Update oscillation
 
 		bsr.w	Level_RingsManager		; Run the ring manager
 		jsr	ObjectManager.w			; Run the object manager
@@ -388,7 +388,7 @@ AniArt_WWZ:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Level drawing initialization and update routines
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; PARAMETERS:
+; AGUMENTS:
 ;	a1.l	- Camera RAM
 ;	a3.l	- Row plane buffer
 ;	a4.l	- Column plane buffer

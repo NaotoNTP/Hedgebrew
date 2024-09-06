@@ -459,7 +459,7 @@ ObjPlayer_MoveGround:
 
 .ApplySpeed:
 		move.b	_objAngle(a0),d0			; Get angle
-		jsr	CalcSine.w			; Get the sine and cosine
+		jsr	MATH_GetSinCos.w			; Get the sine and cosine
 		muls.w	_objGVel(a0),d1			; Multiply cosine with ground velocity
 		muls.w	_objGVel(a0),d0			; Multiply sine with ground velocity
 		asr.l	#8,d1				; Shift the values over
@@ -688,7 +688,7 @@ ObjPlayer_MoveRoll:
 
 .UpdateSpd:
 		move.b	_objAngle(a0),d0			; Get angle
-		jsr	CalcSine.w			; Get sine and cosine
+		jsr	MATH_GetSinCos.w			; Get sine and cosine
 		muls.w	_objGVel(a0),d0			; Multiply sine with ground velocity
 		asr.l	#8,d0				; Shift over
 		move.w	d0,_objYVel(a0)			; Set Y velocity
@@ -1076,7 +1076,7 @@ ObjPlayer_ChkJump:
 		moveq	#0,d0
 		move.b	_objAngle(a0),d0			; Get angle
 		subi.b	#$40,d0				; Shift it
-		jsr	CalcSine.w			; Get the sine and cosine
+		jsr	MATH_GetSinCos.w			; Get the sine and cosine
 		muls.w	d2,d1				; Mutliply cosine with jump height
 		muls.w	d2,d0				; Mutliply sine with jump height
 		asr.l	#8,d1				; Shift the values over
@@ -1229,7 +1229,7 @@ ObjPlayer_SlopePush:
 		cmpi.b	#$C0,d0				; Is Sonic on a steep slope or ceiling?
 		bcc.s	.End				; If not, branch
 		move.b	_objAngle(a0),d0			; Get angle
-		jsr	CalcSine.w			; Get the sine of it
+		jsr	MATH_GetSinCos.w			; Get the sine of it
 		muls.w	#$20,d0				; Multiple it by $20
 		asr.l	#8,d0				; Shift it
 		tst.w	_objGVel(a0)			; Check speed
@@ -1271,7 +1271,7 @@ ObjPlayer_RollSlopePush:
 		bcc.s	.End				; If not, branch
 
 		move.b	_objAngle(a0),d0			; Get angle
-		jsr	CalcSine.w			; Get sine
+		jsr	MATH_GetSinCos.w			; Get sine
 		muls.w	#$50,d0				; Multiply sine by $50
 		asr.l	#8,d0				; Shift over
 

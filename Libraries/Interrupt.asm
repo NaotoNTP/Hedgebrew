@@ -40,7 +40,7 @@ VInt_FinishUpdates:
 
 VInt_End:
 		addq.l	#1,frameCounter.w		; Increment frame count
-		bsr.w	RandomNumber			; Generate a random number
+		bsr.w	MATH_GetRand			; Generate a random number
 		
 		pop.l	d0-a6				; Restore registers
 		intsOn					; Turn interrupts on
@@ -221,7 +221,7 @@ VInt_RunSMPS:
 		jsr	UpdateAMPS			; Run the AMPS driver
 
 		addq.l	#1,frameCounter.w		; Increment frame count
-		bsr.w	RandomNumber			; Generate a random number
+		bsr.w	MATH_GetRand			; Generate a random number
 		
 		pop.l	d0-a6				; Restore registers
 		rte
@@ -229,7 +229,7 @@ VInt_RunSMPS:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Wait for the vertical interrupt to run and finish
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-; PARAMETERS:
+; AGUMENTS:
 ;	Nothing
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; RETURNS:

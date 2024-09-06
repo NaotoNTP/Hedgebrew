@@ -48,7 +48,8 @@ ObjLostRing:
 		jsr	ObjectMove.w
 		addi.w	#$18,_objYVel(a0)
 		bmi.s	.ChkCol
-		move.w	(frameCounter+3).w,d0
+		moveq	#0,d0
+		and.b	(frameCounter+3).w,d0
 		lsl.w	#5,d0
 		add.w	a0,d0
 		andi.w	#$60,d0
