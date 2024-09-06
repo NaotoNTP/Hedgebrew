@@ -15,7 +15,7 @@ PlayerChkCollision:
 		
 		move.w	_objXVel(a0),d1			; Get X velocity
 		move.w	_objYVel(a0),d2			; Get Y velocity
-		jsr	MATH_GetArcTan.w			; Get the angle
+		jsr	MATH_GetArctan.w			; Get the angle
 		subi.b	#$20,d0				; Shift it over
 		andi.b	#$C0,d0				; Get the quadrant
 		cmpi.b	#$40,d0				; Are we hitting a left wall?

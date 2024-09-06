@@ -32,7 +32,7 @@ ObjBumperMain:
 		move.w	_objYPos(a0),d2
 		sub.w	_objXPos(a2),d1
 		sub.w	_objYPos(a2),d2
-		jsr	MATH_GetArcTan.w
+		jsr	MATH_GetArctan.w
 		move.b	(frameCounter+3).w,d1
 		andi.w	#3,d1
 		add.w	d1,d0

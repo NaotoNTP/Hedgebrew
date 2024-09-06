@@ -48,7 +48,7 @@ ObjBubbles_Init:
 		move.b	d0,_objAnim(a0)
 		move.w	_objXPos(a0),_objBubOrgX(a0)
 		move.w	#-$88,_objYVel(a0)
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		move.b	d0,_objBubAng(a0)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBubbles_Main:
@@ -110,7 +110,7 @@ ObjBubbles_Maker:
 		move.w	#1,_objBubUnk36(a0)
 
 .TryAgain:
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		move.w	d0,d1
 		andi.w	#7,d0
 		cmpi.w	#6,d0
@@ -134,14 +134,14 @@ ObjBubbles_Maker:
 		bpl.w	.loc_12914
 
 .loc_1287C:
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		andi.w	#$1F,d0
 		move.w	d0,_objBubUnk38(a0)
 		jsr	FindFreeObj.w
 		bne.s	.Fail
 		move.l	_objAddress(a0),_objAddress(a1)
 		move.w	_objXPos(a0),_objXPos(a1)
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		andi.w	#$F,d0
 		subq.w	#8,d0
 		add.w	d0,_objXPos(a1)
@@ -152,7 +152,7 @@ ObjBubbles_Maker:
 		move.b	(a2,d0.w),_objSubtype(a1)
 		btst	#7,_objBubUnk36(a0)
 		beq.s	.Fail
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		andi.w	#3,d0
 		bne.s	.loc_buh
 		bset	#6,_objBubUnk36(a0)
@@ -169,7 +169,7 @@ ObjBubbles_Maker:
 .Fail:
 		subq.b	#1,_objBubTypeInd(a0)
 		bpl.s	.loc_12914
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		andi.w	#$7F,d0
 		addi.w	#$80,d0
 		add.w	d0,_objBubUnk38(a0)

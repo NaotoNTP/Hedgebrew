@@ -10,7 +10,7 @@
 ; RETURNS:
 ;	d0.l	- Pseudo-random number
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-MATH_GetRand:
+MATH_GetRandom:
 		move.l	(randomSeed).w,d1		; Load the value of the previous random seed
 		beq.s	.initSeed			; If the seed value is zero (uninitialized), branch ahead
 
@@ -78,7 +78,7 @@ MATH_GetSinCos:
 ; RETURNS:
 ;	d0.w	- Arctangent (angle/direction) value
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-MATH_GetArcTan:
+MATH_GetArctan:
 		movem.l	d3-d4,-(sp)			; Backup d3-d4 and initialize them
 		moveq	#0,d3				; ^
 		moveq	#0,d4				; ^

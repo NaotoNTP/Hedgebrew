@@ -156,7 +156,7 @@ ObjDrownCnt_Count:
 		move.w	#59,_objDrownTime(a0)		; Reset timer
 
 		move.w	#1,_objAirUnk36(a0)
-		jsr	MATH_GetRand.w			; Get a random number
+		jsr	MATH_GetRandom.w			; Get a random number
 		andi.w	#1,d0				; Only get 0-1
 		move.b	d0,_objAirUnk34(a0)
 		moveq	#0,d0
@@ -215,7 +215,7 @@ ObjDrownCnt_Count:
 		bpl.w	.NoCountdown
 
 .MakeBubble:
-		jsr	MATH_GetRand.w			; Get a random number
+		jsr	MATH_GetRandom.w			; Get a random number
 		andi.w	#$F,d0				; Only get 0-$F
 		addq.w	#8,d0
 		move.w	d0,_objAirUnk3A(a0)
@@ -241,7 +241,7 @@ ObjDrownCnt_Count:
 		move.w	(rObj_Player+oY).w,d0
 		subi.w	#$C,d0
 		move.w	d0,_objYPos(a1)
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		move.b	d0,_objBubAngle(a1)
 		move.w	lvlFrameCnt.w,d0
 		andi.b	#3,d0
@@ -257,7 +257,7 @@ ObjDrownCnt_Count:
 		cmpi.b	#$C,d2
 		bhs.s	.loc_14082
 		lsr.w	#1,d2
-		jsr	MATH_GetRand.w
+		jsr	MATH_GetRandom.w
 		andi.w	#3,d0
 		bne.s	.loc_1406A
 		bset	#6,_objAirUnk36(a0)
