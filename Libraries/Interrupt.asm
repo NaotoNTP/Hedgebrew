@@ -36,7 +36,7 @@ VInt_Standard:
 		jsr	VInt_Routines(pc,d0.w)		; Jump to the routine
 
 VInt_FinishUpdates:
-		jsr	UpdateAMPS			; Run the AMPS driver
+	;	jsr	UpdateAMPS			; Run the AMPS driver
 
 VInt_End:
 		addq.l	#1,frameCounter.w		; Increment frame count
@@ -218,7 +218,7 @@ VInt_RunSMPS:
 		dbf	d0,*				; ''
 
 .UpdateSMPS:
-		jsr	UpdateAMPS			; Run the AMPS driver
+	;	jsr	UpdateAMPS			; Run the AMPS driver
 
 		addq.l	#1,frameCounter.w		; Increment frame count
 		bsr.w	MATH_GetRandom			; Generate a random number
@@ -280,7 +280,7 @@ HInt_Water:
 		lea	VDP_CTRL,a6			; VDP control port
 		lea	-4(a6),a5			; VDP data port
 		jsr	Level_UpdateHUD			; Update the HUD
-		jsr	UpdateAMPS			; Run the AMPS driver
+	;	jsr	UpdateAMPS			; Run the AMPS driver
 		pop.l	d0-a6				; Restore registers
 		rte
 ; =========================================================================================================================================================

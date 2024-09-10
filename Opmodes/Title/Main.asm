@@ -6,7 +6,7 @@
 TitleScreen:
 		bra.s	TitleScreen
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------	
-;		playSnd	#Mus_Stop, 1			; Stop sound
+;		;playsnd	#Mus_Stop, 1			; Stop sound
 ;
 ;		bsr.w	FadeToBlack			; Fade to black
 ;
@@ -235,7 +235,7 @@ TitleScreen:
 ;		tst.b	d0
 ;		bne.s	.End
 ;		st	(a1)
-;		playSnd	#sRing, 2
+;		;playsnd	#sRing, 2
 ;		rts
 ;
 ;.ResetCheat:

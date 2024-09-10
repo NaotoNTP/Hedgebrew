@@ -123,7 +123,7 @@ ObjMonitorCharStandOn:
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjMonitorBreakOpen:
-		playSnd	#sBreakItem, 2			; Play destroy sound
+		;playsnd	#sBreakItem, 2			; Play destroy sound
 		
 		move.b	_objStatus(a0),d0
 		andi.b	#cStand|cPush,d0
@@ -222,7 +222,7 @@ ObjMonitorContents_GetType:
 		bne.s	.Display
 		addi.w	#10,ringCount.w 				; add 10 rings to the number of rings you have
 		ori.b	#1,hudUpdateRings.w 			; update the ring counter
-		playSnd	#sRing, 2				; Play ring sound
+		;playsnd	#sRing, 2				; Play ring sound
 
 .Display:
 		rts

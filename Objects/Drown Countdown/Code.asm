@@ -130,7 +130,7 @@ ObjDrownCnt_ShowNum:
 		cmpi.b	#7,_objAnim(a0)
 		bcc.s	.NoNumber			; If so, branch
 
-		playSnd	#sDrownCount, 2			; Play drown count sound
+		;playsnd	#sDrownCount, 2			; Play drown count sound
 
 		move.w	#15,_objDrownTime(a0)		; Reset drown timer
 		clr.w	_objYVel(a0)			; Don't move up
@@ -177,7 +177,7 @@ ObjDrownCnt_Count:
 		bra.s	.ReduceAir
 
 .WarnSound:
-		playSnd	#sDrownWarn, 2			; Play drown warn sound
+		;playsnd	#sDrownWarn, 2			; Play drown warn sound
 
 .ReduceAir:
 		subq.b	#1,(rObj_Player+_objAirTimer).w	; Reduce air
@@ -185,7 +185,7 @@ ObjDrownCnt_Count:
 
 		bsr.w	ObjDrown_ResetDrown		; Reset drowning stuff
 		move.w	#$FFFF,camLocked.w		; Lock the camera
-		playSnd	#sDrown, 2			; Play drowning sound
+		;playsnd	#sDrown, 2			; Play drowning sound
 		move.b	#$A,_objAirUnk34(a0)
 		move.w	#1,_objAirUnk36(a0)
 		move.w	#$78,_objAirUnk2C(a0)

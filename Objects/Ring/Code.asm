@@ -42,7 +42,7 @@ ObjRingLoss:
 .ResetCounter:
 		clr.w	ringCount.w
 		move.b	#1,hudUpdateRings.w
-		playSnd	#sRingLoss, 2
+		;playsnd	#sRingLoss, 2
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjLostRing:
 		jsr	ObjectMove.w

@@ -6,7 +6,7 @@
 Ending:
 		bra.s	Ending
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-;		playSnd	#Mus_Stop, 1			; Stop sound
+;		;playsnd	#Mus_Stop, 1			; Stop sound
 ;
 ;		intsOff					; Disable interrupts
 ;

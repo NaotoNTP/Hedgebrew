@@ -181,7 +181,7 @@ MoveSpikes_Delay:
 		bne.s	locret_CFE6
 		tst.b	_objRender(a0)
 		bpl.s	locret_CFE6
-		playSnd	#sSpikeMove, 2		; Play spike move sound
+		;playsnd	#sSpikeMove, 2		; Play spike move sound
 		bra.s	locret_CFE6
 ; ===========================================================================
 MoveSpikes_ChkDir:

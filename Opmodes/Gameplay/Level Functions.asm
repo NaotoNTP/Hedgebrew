@@ -654,7 +654,7 @@ PlayeringCollectlision:
 CollectRing:
 		addq.w	#1,ringCount.w			; Incremment ring count
 		st	hudUpdateRings.w			; Update ring counter in HUD
-		playSnd	#sRing, 2			; Play ring sound
+		;playsnd	#sRing, 2			; Play ring sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Render the HUD

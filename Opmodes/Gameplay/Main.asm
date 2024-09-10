@@ -2,7 +2,7 @@
 ; Level
 ; =========================================================================================================================================================
 Level:
-		playSnd	#Mus_FadeOut, 1			; Fade out sound
+		;playsnd	#Mus_FadeOut, 1			; Fade out sound
 
 		jsr	FadeToBlack			; Fade to black
 
@@ -45,7 +45,7 @@ Level_NoFade:
 		lsr.w	#7,d0				; ''
 		move.b	(a0,d0.w),d0			; Get music ID
 		move.b	d0,lvlMusic.w		; Store it
-		playSnd	d0, 1				; Play it
+		;playsnd	d0, 1				; Play it
 
 		intsOn					; Enable interrupts
 
@@ -222,7 +222,7 @@ CheckPause:
 
 .SetPause:
 		st	pauseFlag.w			; Pause the game
-		AMPS_MUSPAUSE				; Pause the music
+;		AMPS_MUSPAUSE				; Pause the music
 
 .PauseLoop:
 		move.b	#vGeneral,vIntRoutine.w		; General V-INT routine
@@ -230,7 +230,7 @@ CheckPause:
 		btst	#7,ctrlPressP1.w			; Has the start button been pressed?
 		beq.s	.PauseLoop			; If not, branch
 
-		AMPS_MUSUNPAUSE				; Unpause the music
+;		AMPS_MUSUNPAUSE				; Unpause the music
 		clr.b	pauseFlag.w			; Unpause the game
 
 .End:
@@ -246,7 +246,8 @@ CheckPause:
 ; Music IDs
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 Level_MusicIDs:
-		dc.b	mWWZ, mWWZ
+	;	dc.b	mWWZ, mWWZ
+		dc.b	-1, -1
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Level water heights (-1 for no water)
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

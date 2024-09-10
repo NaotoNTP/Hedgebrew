@@ -231,7 +231,7 @@ ObjBubbles_ChkSonic:
 		bcs.s	.End
 
 		jsr	ObjDrown_ResetDrown
-		playSnd	#sBubble, 2
+		;playsnd	#sBubble, 2
 		clr.l	_objXVel(a1)
 		clr.w	_objGVel(a1)
 		move.b	#$15,_objAnim(a1)

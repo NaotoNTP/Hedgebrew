@@ -6,10 +6,6 @@
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 		include	"Config/Configuration.asm"	; Configuration
 
-		include	"Sound/langZ80.asm"		; Z80 Language macros
-		include	"Sound/amps/code/macro.asm"	; AMPS macros
-		include	"Sound/amps/code/smps2asm.asm"	; AMPS SMPS2ASM
-
 		include	"Config/Constants.asm"		; Constants
 		include	"Config/Macros.asm"		; Macros
 		include	"Config/Offsets.asm"		; Offsets
@@ -32,7 +28,7 @@ GameInit:
 		
 		bsr.w	InitDMAQueue				; Initialize the DMA queue
 		bsr.w	InitVDP					; Initialize the VDP
-		jsr	LoadDualPCM				; Load Dual PCM
+	;	jsr	LoadDualPCM				; Load Dual PCM
 		
 		move.b	HW_VERSION,d0				; Get hardware version
 		andi.b	#$C0,d0					; Just get region bits
@@ -250,12 +246,8 @@ ArtUnc_Sirens:
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Sound driver
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
-		include	"Sound/amps/code/68k.asm"
-DualPCM:
-		z80prog	0
-		include	"Sound/amps/code/Z80.asm"
-DualPCM_sz:
-		z80prog
+;		include	"Sound/amps/code/68k.asm"
+
 
 ; =========================================================================================================================================================
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------

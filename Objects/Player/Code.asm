@@ -186,7 +186,7 @@ ObjPlayer_Water:
 		asr.w	_objYVel(a0)
 		beq.s	.End				; If a splash doesn't need to be created, branch
 
-		playSnd	#sSplash, 2			; Play splash sound
+		;playsnd	#sSplash, 2			; Play splash sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .NotInWater:
@@ -206,7 +206,7 @@ ObjPlayer_Water:
 		move.w	#-$1000,_objYVel(a0)		; Cap the speed
 
 .PlaySplashSnd:
-		playSnd	#sSplash, 2			; Play splash sound
+		;playsnd	#sSplash, 2			; Play splash sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do Sonic's modes
@@ -573,7 +573,7 @@ ObjPlayer_MoveLeft:
 		blt.s	.End				; If not, branch
 		move.b	#$D,_objAnim(a0)			; Set animation to skidding
 		bclr	#0,_objStatus(a0)			; Clear flip flag
-		playSnd	#sSkid, 2			; Play skid sound
+		;playsnd	#sSkid, 2			; Play skid sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Move right on the ground
@@ -621,7 +621,7 @@ ObjPlayer_MoveRight:
 		bgt.s	.End				; If not, branch
 		move.b	#$D,_objAnim(a0)			; Set animation to skidding
 		bset	#0,_objStatus(a0)			; Set flip flag
-		playSnd	#sSkid, 2			; Play skid sound
+		;playsnd	#sSkid, 2			; Play skid sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Do movement while rolling
@@ -895,7 +895,7 @@ ObjPlayer_Peelout:
 		neg.w	_objGVel(a0)			; Go the other way
 
 .SetAni:
-		playSnd	#sCharge, 2			; Play charge sound
+		;playsnd	#sCharge, 2			; Play charge sound
 
 		addq.l	#4,sp				; Don't return to caller
 		st	_objDashFlag(a0)			; Set the peelout flag
@@ -921,7 +921,7 @@ ObjPlayer_Peelout:
 		neg.w	_objGVel(a0)			; Go the other way
 
 .FinishDash:
-		playSnd	#sChargeRelease, 2		; Play charge release sound
+		;playsnd	#sChargeRelease, 2		; Play charge release sound
 
 		bra.s	.DoUpdates			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -938,7 +938,7 @@ ObjPlayer_Peelout:
 .StopSound:
 		clr.w	_objGVel(a0)			; Stop ground movement
 
-		playSnd	#sChargeStop, 2			; Play charge stop sound
+		;playsnd	#sChargeStop, 2			; Play charge stop sound
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .DoUpdates:
 		addq.l	#4,sp				; Don't return to caller
@@ -983,7 +983,7 @@ ObjPlayer_Spindash:
 		addq.w	#5,_objYPos(a0)			; Align Sonic to the ground
 		move.b	#2,_objAnim(a0)			; Set to spin animation
 
-		playSnd	#sCharge, 2			; Play charge sound
+		;playsnd	#sCharge, 2			; Play charge sound
 
 		addq.l	#4,sp				; Don't return to caller
 		move.b	#1,_objDashFlag(a0)		; Set the spindash flag
@@ -1009,7 +1009,7 @@ ObjPlayer_Spindash:
 		neg.w	_objGVel(a0)			; Go the other way
 
 .FinishDash:
-		playSnd	#sChargeRelease, 2		; Play charge release sound
+		;playsnd	#sChargeRelease, 2		; Play charge release sound
 
 		bra.s	.DoUpdates			; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1029,7 +1029,7 @@ ObjPlayer_Spindash:
 		move.b	_objInitColW(a0),_objColW(a0)		; Reset collision width
 		subq.w	#5,_objYPos(a0)			; Align Sonic with the ground
 
-		playSnd	#sChargeStop, 2			; Play charge stop sound
+		;playsnd	#sChargeStop, 2			; Play charge stop sound
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .DoUpdates:
 		addq.l	#4,sp				; Don't return to caller
@@ -1087,7 +1087,7 @@ ObjPlayer_ChkJump:
 		bclr	#5,_objStatus(a0)			; Clear "pushing" flag
 		addq.w	#4,sp				; Do not return to collaer
 		st	_objJumping(a0)			; Set the jumping flag
-		playSnd	#sLeap, 2			; Play jump sound
+		;playsnd	#sLeap, 2			; Play jump sound
 		move.b	#$E,_objColH(a0)			; Reduce Sonic's hitbox
 		move.b	#7,_objColW(a0)			; ''
 		addq.w	#5,_objYPos(a0)			; Align Sonic to the ground
@@ -1347,7 +1347,7 @@ ObjPlayer_ChkBounce:
 		clr.b	_objDashTimer(a0)			; Reset dash timer
 		clr.b	_objDashFlag(a0)			; Reset dash flag
 
-		playSnd	#sFloorBounce, 2		; Play the floor bounce sound
+		;playsnd	#sFloorBounce, 2		; Play the floor bounce sound
 
 		btst	#2,_objStatus(a0)			; Is Sonic already rolling?
 		bne.s	.End				; If so, branch
@@ -1400,7 +1400,7 @@ ObjPlayer_ChkBounce:
 		clr.b	_objDashTimer(a0)			; Reset dash timer
 		clr.b	_objDashFlag(a0)			; Reset dash flag
 
-		playSnd	#sFloorBounce, 2		; Play the floor bounce sound
+		;playsnd	#sFloorBounce, 2		; Play the floor bounce sound
 
 		btst	#2,_objStatus(a0)			; Is Sonic already rolling?
 		bne.s	.End2				; If so, branch
@@ -1567,7 +1567,7 @@ ObjPlayer_GetHurt:
 
 	;	cmpi.l	#ObjSpike,_objAddress(a2)		; Did Sonic hit a spike?
 	;	beq.s	.End				; If not, branch
-		playSnd	#sHurt, 2			; Play hurt sound
+		;playsnd	#sHurt, 2			; Play hurt sound
 
 .End:
 		moveq	#-1,d0				; Set return status
@@ -1646,7 +1646,7 @@ ObjPlayer_GetKilled:
 
 	;	cmpi.l	#ObjSpike,_objAddress(a2)		; Did Sonic hit a spike?
 	;	beq.s	.End				; If not, branch
-		playSnd	#sDeath,2			; Play death sound
+		;playsnd	#sDeath,2			; Play death sound
 
 .End:
 		moveq	#-1,d0				; Set return status

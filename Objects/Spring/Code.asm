@@ -117,7 +117,7 @@ ObjSpring_Up:
 		move.b	#$F,_objLRBSolid(a1)		; ''
 
 .PlaySound:
-		playSnd	#sSpring, 2			; Play spring sound
+		;playsnd	#sSpring, 2			; Play spring sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjSpring_Horizontal:
@@ -185,7 +185,7 @@ ObjSpring_Horizontal:
 .PlaySound:
 		bclr	#cPushBit,_objStatus(a0)		; Clear "push" flags
 		bclr	#cPushBit,_objStatus(a1)		; ''
-		playSnd	#sSpring, 2			; Play spring sound
+		;playsnd	#sSpring, 2			; Play spring sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjSpring_Down:
@@ -231,7 +231,7 @@ ObjSpring_Down:
 		bset	#1,_objStatus(a1)			; Set the player's "in air" flag
 		bclr	#cStandBit,_objStatus(a1)		; Make the player no longer be on the spring
 		move.b	#4,_objRoutine(a1)			; Reset the player's routine
-		playSnd	#sSpring, 2			; Play spring sound
+		;playsnd	#sSpring, 2			; Play spring sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjSpring_DiagonallyUp:
@@ -300,7 +300,7 @@ ObjSpring_DiagonallyUp:
 		move.b	#$F,_objLRBSolid(a1)		; ''
 
 .PlaySound:
-		playSnd	#sSpring, 2			; Play spring sound
+		;playsnd	#sSpring, 2			; Play spring sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .SlopeData:
@@ -358,7 +358,7 @@ ObjSpring_DiagonallyDown:
 		move.b	#$F,_objLRBSolid(a1)		; ''
 
 .PlaySound:
-		playSnd	#sSpring, 2			; Play spring sound
+		;playsnd	#sSpring, 2			; Play spring sound
 		rts
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 .SlopeData:

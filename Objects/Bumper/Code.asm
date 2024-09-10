@@ -57,7 +57,7 @@ ObjBumperMain:
 		bclr	#5,_objStatus(a2)
 		clr.b	_objJumping(a2)
 		move.b	#1,_objAnim(a0)
-		playSnd	#sBumper, 2
+		;playsnd	#sBumper, 2
 
 .Display:
 		lea	Ani_ObjBumper(pc),a1

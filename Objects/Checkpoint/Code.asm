@@ -61,7 +61,7 @@ ObjChkpoint_Main:
 		cmpi.w	#$68,d0				; Is the player within vertical boundaries?
 		bcc.w	ObjChkpoint_Animate		; If not, branch
 		
-		playSnd	#sCheckpoint, 2			; Play checkpoint sound
+		;playsnd	#sCheckpoint, 2			; Play checkpoint sound
 
 		jsr	FindFreeObj.w			; Find a free object slot
 		beq.s	.SetPoint			; If there is none, branch

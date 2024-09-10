@@ -81,8 +81,8 @@ fgColBuff	rs.b	$82				; Foreground vertical plane buffer
 bgRowBuff	rs.b	$102				; Background horizontal plane buffer
 bgColBuff	rs.b	$82				; Background vertical plane buffer
 
-ampsVars		rs.b	0			; AMPS variables
-		include	"Sound/amps/code/ram.asm"
+;ampsVars		rs.b	0			; AMPS variables
+;		include	"Sound/amps/code/ram.asm"
 
 		; --- ENGINE VARIABLES ---
 

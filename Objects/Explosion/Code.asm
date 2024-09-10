@@ -4,11 +4,11 @@
 EXPLODE_ANI	EQU	3
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjBossExplode:
-		playSnd	#sBomb, 2			; Play explosion sound
-		bra.s	ObjExplosion_Init		; Continue
+		;playsnd	#sBomb, 2			; Play explosion sound
+		bra.w	ObjExplosion_Init		; Continue
 ; ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ObjExplosion:
-		playSnd	#sBreakItem, 2			; Play explosion sound
+		;playsnd	#sBreakItem, 2			; Play explosion sound
 
 ObjExplosion_Init:
 		move.l	#ObjExplosion_Main,_objAddress(a0)	; Next routine
