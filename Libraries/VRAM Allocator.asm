@@ -237,27 +237,8 @@ VALLOC_Deallocate:
 		bhi.s	.insertAtIndex				; If so, branch to the logic to insert this node at this index within the free list.
 		bra.s	.findInsertionPoint			; Otherwise, loop until we find the appropriate place to insert this within the list.
 ; -----------------------------------------------------------------------------------------------------------------------------------
-; Internal subroutine to cut a node out of the allocation list
-; -----------------------------------------------------------------------------------------------------------------------------------
-.cutFromAllocList:
-		move.w	vnode.next(a6),d0			; load the 'next' pointer into d0.
-		beq.s	.cutNodeIsTail
-
-		movea.w	d0,a4					; Load the next node into register a4.
-		move.w	vnode.prev(a6),vnode.prev(a4)		; Make its 'previous' pointer skip over the current node.
-
-.cutNodeIsTail:
-		move.w	vnode.prev(a6),d0			; load the 'previous' pointer into d0.
-		beq.s	.cutNodeIsHead
-
-		movea.w	d0,a4					; Load the previous node into register a4.
-		move.w	vnode.next(a6),vnode.next(a4)		; Make its 'next' pointer skip over the current node.
-
-.cutNodeIsHead:
-		rts
-; -----------------------------------------------------------------------------------------------------------------------------------
 .appendAsHead:
-		bsr.s	.cutFromAllocList
+		bsr.w	.cutFromAllocList
 		move.w	a6,(vallocFreeHead).w			; Set this node as the new head of the free list.
 		move.w	a6,vnode.prev(a5)			; Make the old head node point to the new head from its 'previous' pointer.
 		move.w	a5,vnode.next(a6)			; Make the new head node point to the old head from its 'next' pointer.
@@ -265,7 +246,7 @@ VALLOC_Deallocate:
 		bra.s	.coalesceNodes				; Branch ahead to the logic that handles coalescing adjacent nodes.
 ; -----------------------------------------------------------------------------------------------------------------------------------
 .appendAsTail:
-		bsr.s	.cutFromAllocList
+		bsr.w	.cutFromAllocList
 		move.w	a6,(vallocFreeTail).w			; Append this node as the new tail of the free list.
 		move.w	a6,vnode.next(a5)			; Make the 'next' pointer on the old tail point to the new tail.
 		move.w	a5,vnode.prev(a6)			; Make the 'previous' pointer on the new tail point back to the old tail.
@@ -273,7 +254,7 @@ VALLOC_Deallocate:
 		bra.s	.coalesceNodes				; Branch ahead to the logic that handles coalescing adjacent nodes.
 ; -----------------------------------------------------------------------------------------------------------------------------------
 .insertAtIndex:
-		bsr.s	.cutFromAllocList
+		bsr.w	.cutFromAllocList
 		move.w	vnode.prev(a5),vnode.prev(a6)		; Save the address of the node that comes before the point of insertion so we don't lose it.
 		move.w	a6,vnode.prev(a5)			; Make the 'previous' pointer on the node following the point of insertion point to our new node.
 		move.w	a5,vnode.next(a6)			; Make the 'next' pointer on the new node point the the node that follows it in the list.
@@ -337,4 +318,23 @@ VALLOC_Deallocate:
 .return:
 		andi	#~$C,ccr				; Clear both the zero and negative flags on the ccr, indicating successful deallocation.
 		rts						; Return.
+; -----------------------------------------------------------------------------------------------------------------------------------
+; Internal subroutine to cut a node out of the allocation list
+; -----------------------------------------------------------------------------------------------------------------------------------
+.cutFromAllocList:
+		move.w	vnode.next(a6),d0			; load the 'next' pointer into d0.
+		beq.s	.cutNodeIsTail
+
+		movea.w	d0,a4					; Load the next node into register a4.
+		move.w	vnode.prev(a6),vnode.prev(a4)		; Make its 'previous' pointer skip over the current node.
+
+.cutNodeIsTail:
+		move.w	vnode.prev(a6),d0			; load the 'previous' pointer into d0.
+		beq.s	.cutNodeIsHead
+
+		movea.w	d0,a4					; Load the previous node into register a4.
+		move.w	vnode.next(a6),vnode.next(a4)		; Make its 'next' pointer skip over the current node.
+
+.cutNodeIsHead:
+		rts
 ; -----------------------------------------------------------------------------------------------------------------------------------
