@@ -862,7 +862,7 @@ CheckObjActive2:
 		rts
 
 .Delete:
-		move.w	_objRespawn(a0),d0			; Get respawn table entry address
+		move.w	_objRespawn(a0),d0		; Get respawn table entry address
 		beq.s	.DoDelete			; If 0, branch
 		movea.w	d0,a2
 		bclr	#7,(a2)				; Mark as gone
