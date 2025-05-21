@@ -40,20 +40,24 @@ paletteBuffAlt	rs.b	$80				; Water palette buffer
 paletteBuff	rs.b	$80				; Palette buffer
 
 kosVars		rs.b	0				; Kosinski decompression queue variables
+
 kosCount	rs.w	1				; Kosinski decompression queue count
 kosRegisters	rs.b	$1A				; Kosinski decompression stored registers
 kosStatusReg	rs.w	1				; Kosinski decompression stored SR
 kosBookmark	rs.l	1				; Kosinski decompression bookmark
+
 kosList		rs.b	$20				; Kosinski decompression queue
 kosSource	equ	kosList				; ''
 kosDestination	equ	kosList+4			; ''
 kosList_End	rs.b	0				; ''
+
 kosMModules	rs.w	1				; Kosinski moduled decompression modules left
 kosMLastSize	rs.w	1				; Kosinski moduled decompression last module size
 kosMList	rs.b	$20*6				; Kosinski moduled decompression queue
 kosMSource	equ	kosMList			; ''
 kosMDestination	equ	kosMList+4			; ''
 kosMList_End	rs.b	0				; ''
+
 kosVars_End	rs.b	0				; End of Kosinski decompression queue variables
 
 objRespawn	rs.b	$300				; Object respawn table
